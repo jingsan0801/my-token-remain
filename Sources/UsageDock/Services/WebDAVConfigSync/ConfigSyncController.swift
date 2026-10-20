@@ -41,6 +41,9 @@ final class ConfigSyncController: ObservableObject {
     /// 账号仓库由 App 入口注入(UsageStore 持有),避免再造第二个实例。
     var accountsStoreProvider: (() -> ProviderAccountsStore?)?
 
+    /// Test seam; production keeps `.system`.
+    var secretWriter: SecretWriter = .system
+
     private let defaults: UserDefaults
     private var autoSyncTask: Task<Void, Never>?
     private var becomesActiveObserver: NSObjectProtocol?
@@ -197,6 +200,26 @@ final class ConfigSyncController: ObservableObject {
 
     // MARK: - 导入
 
+    /// Import writes go through this seam so tests never touch the real
+    /// Keychain. Production uses `.system`.
+    struct SecretWriter {
+        var providerSecret: (ProviderQuota.Provider, String) -> Void
+        var openRouterKey: (String) -> Void
+        var zaiKey: (String) -> Void
+        var accountSecret: (ProviderQuota.Provider, ProviderAccountID, String) -> Void
+
+        static let system = SecretWriter(
+            providerSecret: { provider, secret in
+                try? ProviderSecretStore(provider: provider).save(secret)
+            },
+            openRouterKey: { key in try? OpenRouterKeyStore().save(key) },
+            zaiKey: { key in try? ZAIKeyStore().save(key) },
+            accountSecret: { provider, id, secret in
+                try? ProviderAccountSecretStore(provider: provider, accountID: id).save(secret)
+            }
+        )
+    }
+
     struct ImportSummary: Sendable {
         var profilesAdded = 0
         var profilesUpdated = 0
@@ -248,21 +271,21 @@ final class ConfigSyncController: ObservableObject {
 
         for (providerRaw, secret) in payload.secrets.providerSecrets {
             guard let provider = ProviderQuota.Provider(rawValue: providerRaw) else { continue }
-            try? ProviderSecretStore(provider: provider).save(secret)
+            secretWriter.providerSecret(provider, secret)
             summary.secretsApplied += 1
         }
         if let key = payload.secrets.openRouterKey {
-            try? OpenRouterKeyStore().save(key)
+            secretWriter.openRouterKey(key)
             summary.secretsApplied += 1
         }
         if let key = payload.secrets.zaiKey {
-            try? ZAIKeyStore().save(key)
+            secretWriter.zaiKey(key)
             summary.secretsApplied += 1
         }
         for (accountIDRaw, secret) in payload.secrets.accountSecrets {
             let id = ProviderAccountID(rawValue: accountIDRaw)
             guard let profile = accountsStore.profiles.first(where: { $0.id == id }) else { continue }
-            try? ProviderAccountSecretStore(provider: profile.provider, accountID: id).save(secret)
+            secretWriter.accountSecret(profile.provider, id, secret)
             summary.secretsApplied += 1
         }
         return summary

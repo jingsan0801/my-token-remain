@@ -92,9 +92,19 @@ struct WebDAVConfigSyncTests {
             deleteSecret: { _ in }
         )
         let controller = ConfigSyncController(defaults: defaults, observesActivation: false)
+        // Never let a test write fabricated values into the real Keychain.
+        var written: [String] = []
+        controller.secretWriter = .init(
+            providerSecret: { provider, _ in written.append("provider:\(provider.rawValue)") },
+            openRouterKey: { _ in written.append("openrouter") },
+            zaiKey: { _ in written.append("zai") },
+            accountSecret: { _, id, _ in written.append("account:\(id.rawValue)") }
+        )
         let summary = controller.apply(samplePayload(), using: accountsStore)
 
         #expect(summary.profilesAdded == 1)
+        #expect(summary.secretsApplied == 3)
+        #expect(Set(written) == ["provider:DeepSeek", "openrouter", "account:managed.00000000-0000-0000-0000-000000000001"])
         let profile = accountsStore.profiles.first
         #expect(profile?.displayName == "工作号")
         #expect(profile?.provider.rawValue == "Kimi")
