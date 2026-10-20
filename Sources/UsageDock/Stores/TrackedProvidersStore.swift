@@ -119,6 +119,21 @@ final class TrackedProvidersStore: ObservableObject {
         )
     }
 
+    /// WebDAV 配置同步导入:整体替换追踪集合、顺序与管理页隐藏集。
+    /// 仅由 ConfigSyncController 在用户确认覆盖后调用。
+    func applySyncedState(
+        enabled newEnabled: Set<ProviderQuota.Provider>,
+        order newOrder: [ProviderQuota.Provider],
+        hiddenFromManagement newHidden: Set<ProviderQuota.Provider>
+    ) {
+        enabled = newEnabled.intersection(Set(Self.allProviders))
+        order = Self.mergedOrder(newOrder.map(\.rawValue))
+        hiddenFromManagement = newHidden.intersection(Set(Self.allProviders))
+        persistEnabled()
+        persistOrder()
+        persistHidden()
+    }
+
     func setEnabled(_ provider: ProviderQuota.Provider, _ isOn: Bool) {
         if isOn {
             enabled.insert(provider)

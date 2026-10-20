@@ -114,7 +114,8 @@ final class UsageStore: ObservableObject {
 
     private let tracked: TrackedProvidersStore
     private let defaults: UserDefaults
-    private let providerAccountsStore: ProviderAccountsStore
+    /// 内部可读:WebDAV 配置同步导出/导入账号元数据与受管账号凭证用。
+    let providerAccountsStore: ProviderAccountsStore
     private let traeAgentTrajectoryStore: TraeAgentTrajectoryStore
     private var cancellables = Set<AnyCancellable>()
     private var refreshTask: Task<Void, Never>?
