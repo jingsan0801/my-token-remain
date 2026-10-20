@@ -118,7 +118,7 @@ final class PopoverLayoutStore: ObservableObject {
         .grok, .grokBot, .openrouter, .antigravity, .opencode, .zai, .zaiTeam,
         .deepseek, .kimi, .minimax, .mimo, .alibabaTokenPlan, .qoder, .kiro, .volcengine, .ollama,
         .muse, .museCode, .amp, .factory, .augment, .thirdParty,
-        .localUsage, .aiFeed
+        .localUsage
     ]
     /// 首次出现时默认隐藏的挂件:主流三家之外的 provider 面向少数用户,
     /// 通过 "+" 菜单一键添加,不给其他用户增加弹窗长度。

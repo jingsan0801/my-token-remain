@@ -53,21 +53,5 @@
   <string>NSApplication</string>
   <key>NSLocalNetworkUsageDescription</key>
   <string>TokenRemain exchanges encrypted quota snapshots with Windows devices you explicitly pair on your local network.</string>
-  <key>SUFeedURL</key>
-  <string>https://github.com/Carstin520/token-remain/releases/latest/download/appcast.xml</string>
-  <key>SUPublicEDKey</key>
-  <string>GU6+EVHK79NX+/5g1GKCID3GQUc099GfNo4w/a6spDI=</string>
-  <key>SUEnableAutomaticChecks</key>
-  <false/>
-  <key>SUAutomaticallyUpdate</key>
-  <false/>
-  <key>SUAllowsAutomaticUpdates</key>
-  <false/>
-  <key>SUShowReleaseNotes</key>
-  <false/>
-  <key>SUVerifyUpdateBeforeExtraction</key>
-  <true/>
-  <key>SURequireSignedFeed</key>
-  <true/>
 </dict>
 </plist>

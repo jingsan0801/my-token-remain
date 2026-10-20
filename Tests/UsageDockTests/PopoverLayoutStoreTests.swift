@@ -4,13 +4,14 @@ import Testing
 
 @Suite("Popover widget layout")
 struct PopoverLayoutStoreTests {
-    @Test("Default order keeps providers first and AI Feed last")
+    @Test("Default order keeps providers first and local usage last")
     func defaultOrder() {
         let defaults = testDefaults()
         let store = PopoverLayoutStore(defaults: defaults)
 
         // 主流三家之外的 provider 挂件首次出现默认隐藏,由 "+" 菜单按需添加。
-        #expect(store.visibleWidgets == [.claude, .codex, .cursor, .localUsage, .aiFeed])
+        // Fork note: AI 动态已断开,默认顺序不再包含 aiFeed。
+        #expect(store.visibleWidgets == [.claude, .codex, .cursor, .localUsage])
         #expect(store.availableWidgets == PopoverLayoutStore.defaultOrder.filter(PopoverLayoutStore.defaultHidden.contains))
         #expect(PopoverWidget.aiFeed.title == "AI动态")
     }
@@ -73,22 +74,22 @@ struct PopoverLayoutStoreTests {
         let store = PopoverLayoutStore(defaults: defaults)
 
         store.hide(.localUsage)
-        #expect(store.visibleWidgets == [.claude, .codex, .cursor, .aiFeed])
+        #expect(store.visibleWidgets == [.claude, .codex, .cursor])
         #expect(Set(store.availableWidgets) == PopoverLayoutStore.defaultHidden.union([.localUsage]))
 
         store.show(.localUsage)
-        #expect(store.visibleWidgets == [.claude, .codex, .cursor, .localUsage, .aiFeed])
+        #expect(store.visibleWidgets == [.claude, .codex, .cursor, .localUsage])
     }
 
     @Test("Order and pinned expansion survive a new store")
     func persistence() {
         let defaults = testDefaults()
         var store = PopoverLayoutStore(defaults: defaults)
-        store.move(.aiFeed, before: .claude)
+        store.move(.localUsage, before: .claude)
         store.togglePinned(.codex)
 
         store = PopoverLayoutStore(defaults: defaults)
-        #expect(store.visibleWidgets == [.aiFeed, .claude, .codex, .cursor, .localUsage])
+        #expect(store.visibleWidgets == [.localUsage, .claude, .codex, .cursor])
         #expect(store.isPinned(.codex))
         #expect(store.isExpanded(.codex))
     }

@@ -31,11 +31,8 @@ struct OverviewSection: View {
                     onRetry: onRetryCCUsage
                 )
                 officialQuotaPanel
-                TrendingStoriesCard(posts: feedStore.topStories)
                 riskDetailPanel
             }
-
-            AIFeedSection(store: feedStore)
         }
     }
 

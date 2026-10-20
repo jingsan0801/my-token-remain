@@ -182,12 +182,9 @@ struct UsageMenuView: View {
                 layout: layout
             )
         case .aiFeed:
-            AIFeedHotStoriesCard(
-                posts: feedStore.topStories,
-                isExpanded: layout.isExpanded(.aiFeed),
-                layout: layout,
-                onViewAll: { onOpenDashboard(.overview) }
-            )
+            // Fork note: AI 动态已断开(不再访问 api.tokenremain.com)。
+            // 旧布局存档里残留的 aiFeed 槽位渲染为空。
+            EmptyView()
         default:
             // 其余挂件都是 provider 额度卡,provider 映射必然非空。
             let provider = widget.provider!

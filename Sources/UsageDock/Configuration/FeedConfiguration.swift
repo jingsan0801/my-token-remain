@@ -2,23 +2,19 @@ import Foundation
 
 /// Public, credential-free entry point for the server-curated broadcast feed.
 ///
-/// Production builds inject `TokenRemainBroadcastBaseURL` into Info.plist.
-/// Local builds can instead set `TOKENREMAIN_BROADCAST_BASE_URL`.
+/// Fork note: the upstream production server (`https://api.tokenremain.com`)
+/// and the Info.plist-injected `TokenRemainBroadcastBaseURL` were removed, so
+/// a personal build never contacts the original author's server. The AI feed
+/// and push registration stay disabled unless `TOKENREMAIN_BROADCAST_BASE_URL`
+/// is set explicitly in the environment.
 enum FeedConfiguration {
     static let pollingIntervalSeconds: TimeInterval = 600
-    private static let productionBaseURL =
-        "https://api.tokenremain.com"
 
     static var baseURL: URL? {
-        let environmentValue = ProcessInfo.processInfo.environment[
+        guard let rawValue = ProcessInfo.processInfo.environment[
             "TOKENREMAIN_BROADCAST_BASE_URL"
-        ]
-        let bundledValue = Bundle.main.object(
-            forInfoDictionaryKey: "TokenRemainBroadcastBaseURL"
-        ) as? String
-        guard let rawValue = [environmentValue, bundledValue, productionBaseURL]
-            .compactMap({ $0?.trimmingCharacters(in: .whitespacesAndNewlines) })
-            .first(where: { !$0.isEmpty }),
+        ]?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !rawValue.isEmpty,
               let url = URL(string: rawValue),
               let scheme = url.scheme?.lowercased(),
               ["https", "http"].contains(scheme),
