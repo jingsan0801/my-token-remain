@@ -3,6 +3,26 @@
 All notable product changes are recorded here. TokenRemain uses Semantic
 Versioning for public releases.
 
+## Unreleased
+
+### Added
+
+- Fork-only: optional WebDAV config sync. Tracked providers, account metadata
+  and app-owned credentials are written as a plaintext JSON file to a WebDAV
+  server you control, over HTTPS.
+
+### Changed
+
+- Fork builds no longer start the Sparkle updater or contact
+  `api.tokenremain.com`; the AI Feed surfaces are hidden.
+
+### Fixed
+
+- Keep drag-handle geometry out of SwiftUI render state so animated card
+  measurements cannot continually invalidate layout.
+- Remove the empty standalone Settings scene; route the Settings command to
+  the existing Dashboard instead of opening a second blank preferences window.
+
 ## 1.4.4 (build 42) — 2026-10-15
 
 ### Fixed

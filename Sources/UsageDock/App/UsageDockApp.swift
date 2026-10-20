@@ -61,6 +61,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             launchAtLogin: launchAtLogin
         )
         DirectSyncController.shared.attach(to: store)
+        ConfigSyncController.shared.accountsStoreProvider = { [weak self] in
+            self?.store.providerAccountsStore
+        }
         feedNotificationObserver = NotificationCenter.default.addObserver(
             forName: .tokenRemainOpenAIFeed,
             object: nil,
@@ -125,6 +128,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func showSettings() {
+        statusBarController?.showDashboard(section: .settings)
+    }
+
     func applicationShouldHandleReopen(
         _ sender: NSApplication,
         hasVisibleWindows flag: Bool
@@ -178,8 +185,19 @@ struct UsageDockApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        Settings {
+        // AppKit already owns every window and the real status item. Keep a
+        // non-inserted scene as the SwiftUI lifecycle anchor, not an empty
+        // Settings scene that can open or restore a blank preferences window.
+        MenuBarExtra("TokenRemain", isInserted: .constant(false)) {
             EmptyView()
+        }
+        .commands {
+            CommandGroup(replacing: .appSettings) {
+                Button(L10n.text("nav.settings")) {
+                    appDelegate.showSettings()
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
         }
     }
 }

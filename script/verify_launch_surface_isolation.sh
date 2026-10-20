@@ -117,5 +117,16 @@ if ! code_contains "$VISIBILITY_HOST" "PrimarySurfaceVisibility\.isVisible"; the
   fail "$VISIBILITY_HOST 的可见性检查必须经过 PrimarySurfaceVisibility"
 fi
 
+# 7. AppKit owns Settings too. An empty SwiftUI Settings scene registers a
+#    second, blank preferences window that macOS can open or restore on launch.
+APP_ENTRY="Sources/UsageDock/App/UsageDockApp.swift"
+if code_contains "$APP_ENTRY" "Settings \{"; then
+  fail "$APP_ENTRY must route settings to Dashboard, not register an empty Settings scene"
+fi
+code_contains "$APP_ENTRY" 'CommandGroup\(replacing: \.appSettings\)' \
+  || fail "$APP_ENTRY must route the standard settings command to Dashboard"
+code_contains "$APP_ENTRY" 'showDashboard\(section: \.settings\)' \
+  || fail "$APP_ENTRY is missing the Dashboard settings route"
+
 (( FAILURES == 0 )) || exit 1
-echo "launch surface isolation verified: AppKit owns window size, visibility checks build nothing"
+echo "launch surface isolation verified: AppKit owns window size and settings, visibility checks build nothing"

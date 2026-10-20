@@ -360,16 +360,30 @@ private extension EnvironmentValues {
     }
 }
 
+/// Geometry is input to AppKit hit testing, not render state. Updating this
+/// reference must not invalidate the handle's SwiftUI layout during animation.
+@MainActor
+final class DirectReorderHandleGeometry {
+    private(set) var frame = CGRect.zero
+
+    func update(_ frame: CGRect) {
+        guard !frame.isNull, !frame.isInfinite,
+              frame.origin.x.isFinite, frame.origin.y.isFinite,
+              frame.width.isFinite, frame.height.isFinite else { return }
+        self.frame = frame
+    }
+}
+
 /// Installs one reusable AppKit press recognizer without taking over SwiftUI's
 /// rendering or reorder state. `NSPressGestureRecognizer` resets itself to
 /// `.possible` after every completed/cancelled sequence, unlike the sequenced
 /// SwiftUI gesture that could stop rearming after its view moved in a ScrollView.
 private struct DirectReorderPressBridge: NSViewRepresentable {
     let configuration: DirectReorderHandleConfiguration
-    let handleFrame: CGRect
+    let geometry: DirectReorderHandleGeometry
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(configuration: configuration, handleFrame: handleFrame)
+        Coordinator(configuration: configuration, geometry: geometry)
     }
 
     func makeNSView(context: Context) -> InstallerView {
@@ -381,7 +395,7 @@ private struct DirectReorderPressBridge: NSViewRepresentable {
 
     func updateNSView(_ nsView: InstallerView, context: Context) {
         context.coordinator.configuration = configuration
-        context.coordinator.handleFrame = handleFrame
+        context.coordinator.geometry = geometry
         context.coordinator.install(on: nsView.window?.contentView)
     }
 
@@ -408,7 +422,8 @@ private struct DirectReorderPressBridge: NSViewRepresentable {
     @MainActor
     final class Coordinator: NSObject, NSGestureRecognizerDelegate {
         var configuration: DirectReorderHandleConfiguration
-        var handleFrame: CGRect
+        var geometry: DirectReorderHandleGeometry
+        private var handleFrame: CGRect { geometry.frame }
         weak var installerView: InstallerView?
         weak var installedView: NSView?
         private var pendingAnchor: DirectReorderPointerAnchor?
@@ -432,10 +447,10 @@ private struct DirectReorderPressBridge: NSViewRepresentable {
 
         init(
             configuration: DirectReorderHandleConfiguration,
-            handleFrame: CGRect
+            geometry: DirectReorderHandleGeometry
         ) {
             self.configuration = configuration
-            self.handleFrame = handleFrame
+            self.geometry = geometry
         }
 
         func install(on view: NSView?) {
@@ -658,7 +673,7 @@ private struct DirectReorderPressBridge: NSViewRepresentable {
 /// compete with reordering for the same pointer sequence.
 private struct DirectReorderHandleModifier: ViewModifier {
     @Environment(\.directReorderHandleConfiguration) private var configuration
-    @State private var handleFrame = CGRect.zero
+    @State private var geometry = DirectReorderHandleGeometry()
 
     func body(content: Content) -> some View {
         if let configuration {
@@ -667,13 +682,13 @@ private struct DirectReorderHandleModifier: ViewModifier {
                 .background {
                     DirectReorderPressBridge(
                         configuration: configuration,
-                        handleFrame: handleFrame
+                        geometry: geometry
                     )
                 }
                 .onGeometryChange(for: CGRect.self) { proxy in
                     proxy.frame(in: .named(configuration.coordinateSpace))
                 } action: { frame in
-                    handleFrame = frame
+                    geometry.update(frame)
                 }
         } else {
             content

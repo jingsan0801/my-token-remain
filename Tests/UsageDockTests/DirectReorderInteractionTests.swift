@@ -1,4 +1,6 @@
 import CoreGraphics
+import Foundation
+import Observation
 import Testing
 @testable import UsageDock
 
@@ -7,6 +9,39 @@ import Testing
 struct DirectReorderInteractionTests {
     private enum Item: String, Hashable {
         case a, b, c, d
+    }
+
+    @Test("Handle geometry changes never invalidate SwiftUI observation")
+    func handleGeometryDoesNotDriveRendering() {
+        let geometry = DirectReorderHandleGeometry()
+        let invalidated = DirectReorderGeometryInvalidation()
+        withObservationTracking {
+            _ = geometry.frame
+        } onChange: {
+            invalidated.mark()
+        }
+
+        // Repeated subpixel measurements during settling must remain usable
+        // for hit testing without scheduling another SwiftUI layout pass.
+        for step in 0..<1_000 {
+            geometry.update(CGRect(x: CGFloat(step) / 3, y: 24, width: 100, height: 30))
+        }
+        #expect(!invalidated.wasMarked)
+        #expect(geometry.frame == CGRect(x: 333, y: 24, width: 100, height: 30))
+    }
+
+    @Test("Handle hit testing reads the latest frame without a render pass")
+    func handleGeometryKeepsLatestMeasurement() {
+        let geometry = DirectReorderHandleGeometry()
+        let appKitReader = { geometry.frame }
+        geometry.update(CGRect(x: 20, y: 40, width: 100, height: 30))
+        #expect(appKitReader().origin == CGPoint(x: 20, y: 40))
+        geometry.update(CGRect(x: 120, y: 80, width: 100, height: 30))
+        #expect(appKitReader().origin == CGPoint(x: 120, y: 80))
+
+        geometry.update(.null)
+        geometry.update(.infinite)
+        #expect(appKitReader() == CGRect(x: 120, y: 80, width: 100, height: 30))
     }
 
     @Test("Only the active drag handle owns press feedback")
@@ -345,5 +380,22 @@ struct DirectReorderInteractionTests {
             layout: .grid(spacing: 14)
         )
         #expect(interaction.isDragging(.a))
+    }
+}
+
+private final class DirectReorderGeometryInvalidation: @unchecked Sendable {
+    private let lock = NSLock()
+    private var marked = false
+
+    var wasMarked: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return marked
+    }
+
+    func mark() {
+        lock.lock()
+        defer { lock.unlock() }
+        marked = true
     }
 }
