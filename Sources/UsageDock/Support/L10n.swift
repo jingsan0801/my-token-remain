@@ -59,7 +59,7 @@ enum L10n {
         "webdav.status.downloaded": "已于 %@ 导入",
         "webdav.last_upload": "上次同步:%@",
         "webdav.import_confirm_title": "从云端导入配置?",
-        "webdav.import_confirm_message": "来源设备:%@\n导出时间:%@\n包含 %d 个账号、%d 个密钥。\n\n导入将覆盖本机的追踪选择、账号配置与同名密钥。",
+        "webdav.import_confirm_message": "来源设备:%@\n导出时间:%@\n包含 %d 个附加账号、%d 个密钥。\n\n导入将覆盖本机的追踪选择、账号配置与同名密钥。",
         "webdav.import_confirm_apply": "导入并覆盖",
         "webdav.error.not_https": "服务器地址必须使用 HTTPS。",
         "webdav.error.invalid_url": "服务器地址或远程目录格式无效。",

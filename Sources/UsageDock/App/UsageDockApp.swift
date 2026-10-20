@@ -64,6 +64,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ConfigSyncController.shared.accountsStoreProvider = { [weak self] in
             self?.store.providerAccountsStore
         }
+#if DEBUG
+        // QA hook: exercise WebDAV sync without driving the settings UI.
+        if arguments.contains("--webdav-sync-upload") {
+            Task { [weak self] in
+                try? await Task.sleep(for: .seconds(2))
+                guard let self else { return }
+                await ConfigSyncController.shared.upload(accountsStore: self.store.providerAccountsStore)
+            }
+        }
+        if arguments.contains("--webdav-sync-download") {
+            Task { [weak self] in
+                try? await Task.sleep(for: .seconds(2))
+                guard self != nil else { return }
+                _ = await ConfigSyncController.shared.download()
+            }
+        }
+#endif
         feedNotificationObserver = NotificationCenter.default.addObserver(
             forName: .tokenRemainOpenAIFeed,
             object: nil,

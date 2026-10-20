@@ -1,6 +1,7 @@
 import AppKit
 import CryptoKit
 import Foundation
+import OSLog
 
 /// WebDAV 配置同步(账号配置 + 本 App 持有的凭证)的编排层。Fork 自有功能。
 ///
@@ -21,6 +22,8 @@ final class ConfigSyncController: ObservableObject {
         static let lastUploadAt = "tokenRemain.webdavSync.lastUploadAt"
         static let lastDownloadAt = "tokenRemain.webdavSync.lastDownloadAt"
         static let lastUploadedFingerprint = "tokenRemain.webdavSync.lastFingerprint"
+        static let lastAccountCount = "tokenRemain.webdavSync.lastAccountCount"
+        static let lastSecretCount = "tokenRemain.webdavSync.lastSecretCount"
     }
 
     static let defaultServerURL = "https://dav.jianguoyun.com/dav/"
@@ -43,6 +46,8 @@ final class ConfigSyncController: ObservableObject {
 
     /// Test seam; production keeps `.system`.
     var secretWriter: SecretWriter = .system
+
+    private let logger = Logger(subsystem: "com.jamesli.usagedock", category: "WebDAVSync")
 
     private let defaults: UserDefaults
     private var autoSyncTask: Task<Void, Never>?
@@ -137,7 +142,11 @@ final class ConfigSyncController: ObservableObject {
 
     // MARK: - 导出
 
-    func collectPayload(accountsStore: ProviderAccountsStore) -> ConfigSyncPayload {
+    func collectPayload(
+        accountsStore: ProviderAccountsStore,
+        environment: [String: String] = ProcessInfo.processInfo.environment,
+        homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser
+    ) -> ConfigSyncPayload {
         let tracked = TrackedProvidersStore.shared
         let trackedState = ConfigSyncPayload.TrackedState(
             enabled: tracked.enabled.map(\.rawValue).sorted(),
@@ -170,15 +179,27 @@ final class ConfigSyncController: ObservableObject {
             }
         }
 
+        // Export every credential this Mac can actually use, including values
+        // supplied through provider environment variables or the documented
+        // Z.ai / OpenRouter config files. The user explicitly chose plaintext
+        // sync, and leaving env-sourced keys out would silently produce an
+        // empty payload on machines configured this way.
         var providerSecrets: [String: String] = [:]
         for descriptor in ProviderSecretStore.descriptors {
-            let store = ProviderSecretStore(provider: descriptor.provider)
-            if let value = try? store.loadFromKeychain(interaction: .disallowed) {
+            var store = ProviderSecretStore(provider: descriptor.provider)
+            store.environment = environment
+            if let value = store.load() {
                 providerSecrets[descriptor.provider.rawValue] = value
             }
         }
-        let openRouterKey = try? OpenRouterKeyStore().loadFromKeychain(interaction: .disallowed)
-        let zaiKey = try? ZAIKeyStore().loadFromKeychain(interaction: .disallowed)
+        var openRouterStore = OpenRouterKeyStore()
+        openRouterStore.environment = environment
+        openRouterStore.homeDirectory = homeDirectory
+        let openRouterKey = openRouterStore.load()
+        var zaiStore = ZAIKeyStore()
+        zaiStore.environment = environment
+        zaiStore.homeDirectory = homeDirectory
+        let zaiKey = zaiStore.load()
 
         return ConfigSyncPayload(
             exportedAt: Date(),
@@ -299,6 +320,9 @@ final class ConfigSyncController: ObservableObject {
         defer { isBusy = false }
         do {
             let payload = collectPayload(accountsStore: accountsStore)
+            logger.info("upload collected accounts=\(payload.accountCount, privacy: .public) secrets=\(payload.secretCount, privacy: .public)")
+            defaults.set(payload.accountCount, forKey: DefaultsKey.lastAccountCount)
+            defaults.set(payload.secretCount, forKey: DefaultsKey.lastSecretCount)
             let data = try payload.encoded()
             try await makeClient().upload(data: data, remotePath: remotePath)
             let now = Date()
@@ -319,6 +343,9 @@ final class ConfigSyncController: ObservableObject {
         do {
             let data = try await makeClient().download(remotePath: remotePath)
             let payload = try ConfigSyncPayload.decoded(from: data)
+            logger.info("download decoded accounts=\(payload.accountCount, privacy: .public) secrets=\(payload.secretCount, privacy: .public)")
+            defaults.set(payload.accountCount, forKey: DefaultsKey.lastAccountCount)
+            defaults.set(payload.secretCount, forKey: DefaultsKey.lastSecretCount)
             statusMessage = nil
             return payload
         } catch {

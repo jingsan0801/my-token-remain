@@ -82,6 +82,36 @@ struct WebDAVConfigSyncTests {
     }
 
     @MainActor
+    @Test("Environment-sourced provider keys are exported")
+    func exportsEnvironmentKeys() {
+        let defaults = UserDefaults(suiteName: "WebDAVConfigSyncTests.\(UUID().uuidString)")!
+        let accountsStore = ProviderAccountsStore(
+            defaults: defaults,
+            rootDirectory: URL(fileURLWithPath: NSTemporaryDirectory())
+                .appending(path: UUID().uuidString, directoryHint: .isDirectory),
+            deleteSecret: { _ in }
+        )
+        let controller = ConfigSyncController(defaults: defaults, observesActivation: false)
+        let home = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appending(path: UUID().uuidString, directoryHint: .isDirectory)
+        let payload = controller.collectPayload(
+            accountsStore: accountsStore,
+            environment: [
+                "DEEPSEEK_API_KEY": "sk-env-deepseek",
+                "OPENROUTER_API_KEY": "sk-or-env",
+            ],
+            homeDirectory: home
+        )
+
+        #expect(payload.secrets.providerSecrets["DeepSeek"] == "sk-env-deepseek")
+        #expect(payload.secrets.openRouterKey == "sk-or-env")
+        #expect(payload.secrets.zaiKey == nil)
+        #expect(payload.secrets.providerSecrets.count == 1)
+        #expect(payload.secretCount == 2)
+        #expect(payload.accountCount == 0)
+    }
+
+    @MainActor
     @Test("Import applies profiles and selections to a fresh store")
     func importAppliesToStore() {
         let defaults = UserDefaults(suiteName: "WebDAVConfigSyncTests.\(UUID().uuidString)")!
