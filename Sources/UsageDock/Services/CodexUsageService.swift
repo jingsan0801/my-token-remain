@@ -12,7 +12,7 @@ struct CodexUsageService {
         guard preferAPI else {
             return try await fetchFromLocalSnapshots()
         }
-        let logger = Logger(subsystem: "com.jamesli.usagedock", category: "CodexUsage")
+        let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "CodexUsage")
         do {
             let quota = try await CodexAPIUsageService().fetch()
             // The account-wide API does not currently expose every model-scoped

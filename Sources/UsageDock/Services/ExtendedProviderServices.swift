@@ -1063,7 +1063,7 @@ struct VolcengineUsageService {
         )
     }
 
-    private static let logger = Logger(subsystem: "com.jamesli.usagedock", category: "VolcengineUsage")
+    private static let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "VolcengineUsage")
 
     /// Percent 的定位必须确定:优先官方形状 `Result.user_limit.Percent`;
     /// 显式路径缺席才退化为递归查找,且遍历按 key 排序——Dictionary 的

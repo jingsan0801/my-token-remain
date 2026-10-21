@@ -9,6 +9,8 @@ struct InstalledAppIdentity: Equatable {
 }
 
 enum LegacyInstallationCleanupPolicy {
+    // Intentionally the original identifier: this policy finds and recycles
+    // installs of the upstream app, not the renamed fork.
     static let stableBundleIdentifier = "com.jamesli.usagedock"
 
     static func removableStableCopies(
@@ -75,7 +77,7 @@ final class LegacyInstallationCleaner {
     static let shared = LegacyInstallationCleaner()
 
     private static let logger = Logger(
-        subsystem: "com.jamesli.usagedock",
+        subsystem: "com.jingsan0801.mytokenremain",
         category: "LegacyInstallationCleaner"
     )
 

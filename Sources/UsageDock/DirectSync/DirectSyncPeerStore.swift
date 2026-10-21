@@ -15,7 +15,7 @@ struct DirectSyncPeerRecord: Codable, Identifiable, Equatable {
 final class DirectSyncPeerStore {
     private static let peersKey = "tokenRemain.directSync.peers.v1"
     private static let replayKey = "tokenRemain.directSync.replay.v1"
-    private static let keychainService = "com.jamesli.usagedock.direct-sync.peer-key.v1"
+    private static let keychainService = "com.jingsan0801.mytokenremain.direct-sync.peer-key.v1"
 
     private let defaults: UserDefaults
     private(set) var peers: [DirectSyncPeerRecord]

@@ -199,7 +199,7 @@ final class ProviderAccountsStore {
 
     private static func defaultRootDirectory() -> URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-            .appending(path: "com.jamesli.usagedock", directoryHint: .isDirectory)
+            .appending(path: "com.jingsan0801.mytokenremain", directoryHint: .isDirectory)
             .appending(path: "provider-accounts", directoryHint: .isDirectory)
     }
 

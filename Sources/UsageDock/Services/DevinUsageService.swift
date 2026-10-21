@@ -29,7 +29,7 @@ struct DevinUsageService {
         }
     }
 
-    private static let logger = Logger(subsystem: "com.jamesli.usagedock", category: "DevinUsage")
+    private static let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "DevinUsage")
 
     func fetch(now: Date = .now) async throws -> ProviderQuota {
         try await fetch(apiKey: nil, apiServerURL: nil, now: now)

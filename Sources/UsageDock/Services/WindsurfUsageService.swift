@@ -27,7 +27,7 @@ struct WindsurfUsageService {
     }
 
     private static let logger = Logger(
-        subsystem: "com.jamesli.usagedock",
+        subsystem: "com.jingsan0801.mytokenremain",
         category: "WindsurfUsage"
     )
 

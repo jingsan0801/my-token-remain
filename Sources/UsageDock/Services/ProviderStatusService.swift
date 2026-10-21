@@ -31,7 +31,7 @@ struct ProviderStatusService: Sendable {
     }()
 
     private static let logger = Logger(
-        subsystem: "com.jamesli.usagedock",
+        subsystem: "com.jingsan0801.mytokenremain",
         category: "ProviderStatus"
     )
 

@@ -22,7 +22,7 @@ sync_contract="$(USAGEDOCK_SYNC_RELEASE=1 "$BUILD_SCRIPT" --print-install-contra
 require_contract_value "$dev_contract" "sync_release=0"
 require_contract_value "$dev_contract" "app_name=TokenRemain Dev"
 require_contract_value "$dev_contract" "executable=UsageDockDev"
-require_contract_value "$dev_contract" "bundle_id=com.jamesli.usagedock.dev"
+require_contract_value "$dev_contract" "bundle_id=com.jingsan0801.mytokenremain.dev"
 require_contract_value "$dev_contract" \
   "installed_app=/Users/jamesli/Applications/TokenRemain Dev.app"
 require_contract_value "$dev_contract" \
@@ -31,7 +31,7 @@ require_contract_value "$dev_contract" \
 require_contract_value "$sync_contract" "sync_release=1"
 require_contract_value "$sync_contract" "app_name=TokenRemain"
 require_contract_value "$sync_contract" "executable=UsageDock"
-require_contract_value "$sync_contract" "bundle_id=com.jamesli.usagedock"
+require_contract_value "$sync_contract" "bundle_id=com.jingsan0801.mytokenremain"
 require_contract_value "$sync_contract" \
   "installed_app=/Users/jamesli/Applications/TokenRemain.app"
 

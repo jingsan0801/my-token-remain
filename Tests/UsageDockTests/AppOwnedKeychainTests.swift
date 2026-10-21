@@ -15,16 +15,16 @@ struct AppOwnedKeychainTests {
     @Test("Production keeps historical services while development uses its own namespace")
     func namespaceIsolation() {
         let production = AppOwnedKeychainNamespace(
-            bundleIdentifier: "com.jamesli.usagedock"
+            bundleIdentifier: "com.jingsan0801.mytokenremain"
         )
         let development = AppOwnedKeychainNamespace(
-            bundleIdentifier: "com.jamesli.usagedock.dev"
+            bundleIdentifier: "com.jingsan0801.mytokenremain.dev"
         )
         let unrelated = AppOwnedKeychainNamespace(bundleIdentifier: "org.swift.swiftpm")
 
-        #expect(production.service("deepseek") == "com.jamesli.usagedock.deepseek")
-        #expect(development.service("deepseek") == "com.jamesli.usagedock.dev.deepseek")
-        #expect(unrelated.service("deepseek") == "com.jamesli.usagedock.deepseek")
+        #expect(production.service("deepseek") == "com.jingsan0801.mytokenremain.deepseek")
+        #expect(development.service("deepseek") == "com.jingsan0801.mytokenremain.dev.deepseek")
+        #expect(unrelated.service("deepseek") == "com.jingsan0801.mytokenremain.deepseek")
     }
 
     @Test("Authorization denial is not reported as a missing credential")
@@ -74,7 +74,7 @@ struct AppOwnedKeychainTests {
             }
         )
         let store = KeychainSecretStore(
-            service: "com.jamesli.usagedock.test",
+            service: "com.jingsan0801.mytokenremain.test",
             account: "secret",
             operations: operations
         )
@@ -87,7 +87,7 @@ struct AppOwnedKeychainTests {
 
     private func makeStore(readStatus: OSStatus) -> KeychainSecretStore {
         KeychainSecretStore(
-            service: "com.jamesli.usagedock.test",
+            service: "com.jingsan0801.mytokenremain.test",
             account: "secret",
             operations: KeychainSecretStore.Operations(
                 read: { _, _, _ in

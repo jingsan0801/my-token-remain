@@ -185,7 +185,7 @@ actor ModelThroughputService {
         let directory = cacheDirectory ?? fileManager
             .urls(for: .cachesDirectory, in: .userDomainMask)
             .first!
-            .appending(path: "com.jamesli.usagedock", directoryHint: .isDirectory)
+            .appending(path: "com.jingsan0801.mytokenremain", directoryHint: .isDirectory)
         cacheURL = directory.appending(path: "model-throughput-v1.json")
     }
 

@@ -63,7 +63,7 @@ actor ExchangeRateService {
         let directory = cacheDirectory ?? fileManager
             .urls(for: .cachesDirectory, in: .userDomainMask)
             .first!
-            .appending(path: "com.jamesli.usagedock", directoryHint: .isDirectory)
+            .appending(path: "com.jingsan0801.mytokenremain", directoryHint: .isDirectory)
         cacheURL = directory.appending(path: "exchange-rates-v1.json")
 
         if let fetcher {

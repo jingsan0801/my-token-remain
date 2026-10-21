@@ -18,7 +18,7 @@ extension KeychainSecretStore: SourceIdentityKeychainStoring {}
 /// group. Copying one source ID to another Mac would make independent writers
 /// share a replay sequence and turn a safe per-device LWW record into a race.
 struct SourceIdentityStore {
-    static let service = "com.jamesli.usagedock.private-sync.identity"
+    static let service = "com.jingsan0801.mytokenremain.private-sync.identity"
     static let account = "source-instance-id.v1"
     static let legacyDefaultsKey = "crossDeviceSync.sourceInstanceID"
 

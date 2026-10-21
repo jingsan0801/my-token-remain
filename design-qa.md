@@ -82,7 +82,7 @@ final result: passed
 
 - The app selects one of eleven image states from the lowest available provider quota.
 - Missing data uses the neutral state; zero quota uses the offline X-eye state.
-- The installed app bundle includes all eleven state images and `TokenRemain.icns`.
+- The installed app bundle includes all eleven state images and `MyTokenRemain.icns`.
 - Build, tests, signing, installation, and launch verification passed.
 
 ## Remaining polish

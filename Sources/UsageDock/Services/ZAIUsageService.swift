@@ -41,7 +41,7 @@ struct ZAIUsageService {
     private static let quotaPath = "/api/monitor/usage/quota/limit"
     private static let subscriptionPath = "/api/biz/subscription/list"
     private static let balancePath = "/api/biz/account/query-customer-account-report"
-    private static let logger = Logger(subsystem: "com.jamesli.usagedock", category: "ZAIUsage")
+    private static let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "ZAIUsage")
 
     var region: ZAIAPIRegion = ZAIRegionStore().load()
     var queryMode: ZAIQueryMode = ZAIQueryModeStore().load()
@@ -336,7 +336,7 @@ struct ZAIQueryModeStore {
 /// 窗口并移出 scoped,同一池不会渲染两次;未知 type 记日志不渲染,等拿到
 /// 真实样本再定语义。GLM Team 复用本解析器,行为自动继承。
 enum ZAIUsageParser {
-    private static let logger = Logger(subsystem: "com.jamesli.usagedock", category: "ZAIUsageParser")
+    private static let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "ZAIUsageParser")
 
     static func parse(
         _ data: Data,

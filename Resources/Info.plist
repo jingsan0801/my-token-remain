@@ -7,11 +7,11 @@
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleIdentifier</key>
-  <string>com.jamesli.usagedock</string>
+  <string>com.jingsan0801.mytokenremain</string>
   <key>CFBundleName</key>
-  <string>TokenRemain</string>
+  <string>MyTokenRemain</string>
   <key>CFBundleDisplayName</key>
-  <string>TokenRemain</string>
+  <string>MyTokenRemain</string>
   <key>CFBundleDevelopmentRegion</key>
   <string>en</string>
   <key>CFBundleLocalizations</key>
@@ -34,7 +34,7 @@
     <string>id</string>
   </array>
   <key>CFBundleIconFile</key>
-  <string>TokenRemain.icns</string>
+  <string>MyTokenRemain.icns</string>
   <key>CFBundleIconName</key>
   <string>AppIcon</string>
   <key>CFBundlePackageType</key>

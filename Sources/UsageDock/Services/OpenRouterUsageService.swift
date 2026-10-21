@@ -30,7 +30,7 @@ struct OpenRouterUsageService {
 
     private static let creditsURL = URL(string: "https://openrouter.ai/api/v1/credits")!
     private static let keyURL = URL(string: "https://openrouter.ai/api/v1/key")!
-    private static let logger = Logger(subsystem: "com.jamesli.usagedock", category: "OpenRouterUsage")
+    private static let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "OpenRouterUsage")
 
     func fetch(now: Date = .now) async throws -> ProviderQuota {
         try await fetch(apiKey: nil, now: now)

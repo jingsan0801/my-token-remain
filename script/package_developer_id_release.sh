@@ -121,8 +121,8 @@ verify_app() {
   [[ "$(/usr/libexec/PlistBuddy -c 'Print :TokenRemainBundledCCUsageVersion' "$app/Contents/Info.plist")" == "$CCUSAGE_VERSION" ]]
   /usr/bin/codesign -d --entitlements :- "$app/Contents/MacOS/UsageDock" > "$entitlements" 2>/dev/null
   [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.icloud-container-environment' "$entitlements")" == "Production" ]]
-  [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.icloud-container-identifiers:0' "$entitlements")" == "iCloud.com.jamesli.tokenremain" ]]
-  [[ "$(/usr/libexec/PlistBuddy -c 'Print :keychain-access-groups:0' "$entitlements")" == "84397AQ22Y.com.jamesli.tokenremain.sync" ]]
+  [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.icloud-container-identifiers:0' "$entitlements")" == "iCloud.com.jingsan0801.mytokenremain" ]]
+  [[ "$(/usr/libexec/PlistBuddy -c 'Print :keychain-access-groups:0' "$entitlements")" == "84397AQ22Y.com.jingsan0801.mytokenremain.sync" ]]
   [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.aps-environment' "$entitlements")" == "production" ]]
   if /usr/libexec/PlistBuddy -c 'Print :com.apple.security.get-task-allow' "$entitlements" >/dev/null 2>&1; then
     echo "Release app must not contain get-task-allow." >&2
@@ -190,7 +190,7 @@ build_notarized_dmg() {
   # Shipping it as a file keeps packaging headless — driving Finder over
   # AppleScript would need Automation consent and a GUI session.
   /usr/bin/ditto "$dmg_assets/DS_Store" "$staging_dir/.DS_Store"
-  /usr/bin/ditto "$APP/Contents/Resources/TokenRemain.icns" "$staging_dir/.VolumeIcon.icns"
+  /usr/bin/ditto "$APP/Contents/Resources/MyTokenRemain.icns" "$staging_dir/.VolumeIcon.icns"
 
   rm -f "$DMG" "$VERSIONED_DMG"
   size_mb=$(( $(/usr/bin/du -sm "$staging_dir" | /usr/bin/awk '{print $1}') + 60 ))

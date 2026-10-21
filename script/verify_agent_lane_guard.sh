@@ -116,7 +116,7 @@ expect_block git-clean 'git clean -fd'
 expect_block git-stash 'git stash'
 expect_block git-checkout 'git checkout -- .'
 expect_block rm-recursive 'rm -rf build'
-expect_block rm-recursive 'rm -rf ~/Library/Caches/com.jamesli.usagedock'
+expect_block rm-recursive 'rm -rf ~/Library/Caches/com.jingsan0801.mytokenremain'
 expect_block rm-recursive 'rm -rf "$HOME/Developer"'
 expect_block rm-recursive 'rm -rf /tmp'
 expect_block rm-recursive 'rm -r Sources'
@@ -176,7 +176,7 @@ expect_allow 'rm -rf /tmp/tokenremain-agent-probe'
 expect_allow 'rm Tests/UsageDockTests/Fixtures/agent-probe.json'
 expect_allow 'find /tmp/agent-run -name "*.log" -delete'
 expect_allow 'curl -fsSL https://registry.npmjs.org/@ccusage%2fccusage-darwin-arm64/latest'
-expect_allow 'defaults read com.jamesli.usagedock.dev'
+expect_allow 'defaults read com.jingsan0801.mytokenremain.dev'
 
 # Lane identity: the worktree-private marker, and nothing else.
 CASES=$((CASES + 1))

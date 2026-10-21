@@ -372,7 +372,7 @@ final class StatusBarController: NSObject {
     /// 弹窗是否走 macOS 26 的 Liquid Glass 面板。
     ///
     /// 隐藏开关是给"新系统上玻璃又出问题"留的安全阀,用户不必整版回退:
-    ///   defaults write com.jamesli.usagedock \
+    ///   defaults write com.jingsan0801.mytokenremain \
     ///     tokenRemain.forceLegacyPopover.v1 -bool YES
     /// 这是一条逃生通道,不是外观偏好,所以不进设置面板。
     private var usesLiquidGlassPopup: Bool {

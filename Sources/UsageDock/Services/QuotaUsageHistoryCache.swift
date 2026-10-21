@@ -11,7 +11,7 @@ struct QuotaUsageHistoryCache: Sendable {
         } else {
             let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
             self.url = caches
-                .appending(path: "com.jamesli.usagedock", directoryHint: .isDirectory)
+                .appending(path: "com.jingsan0801.mytokenremain", directoryHint: .isDirectory)
                 .appending(path: "quota-usage-history-v1.json")
         }
     }

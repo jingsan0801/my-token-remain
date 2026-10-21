@@ -57,7 +57,7 @@ struct AntigravityUsageService {
         URL(string: "https://daily-cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary")!,
         URL(string: "https://cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary")!
     ]
-    private static let logger = Logger(subsystem: "com.jamesli.usagedock", category: "AntigravityUsage")
+    private static let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "AntigravityUsage")
 
     func fetch(now: Date = .now) async throws -> ProviderQuota {
         // Prefer Antigravity's loopback quota service. It uses the already-running
@@ -164,7 +164,7 @@ enum AntigravityUsageParser {
         "gemini-5h", "gemini-weekly", "3p-5h", "3p-weekly"
     ]
     private static let logger = Logger(
-        subsystem: "com.jamesli.usagedock",
+        subsystem: "com.jingsan0801.mytokenremain",
         category: "AntigravityUsage"
     )
     /// 两组模型额度的显示名。品牌/模型名不做本地化。

@@ -148,7 +148,7 @@ struct KeychainReadTests {
     }
 
     /// 还原失败不能吞掉读取结果,也不能让调用方以为读取本身失败了。
-    /// (还原失败会被记进 com.jamesli.usagedock 的 Keychain 日志,不在这里断言。)
+    /// (还原失败会被记进 com.jingsan0801.mytokenremain 的 Keychain 日志,不在这里断言。)
     @Test("A failed restore still yields the value that was read")
     func failedRestoreDoesNotLoseTheRead() {
         var calls: [Bool] = []
@@ -338,7 +338,7 @@ struct KeychainAuthorizedReadTests {
     @Test("Suppressing interaction does not break a read the process is authorized for",
           .enabled(if: KeychainAuthorizedReadTests.enabled))
     func authorizedReadStillSucceeds() throws {
-        let service = "com.jamesli.usagedock.acl-selftest"
+        let service = "com.jingsan0801.mytokenremain.acl-selftest"
         let account = "selftest-\(UUID().uuidString)"
         let store = KeychainSecretStore(service: service, account: account)
         let value = "selftest-\(UUID().uuidString)"

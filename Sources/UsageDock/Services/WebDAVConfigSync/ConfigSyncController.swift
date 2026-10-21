@@ -47,7 +47,7 @@ final class ConfigSyncController: ObservableObject {
     /// Test seam; production keeps `.system`.
     var secretWriter: SecretWriter = .system
 
-    private let logger = Logger(subsystem: "com.jamesli.usagedock", category: "WebDAVSync")
+    private let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "WebDAVSync")
 
     private let defaults: UserDefaults
     private var autoSyncTask: Task<Void, Never>?

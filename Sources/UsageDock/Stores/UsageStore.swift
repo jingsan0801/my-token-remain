@@ -141,7 +141,7 @@ final class UsageStore: ObservableObject {
     private let providerAccountQuotaCache: ProviderAccountQuotaCache
     private let historyCache = DailyHistoryCache()
     private let quotaUsageHistoryCache: QuotaUsageHistoryCache
-    private let logger = Logger(subsystem: "com.jamesli.usagedock", category: "UsageRefresh")
+    private let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "UsageRefresh")
     private let claudeRetryAfterKey = "claudeRetryAfter"
     private let serviceStatusRefreshInterval: TimeInterval = 300
     private var quotaErrorMessage: String?

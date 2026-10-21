@@ -18,7 +18,7 @@ enum LiquidGlassPopupAvailability {
         systemSupportsLiquidGlass && !forceLegacyPopover
     }
 
-    /// `defaults write com.jamesli.usagedock tokenRemain.forceLegacyPopover.v1 -bool YES`
+    /// `defaults write com.jingsan0801.mytokenremain tokenRemain.forceLegacyPopover.v1 -bool YES`
     static func forceLegacyPopover(in defaults: UserDefaults = .standard) -> Bool {
         defaults.bool(forKey: PreferencesStore.forceLegacyPopoverKey)
     }

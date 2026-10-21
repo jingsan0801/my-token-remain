@@ -30,7 +30,7 @@ struct CopilotUsageService {
     }
 
     private static let usageURL = URL(string: "https://api.github.com/copilot_internal/user")!
-    private static let logger = Logger(subsystem: "com.jamesli.usagedock", category: "CopilotUsage")
+    private static let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "CopilotUsage")
 
     func fetch(now: Date = .now) async throws -> ProviderQuota {
         try await fetch(token: nil, now: now)

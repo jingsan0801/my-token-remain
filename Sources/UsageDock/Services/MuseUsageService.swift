@@ -46,7 +46,7 @@ struct MuseUsageService: Sendable {
         }
     }
 
-    private static let logger = Logger(subsystem: "com.jamesli.usagedock", category: "MuseUsage")
+    private static let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "MuseUsage")
     private static let userAgent =
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
 

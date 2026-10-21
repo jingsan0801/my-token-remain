@@ -19,7 +19,7 @@ final class LocalAISessionActivityMonitor: @unchecked Sendable {
     private var stream: FSEventStreamRef?
     private var monitoredPaths: Set<String> = []
     private let eventQueue = DispatchQueue(
-        label: "com.jamesli.usagedock.session-activity",
+        label: "com.jingsan0801.mytokenremain.session-activity",
         qos: .utility
     )
 

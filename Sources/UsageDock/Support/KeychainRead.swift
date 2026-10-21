@@ -101,7 +101,7 @@ enum KeychainRead {
                 if restoreStatus != errSecSuccess {
                     // 还原失败的后果比看上去严重:此后本进程**所有**需要交互的
                     // 钥匙串读取都会静默失败,且不留痕迹。只记状态码,绝不记条目内容。
-                    Logger(subsystem: "com.jamesli.usagedock", category: "Keychain")
+                    Logger(subsystem: "com.jingsan0801.mytokenremain", category: "Keychain")
                         .error("failed to restore keychain user interaction: OSStatus \(restoreStatus, privacy: .public)")
                 }
             }

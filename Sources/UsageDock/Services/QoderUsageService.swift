@@ -48,7 +48,7 @@ enum QoderLocalIPC {
 
     /// Qoder 共享客户端一次只接受一个可靠连接,并行连接会间歇超时,
     /// 所有 socket 往返都排进这条串行队列。
-    private static let exchangeQueue = DispatchQueue(label: "com.jamesli.usagedock.qoder-ipc")
+    private static let exchangeQueue = DispatchQueue(label: "com.jingsan0801.mytokenremain.qoder-ipc")
 
     static func infoFileURL(
         edition: Edition,

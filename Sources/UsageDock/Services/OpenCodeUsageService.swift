@@ -28,7 +28,7 @@ struct OpenCodeUsageService {
     static let weeklyCapUSD: Double = 30
     static let monthlyCapUSD: Double = 60
 
-    private static let logger = Logger(subsystem: "com.jamesli.usagedock", category: "OpenCodeUsage")
+    private static let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "OpenCodeUsage")
     private static let anchorCache = OpenCodeAnchorCache()
 
     var dataDirectory: URL = {

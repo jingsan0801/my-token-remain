@@ -13,8 +13,8 @@ cd "$ROOT_DIR"
 ./script/verify_keychain_read_contract.sh
 ./script/verify_website_release_contract.sh
 
-[[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' Resources/Info.plist)" == "com.jamesli.usagedock" ]]
-[[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.icloud-container-identifiers:0' Resources/UsageDockSync.entitlements)" == "iCloud.com.jamesli.tokenremain" ]]
+[[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' Resources/Info.plist)" == "com.jingsan0801.mytokenremain" ]]
+[[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.icloud-container-identifiers:0' Resources/UsageDockSync.entitlements)" == "iCloud.com.jingsan0801.mytokenremain" ]]
 
 /bin/bash -n script/build_and_run.sh
 /bin/bash -n script/verify_launch_stability.sh

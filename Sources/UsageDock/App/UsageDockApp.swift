@@ -28,6 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var dockIconCancellable: AnyCancellable?
     func applicationDidFinishLaunching(_ notification: Notification) {
         let arguments = ProcessInfo.processInfo.arguments
+        LegacyNamespaceMigration.runIfNeeded()
 #if DEBUG
         AppUpdateController.shared.configurePreview(arguments: arguments)
 #endif

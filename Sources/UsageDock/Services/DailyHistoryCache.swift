@@ -10,7 +10,7 @@ struct DailyHistoryCache: Sendable {
     init() {
         let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
         url = caches
-            .appending(path: "com.jamesli.usagedock", directoryHint: .isDirectory)
+            .appending(path: "com.jingsan0801.mytokenremain", directoryHint: .isDirectory)
             .appending(path: "daily-history-cache.json")
     }
 

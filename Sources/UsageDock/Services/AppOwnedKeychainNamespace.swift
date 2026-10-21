@@ -4,7 +4,7 @@ import Foundation
 /// locally signed development variants. Production keeps the historical
 /// service names so existing installations continue to find their secrets.
 struct AppOwnedKeychainNamespace: Equatable, Sendable {
-    static let productionBundleIdentifier = "com.jamesli.usagedock"
+    static let productionBundleIdentifier = "com.jingsan0801.mytokenremain"
 
     let servicePrefix: String
 

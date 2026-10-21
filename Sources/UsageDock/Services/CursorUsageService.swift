@@ -39,7 +39,7 @@ struct CursorUsageService {
     /// 按模型拆分只是附加信息:单独的短时限,超时或失败只丢掉这一行,
     /// 不拖住、也不影响额度本身。
     static let modelUsageTimeout: TimeInterval = 6
-    private static let logger = Logger(subsystem: "com.jamesli.usagedock", category: "CursorUsage")
+    private static let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "CursorUsage")
 
     func fetch(now: Date = .now) async throws -> ProviderQuota {
         try await fetch(accessToken: nil, membershipType: nil, now: now)

@@ -72,7 +72,7 @@ final class DashboardWindowController: NSWindowController {
         window.contentViewController = hosting
         // Keep the real window title for Mission Control, the window switcher and
         // accessibility, but leave the visible chrome to the compact sidebar mark.
-        window.title = "TokenRemain"
+        window.title = "MyTokenRemain"
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
         window.appearance = NSAppearance(named: .darkAqua)

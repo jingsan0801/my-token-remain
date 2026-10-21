@@ -484,7 +484,7 @@ struct AntigravityUsageParserTests {
         #expect(
             AntigravityUsageService.ServiceError.notLoggedIn
                 .description(bundle: englishBundle)
-                == "Antigravity not detected; open Antigravity and keep it running so TokenRemain can read its local quota service"
+                == "Antigravity not detected; open Antigravity and keep it running so MyTokenRemain can read its local quota service"
         )
     }
 }

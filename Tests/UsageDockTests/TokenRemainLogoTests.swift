@@ -386,7 +386,7 @@ final class TokenRemainLogoTests: XCTestCase {
             NSDictionary(contentsOf: repositoryRoot.appending(path: "Resources/Info.plist")) as? [String: Any]
         )
         XCTAssertEqual(plist["CFBundleIconName"] as? String, "AppIcon")
-        XCTAssertEqual(plist["CFBundleIconFile"] as? String, "TokenRemain.icns")
+        XCTAssertEqual(plist["CFBundleIconFile"] as? String, "MyTokenRemain.icns")
     }
 
     func testDockTileDrawsTheIconShapeWhileTheBareLogoStaysTransparent() throws {

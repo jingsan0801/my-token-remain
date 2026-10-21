@@ -78,7 +78,7 @@ struct ClaudeUsageService {
         if configurationDirectory == nil, let cookie = try ProviderSecretStore(provider: .claude).loadFromKeychain(interaction: .disallowed) {
             return try await ClaudeWebUsageService().fetch(configuration: cookie)
         }
-        let logger = Logger(subsystem: "com.jamesli.usagedock", category: "ClaudeUsage")
+        let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "ClaudeUsage")
         let environment = profileEnvironment
         var accessTokenBeforeProbe: String?
         var probeProxyVariables: [String: String] = [:]
@@ -361,7 +361,7 @@ private actor ClaudeScopedUsageSupplement {
             entries[cacheKey] = entry
             return quota.mergingScopedWindows(entry.cachedWindows)
         } catch {
-            Logger(subsystem: "com.jamesli.usagedock", category: "ClaudeUsage")
+            Logger(subsystem: "com.jingsan0801.mytokenremain", category: "ClaudeUsage")
                 .notice("Claude Fable supplement unavailable: \(error.localizedDescription, privacy: .public)")
             return mergingFreshCache(into: quota, entry: entry, now: now)
         }
@@ -1164,7 +1164,7 @@ private enum ClaudeCLIUsageProbe {
             appropriateFor: nil,
             create: true
         )
-        let root = caches.appendingPathComponent("com.jamesli.usagedock/claude-probe", isDirectory: true)
+        let root = caches.appendingPathComponent("com.jingsan0801.mytokenremain/claude-probe", isDirectory: true)
         let settingsDirectory = root.appendingPathComponent(".claude", isDirectory: true)
         try fileManager.createDirectory(at: settingsDirectory, withIntermediateDirectories: true)
 

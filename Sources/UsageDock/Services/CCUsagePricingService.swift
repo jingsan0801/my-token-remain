@@ -139,7 +139,7 @@ actor CCUsagePricingService {
         let directory = cacheDirectory ?? fileManager
             .urls(for: .cachesDirectory, in: .userDomainMask)
             .first!
-            .appending(path: "com.jamesli.usagedock", directoryHint: .isDirectory)
+            .appending(path: "com.jingsan0801.mytokenremain", directoryHint: .isDirectory)
         cacheURL = directory.appending(path: "ccusage-public-pricing-v1.json")
         attemptURL = directory.appending(path: "ccusage-pricing-attempt-v1.json")
         runtimeConfigurationURL = directory.appending(path: "ccusage-runtime-config-v1.json")

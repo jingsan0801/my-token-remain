@@ -27,7 +27,7 @@ final class DirectSyncHTTPServer: @unchecked Sendable {
 
     private static let maximumRequestBytes = 48 * 1024
     private static let maximumHeaderBytes = 16 * 1024
-    private let queue = DispatchQueue(label: "com.jamesli.tokenremain.direct-sync.http")
+    private let queue = DispatchQueue(label: "com.jingsan0801.mytokenremain.direct-sync.http")
     private var listener: NWListener?
     private var handler: Handler?
 

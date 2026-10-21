@@ -319,7 +319,7 @@ enum ClaudeProbeNetworkEnvironment {
         base: [String: String], configurationDirectory: URL?, homeDirectory: URL
     ) async -> [String: String]? {
         guard !Task.isCancelled else { return nil }
-        let logger = Logger(subsystem: "com.jamesli.usagedock", category: "ClaudeProbeNetwork")
+        let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "ClaudeProbeNetwork")
         let settingsDirectory = configurationDirectory
             ?? base["CLAUDE_CONFIG_DIR"].map { URL(fileURLWithPath: $0) }
             ?? homeDirectory.appending(path: ".claude")

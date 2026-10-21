@@ -5,7 +5,7 @@ set -euo pipefail
 # bundle's Assets.car. macOS 26 and later read it through CFBundleIconName and
 # draw it with the system icon shape; without it they set the legacy icns on a
 # generic backing tile. Older systems keep using CFBundleIconFile
-# (TokenRemain.icns), whose full-resolution artwork is better than the 256 px
+# (MyTokenRemain.icns), whose full-resolution artwork is better than the 256 px
 # icns actool would emit as a fallback, so only Assets.car is installed.
 #
 # usage: compile_app_icon.sh <bundle Resources dir> [--required]

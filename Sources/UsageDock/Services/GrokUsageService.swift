@@ -28,7 +28,7 @@ struct GrokUsageService {
 
     private static let creditsURL = URL(string: "https://cli-chat-proxy.grok.com/v1/billing?format=credits")!
     private static let settingsURL = URL(string: "https://cli-chat-proxy.grok.com/v1/settings")!
-    private static let logger = Logger(subsystem: "com.jamesli.usagedock", category: "GrokUsage")
+    private static let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "GrokUsage")
 
     func fetch(now: Date = .now) async throws -> ProviderQuota {
         try await fetch(token: nil, now: now)

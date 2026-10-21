@@ -47,8 +47,8 @@ final class CrossDeviceSyncController: ObservableObject {
     }
 
     static let shared = CrossDeviceSyncController()
-    nonisolated static let cloudContainerIdentifier = "iCloud.com.jamesli.tokenremain"
-    nonisolated static let keychainAccessGroup = "84397AQ22Y.com.jamesli.tokenremain.sync"
+    nonisolated static let cloudContainerIdentifier = "iCloud.com.jingsan0801.mytokenremain"
+    nonisolated static let keychainAccessGroup = "84397AQ22Y.com.jingsan0801.mytokenremain.sync"
     /// 心跳只是 iPhone 端"数据源仍在线"的保活信号。快照有效期长达
     /// 24 小时,15 分钟一跳绰绰有余;更密只会平添 CloudKit 往返。
     nonisolated static let heartbeatInterval: TimeInterval = 15 * 60
@@ -78,7 +78,7 @@ final class CrossDeviceSyncController: ObservableObject {
 
     private let defaults: UserDefaults
     private let sourceIdentityStore: SourceIdentityStore
-    private let logger = Logger(subsystem: "com.jamesli.usagedock", category: "PrivateSync")
+    private let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "PrivateSync")
     private var latestQuotas: [ProviderQuota.Provider: ProviderQuota] = [:]
     private var latestHistory: DailyUsageHistory?
     private var storeSubscription: AnyCancellable?

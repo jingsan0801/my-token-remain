@@ -5,7 +5,7 @@ MODE="${1:-run}"
 PRODUCT_NAME="UsageDock"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
-INSTALL_DIR="${USAGEDOCK_INSTALL_DIR:-/Users/jamesli/Applications}"
+INSTALL_DIR="${USAGEDOCK_INSTALL_DIR:-$HOME/Applications}"
 BROADCAST_BASE_URL="${TOKENREMAIN_BROADCAST_BASE_URL:-https://api.tokenremain.com}"
 # A stable signature lets macOS retain the user's "Always Allow" choice for
 # the Claude Code keychain item across UsageDock rebuilds.
@@ -40,24 +40,26 @@ ARCHIVE_DIR="${USAGEDOCK_ARCHIVE_DIR:-$ROOT_DIR/dist-release}"
 # app. It gets its own bundle, bundle identifier, executable/process name, and
 # installed path. Only a profile-backed sync build may target TokenRemain.app.
 if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
-  APP_NAME="TokenRemain"
+  APP_NAME="MyTokenRemain"
   EXECUTABLE_NAME="UsageDock"
-  BUNDLE_ID="com.jamesli.usagedock"
+  BUNDLE_ID="com.jingsan0801.mytokenremain"
   LEGACY_INSTALLED_APPS=(
     "$INSTALL_DIR/UsageDock.app"
     "$INSTALL_DIR/Token Remain.app"
+    "$INSTALL_DIR/TokenRemain.app"
   )
 else
-  APP_NAME="TokenRemain Dev"
+  APP_NAME="MyTokenRemain Dev"
   EXECUTABLE_NAME="UsageDockDev"
-  BUNDLE_ID="com.jamesli.usagedock.dev"
+  BUNDLE_ID="com.jingsan0801.mytokenremain.dev"
   LEGACY_INSTALLED_APPS=(
     "$INSTALL_DIR/UsageDock Dev.app"
+    "$INSTALL_DIR/TokenRemain Dev.app"
   )
 fi
 APP_BUNDLE="$DIST_DIR/$APP_NAME.app"
 INSTALLED_APP="$INSTALL_DIR/$APP_NAME.app"
-STABLE_SYNC_APP="$INSTALL_DIR/TokenRemain.app"
+STABLE_SYNC_APP="$INSTALL_DIR/MyTokenRemain.app"
 APP_CONTENTS="$APP_BUNDLE/Contents"
 APP_MACOS="$APP_CONTENTS/MacOS"
 APP_RESOURCES="$APP_CONTENTS/Resources"
@@ -171,8 +173,8 @@ prepare_sync_signing() {
 
   local profile_container
   profile_container="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.developer.icloud-container-identifiers:0' "$profile_plist" 2>/dev/null || true)"
-  if [[ "$profile_container" != "iCloud.com.jamesli.tokenremain" ]]; then
-    echo "The sync provisioning profile does not authorize iCloud.com.jamesli.tokenremain." >&2
+  if [[ "$profile_container" != "iCloud.com.jingsan0801.mytokenremain" ]]; then
+    echo "The sync provisioning profile does not authorize iCloud.com.jingsan0801.mytokenremain." >&2
     exit 1
   fi
 
@@ -264,7 +266,7 @@ prepare_sync_signing() {
   fi
 
   SYNC_RESOLVED_ENTITLEMENTS="$SYNC_WORK_DIR/UsageDockSync.resolved.entitlements"
-  SYNC_EXPECTED_KEYCHAIN_GROUP="${app_identifier_prefix}com.jamesli.tokenremain.sync"
+  SYNC_EXPECTED_KEYCHAIN_GROUP="${app_identifier_prefix}com.jingsan0801.mytokenremain.sync"
   SYNC_EXPECTED_APPLICATION_IDENTIFIER="${app_identifier_prefix}${BUNDLE_ID}"
   SYNC_EXPECTED_TEAM_IDENTIFIER="${app_identifier_prefix%.}"
   cp "$SYNC_ENTITLEMENTS_TEMPLATE" "$SYNC_RESOLVED_ENTITLEMENTS"
@@ -295,7 +297,7 @@ verify_sync_signature() {
   application_identifier="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.application-identifier' "$final_entitlements" 2>/dev/null || true)"
   team_identifier="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.team-identifier' "$final_entitlements" 2>/dev/null || true)"
   get_task_allow="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.get-task-allow' "$final_entitlements" 2>/dev/null || true)"
-  if [[ "$container" != "iCloud.com.jamesli.tokenremain" \
+  if [[ "$container" != "iCloud.com.jingsan0801.mytokenremain" \
     || "$environment" != "$SYNC_EXPECTED_ICLOUD_ENVIRONMENT" \
     || "$apns_environment" != "$SYNC_EXPECTED_APNS_ENVIRONMENT" \
     || "$service" != "CloudKit" \
@@ -323,7 +325,7 @@ verify_sync_signature() {
     echo "Final sync bundle has the wrong identifier or executable." >&2
     exit 1
   fi
-  if ! /usr/bin/grep -aFq 'iCloud.com.jamesli.tokenremain' "$signed_app/Contents/MacOS/$EXECUTABLE_NAME" \
+  if ! /usr/bin/grep -aFq 'iCloud.com.jingsan0801.mytokenremain' "$signed_app/Contents/MacOS/$EXECUTABLE_NAME" \
     || ! /usr/bin/grep -aFq 'Private sync source upload succeeded' "$signed_app/Contents/MacOS/$EXECUTABLE_NAME"; then
     echo "Final sync binary was built without the private CloudKit transport." >&2
     exit 1
@@ -345,7 +347,7 @@ verify_development_isolation() {
   fi
   entitlements="$(/usr/bin/codesign -d --entitlements :- "$signed_app" 2>/dev/null || true)"
   if [[ "$entitlements" == *"com.apple.developer.icloud-container-identifiers"* \
-    || "$entitlements" == *"84397AQ22Y.com.jamesli.tokenremain.sync"* ]]; then
+    || "$entitlements" == *"84397AQ22Y.com.jingsan0801.mytokenremain.sync"* ]]; then
     echo "Development-only bundle unexpectedly carries production sync entitlements." >&2
     exit 1
   fi
@@ -533,7 +535,7 @@ cp "$ROOT_DIR/Sources/UsageDock/Resources/claude.png" "$APP_RESOURCES/claude.png
 mkdir -p "$APP_RESOURCES/ProviderIcons"
 /usr/bin/rsync -a --delete --delete-excluded --exclude='*.svg' --exclude='README.md' \
   "$ROOT_DIR/Sources/UsageDock/Resources/ProviderIcons/" "$APP_RESOURCES/ProviderIcons/"
-cp "$ROOT_DIR/Sources/UsageDock/Resources/TokenRemain.icns" "$APP_RESOURCES/TokenRemain.icns"
+cp "$ROOT_DIR/Sources/UsageDock/Resources/MyTokenRemain.icns" "$APP_RESOURCES/MyTokenRemain.icns"
 # macOS 26+ draws the Icon Composer icon; a release must never ship without it.
 if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
   "$ROOT_DIR/script/compile_app_icon.sh" "$APP_RESOURCES" --required

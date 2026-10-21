@@ -14,7 +14,7 @@ struct AIFeedCache: Sendable {
     init(fileManager: FileManager = .default) {
         let base = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-        let directory = base.appendingPathComponent("com.jamesli.usagedock", isDirectory: true)
+        let directory = base.appendingPathComponent("com.jingsan0801.mytokenremain", isDirectory: true)
         try? fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
         url = directory.appendingPathComponent("ai-feed.json")
     }

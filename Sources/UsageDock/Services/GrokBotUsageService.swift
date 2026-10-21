@@ -39,7 +39,7 @@ struct GrokBotUsageService {
     }
 
     private static let usageURL = URL(string: "https://api2.cursor.sh/aiserver.v1.DashboardService/GetSandUsageStatus")!
-    private static let logger = Logger(subsystem: "com.jamesli.usagedock", category: "GrokBotUsage")
+    private static let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "GrokBotUsage")
 
     typealias Transport = @Sendable (URLRequest) async throws -> (Data, URLResponse)
 
