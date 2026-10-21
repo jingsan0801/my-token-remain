@@ -71,7 +71,7 @@ struct ProviderStatusService: Sendable {
         do {
             var request = URLRequest(url: endpoint.summaryURL)
             request.setValue("application/json", forHTTPHeaderField: "Accept")
-            request.setValue("TokenRemain/1", forHTTPHeaderField: "User-Agent")
+            request.setValue("MyTokenRemain/1", forHTTPHeaderField: "User-Agent")
             let (data, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse,
                   (200..<300).contains(http.statusCode) else {

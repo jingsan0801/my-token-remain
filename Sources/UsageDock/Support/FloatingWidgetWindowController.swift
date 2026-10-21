@@ -39,7 +39,7 @@ final class FloatingWidgetWindowController: NSWindowController, NSWindowDelegate
             defer: false
         )
         panel.contentViewController = hosting
-        panel.title = "TokenRemain"
+        panel.title = "MyTokenRemain"
         panel.titleVisibility = .hidden
         panel.titlebarAppearsTransparent = true
         panel.appearance = NSAppearance(named: .darkAqua)

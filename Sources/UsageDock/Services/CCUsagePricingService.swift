@@ -273,7 +273,7 @@ actor CCUsagePricingService {
         request.httpMethod = "GET"
         request.httpBody = nil
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("TokenRemain public-pricing-refresh", forHTTPHeaderField: "User-Agent")
+        request.setValue("MyTokenRemain public-pricing-refresh", forHTTPHeaderField: "User-Agent")
         if let eTag {
             request.setValue(eTag, forHTTPHeaderField: "If-None-Match")
         }

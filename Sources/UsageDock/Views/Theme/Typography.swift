@@ -80,6 +80,8 @@ struct TokenRemainWordmark: View {
 
     var body: some View {
         HStack(spacing: 0) {
+            Text("My")
+                .usageDockAdaptiveForeground(.primary)
             Text("Token")
                 .usageDockAdaptiveForeground(.primary)
             if case .monochrome = style {
@@ -94,6 +96,6 @@ struct TokenRemainWordmark: View {
         .lineLimit(1)
         .fixedSize(horizontal: true, vertical: false)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("TokenRemain")
+        .accessibilityLabel("MyTokenRemain")
     }
 }

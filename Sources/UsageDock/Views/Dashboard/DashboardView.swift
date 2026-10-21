@@ -236,11 +236,7 @@ struct DashboardView: View {
 
     private var brandMark: some View {
         HStack(spacing: 10) {
-            TokenRemainFullBodyRobot(
-                remainingPercent: store.aggregateRemainingPercent,
-                size: 42,
-                animated: visibility.isVisible
-            )
+            MyTokenRemainMark(size: 42)
 
             TokenRemainWordmark(size: 15)
         }

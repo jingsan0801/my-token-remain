@@ -206,7 +206,7 @@ struct UsageDockApp: App {
         // AppKit already owns every window and the real status item. Keep a
         // non-inserted scene as the SwiftUI lifecycle anchor, not an empty
         // Settings scene that can open or restore a blank preferences window.
-        MenuBarExtra("TokenRemain", isInserted: .constant(false)) {
+        MenuBarExtra("MyTokenRemain", isInserted: .constant(false)) {
             EmptyView()
         }
         .commands {

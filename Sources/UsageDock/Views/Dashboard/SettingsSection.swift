@@ -855,6 +855,6 @@ struct SettingsSection: View {
 
     private var appVersion: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-        return version.map { "TokenRemain \($0)" } ?? "TokenRemain"
+        return version.map { "MyTokenRemain \($0)" } ?? "MyTokenRemain"
     }
 }

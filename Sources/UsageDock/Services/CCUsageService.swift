@@ -18,7 +18,7 @@ struct CCUsageService {
         var errorDescription: String? {
             switch self {
             case .bundledExecutableMissing:
-                return "TokenRemain 安装不完整：缺少内置 ccusage 组件。请重新安装最新版。"
+                return "MyTokenRemain 安装不完整：缺少内置 ccusage 组件。请重新安装最新版。"
             case .helperTimedOut:
                 return "内置 ccusage 读取超时。请先重试；若持续失败，请重新安装最新版 TokenRemain。"
             case .invalidOutput:

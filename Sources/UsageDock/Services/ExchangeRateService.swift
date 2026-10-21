@@ -123,7 +123,7 @@ actor ExchangeRateService {
         )
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("TokenRemain exchange-rate-refresh", forHTTPHeaderField: "User-Agent")
+        request.setValue("MyTokenRemain exchange-rate-refresh", forHTTPHeaderField: "User-Agent")
         return request
     }
 
