@@ -72,7 +72,7 @@ struct AppUpdateCheckPolicy {
 /// EdDSA key, so an "update" would have replaced this self-built app with
 /// their signed binaries. This stub keeps the call sites compiling and never
 /// starts an updater; `availableVersion` stays nil so the dashboard update
-/// banner never appears. The bundled Sparkle.framework is never initialized.
+/// banner never appears. Sparkle is not a dependency of this fork anymore.
 @MainActor
 final class AppUpdateController: ObservableObject {
     static let shared = AppUpdateController()

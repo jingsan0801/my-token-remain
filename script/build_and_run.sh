@@ -361,35 +361,6 @@ verify_universal_binary() {
   [[ " $archs " == *" arm64 "* && " $archs " == *" x86_64 "* ]]
 }
 
-sign_embedded_sparkle() {
-  local framework="$APP_FRAMEWORKS/Sparkle.framework"
-  local framework_version="$framework/Versions/B"
-  local timestamp_option="--timestamp=none"
-
-  [[ -d "$framework" ]] || {
-    echo "The packaged application is missing Sparkle.framework." >&2
-    exit 1
-  }
-  if [[ "$SIGNING_COMMON_NAME" == "Developer ID Application:"* ]]; then
-    timestamp_option="--timestamp"
-  fi
-
-  # Sparkle's helpers have different entitlement requirements. Sign them
-  # individually, from the innermost services out, exactly as Sparkle's
-  # distribution guidance requires; do not use codesign --deep for mutation.
-  /usr/bin/codesign --force --sign "$SIGNING_IDENTITY" --options runtime "$timestamp_option" \
-    "$framework_version/XPCServices/Installer.xpc"
-  /usr/bin/codesign --force --sign "$SIGNING_IDENTITY" --options runtime "$timestamp_option" \
-    --preserve-metadata=entitlements \
-    "$framework_version/XPCServices/Downloader.xpc"
-  /usr/bin/codesign --force --sign "$SIGNING_IDENTITY" --options runtime "$timestamp_option" \
-    "$framework_version/Autoupdate"
-  /usr/bin/codesign --force --sign "$SIGNING_IDENTITY" --options runtime "$timestamp_option" \
-    "$framework_version/Updater.app"
-  /usr/bin/codesign --force --sign "$SIGNING_IDENTITY" --options runtime "$timestamp_option" \
-    "$framework"
-}
-
 sign_embedded_ccusage() {
   local timestamp_option="--timestamp=none"
 
@@ -420,41 +391,6 @@ sign_outer_bundle() {
     signing_options+=(--entitlements "$entitlements_path")
   fi
   /usr/bin/codesign "${signing_options[@]}" "$APP_BUNDLE"
-}
-
-verify_embedded_sparkle() {
-  local signed_app="$1"
-  local executable="$signed_app/Contents/MacOS/$EXECUTABLE_NAME"
-  local framework="$signed_app/Contents/Frameworks/Sparkle.framework"
-  local framework_version="$framework/Versions/B"
-
-  [[ -d "$framework" ]] || {
-    echo "Signed application is missing Sparkle.framework." >&2
-    exit 1
-  }
-  # Universal Mach-O output is large enough that grep -q can close the pipe
-  # before otool finishes; with pipefail that looks like a false verification
-  # failure. Read the complete output while discarding matching lines instead.
-  /usr/bin/otool -L "$executable" \
-    | /usr/bin/grep -F '@rpath/Sparkle.framework/Versions/B/Sparkle' >/dev/null
-  /usr/bin/otool -l "$executable" \
-    | /usr/bin/grep -F '@executable_path/../Frameworks' >/dev/null
-  for universal_executable in \
-    "$framework_version/Sparkle" \
-    "$framework_version/Autoupdate" \
-    "$framework_version/Updater.app/Contents/MacOS/Updater" \
-    "$framework_version/XPCServices/Installer.xpc/Contents/MacOS/Installer" \
-    "$framework_version/XPCServices/Downloader.xpc/Contents/MacOS/Downloader"; do
-    verify_universal_binary "$universal_executable" || {
-      echo "Sparkle contains a non-universal executable: $universal_executable" >&2
-      exit 1
-    }
-  done
-  /usr/bin/codesign --verify --strict "$framework_version/XPCServices/Installer.xpc"
-  /usr/bin/codesign --verify --strict "$framework_version/XPCServices/Downloader.xpc"
-  /usr/bin/codesign --verify --strict "$framework_version/Autoupdate"
-  /usr/bin/codesign --verify --strict "$framework_version/Updater.app"
-  /usr/bin/codesign --verify --strict "$framework"
 }
 
 verify_embedded_ccusage() {
@@ -517,7 +453,6 @@ verify_bundle_for_mode() {
     exit 1
   }
   verify_bundle_payload "$signed_app"
-  verify_embedded_sparkle "$signed_app"
   verify_embedded_ccusage "$signed_app"
   if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
     verify_sync_signature "$signed_app"
@@ -544,7 +479,6 @@ fi
 swift build "${SWIFT_BUILD_ARGS[@]}"
 BUILD_DIR="$(swift build "${SWIFT_BUILD_ARGS[@]}" --show-bin-path)"
 BUILD_BINARY="$BUILD_DIR/$PRODUCT_NAME"
-BUILD_SPARKLE_FRAMEWORK="$BUILD_DIR/Sparkle.framework"
 
 rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_MACOS" "$APP_RESOURCES" "$APP_FRAMEWORKS" "$APP_HELPERS"
@@ -574,7 +508,6 @@ if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
     exit 1
   }
 fi
-/usr/bin/ditto "$BUILD_SPARKLE_FRAMEWORK" "$APP_FRAMEWORKS/Sparkle.framework"
 cp "$ROOT_DIR/Resources/Info.plist" "$APP_CONTENTS/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable $EXECUTABLE_NAME" "$APP_CONTENTS/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID" "$APP_CONTENTS/Info.plist"
@@ -647,13 +580,24 @@ else
       | head -n 1)"
   fi
   if [[ -z "$SIGNING_IDENTITY" ]]; then
-    echo "TokenRemain needs an Apple Development signing identity to preserve Keychain approval." >&2
-    exit 1
-  fi
-  SIGNING_COMMON_NAME="$(resolve_signing_common_name "$SIGNING_IDENTITY")"
-  if [[ -z "$SIGNING_COMMON_NAME" ]]; then
-    echo "Could not resolve the requested signing identity." >&2
-    exit 1
+    if [[ "${USAGEDOCK_ALLOW_ADHOC_SIGNING:-0}" == "1" ]]; then
+      # Machines without an Apple Development certificate (CI, a secondary
+      # Mac used only for verification) can opt into an ad-hoc signature.
+      # Keychain items created by this build trust the ad-hoc CDHash, so they
+      # survive relaunches but not rebuilds; production installs should still
+      # use a stable Apple Development identity.
+      SIGNING_IDENTITY="-"
+      SIGNING_COMMON_NAME="Ad Hoc"
+    else
+      echo "TokenRemain needs an Apple Development signing identity to preserve Keychain approval." >&2
+      exit 1
+    fi
+  else
+    SIGNING_COMMON_NAME="$(resolve_signing_common_name "$SIGNING_IDENTITY")"
+    if [[ -z "$SIGNING_COMMON_NAME" ]]; then
+      echo "Could not resolve the requested signing identity." >&2
+      exit 1
+    fi
   fi
 fi
 # Finder/File Provider metadata can be copied onto a local bundle and invalidate
@@ -668,11 +612,9 @@ if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
   # internet-distributed, unnotarized app and kills it before main() runs.
   /usr/bin/xattr -c "$APP_CONTENTS/embedded.provisionprofile" 2>/dev/null || true
   sign_embedded_ccusage
-  sign_embedded_sparkle
   sign_outer_bundle "$SYNC_RESOLVED_ENTITLEMENTS"
 else
   sign_embedded_ccusage
-  sign_embedded_sparkle
   sign_outer_bundle
 fi
 # On File Provider-backed workspaces, codesign itself can cause provenance
