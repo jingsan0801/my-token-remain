@@ -57,8 +57,6 @@ stage_bundle() {
   cp -R "$ROOT_DIR/Sources/UsageDock/Resources/ProviderIcons" "$app_resources/"
   cp "$ROOT_DIR/Sources/UsageDock/Resources/MyTokenRemain.icns" "$app_resources/MyTokenRemain.icns"
   "$ROOT_DIR/script/compile_app_icon.sh" "$app_resources" --required
-  cp -R "$ROOT_DIR/Sources/UsageDock/Resources/TokenRemainHeadStates" "$app_resources/"
-  cp -R "$ROOT_DIR/Sources/UsageDock/Resources/TokenRemainFullBodyStates" "$app_resources/"
   for localization in "$ROOT_DIR/Sources/UsageDock/Localization/"*.lproj; do
     cp -R "$localization" "$app_resources/"
   done

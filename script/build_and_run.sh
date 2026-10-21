@@ -426,15 +426,6 @@ verify_bundle_payload() {
     echo "Bundle ships SVG regeneration sources that nothing loads: $stray_svg" >&2
     exit 1
   }
-  for artwork in "$signed_app/Contents/Resources/TokenRemainHeadStates"/*.png \
-    "$signed_app/Contents/Resources/TokenRemainFullBodyStates"/*.png; do
-    local width
-    width="$(/usr/bin/sips -g pixelWidth "$artwork" | /usr/bin/awk '/pixelWidth/ { print $2 }')"
-    (( width <= 256 )) || {
-      echo "Mascot artwork exceeds its 256px maximum consumer: $artwork is ${width}px." >&2
-      exit 1
-    }
-  done
   if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
     # `strip -S` removes the debug stabs; their presence means the strip was
     # skipped and the executable carries ~7 MB of DWARF per architecture.
@@ -542,8 +533,6 @@ if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
 else
   "$ROOT_DIR/script/compile_app_icon.sh" "$APP_RESOURCES"
 fi
-cp -R "$ROOT_DIR/Sources/UsageDock/Resources/TokenRemainHeadStates" "$APP_RESOURCES/"
-cp -R "$ROOT_DIR/Sources/UsageDock/Resources/TokenRemainFullBodyStates" "$APP_RESOURCES/"
 [[ -x "$CCUSAGE_SOURCE" ]] || {
   echo "Missing executable vendored ccusage $CCUSAGE_VERSION helper." >&2
   exit 1

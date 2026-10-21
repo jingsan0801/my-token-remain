@@ -15,6 +15,9 @@ Versioning for public releases.
 
 - Fork builds no longer start the Sparkle updater or contact
   `api.tokenremain.com`; the AI Feed surfaces are hidden.
+- Rename the fork to MyTokenRemain and replace the pixel-robot artwork with
+  the countdown-ring logo across the app icon, Dock icon, sidebar and
+  onboarding. Migrate legacy defaults and support directories on first launch.
 
 ### Fixed
 

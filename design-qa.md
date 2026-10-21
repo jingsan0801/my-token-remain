@@ -71,7 +71,7 @@ final result: passed
 
 ## Visual checks
 
-- The selected pixel robot, violet stepped shell, dark face, cyan water field, and neutral dash eyes remain recognizable in the 36 pt popover logo.
+- The countdown-ring mark, navy tile, teal arc and tick ring remain recognizable at sidebar and Dock sizes.
 - The logo was center-cropped before app packaging so the robot remains legible at menu-bar and sidebar sizes.
 - The live 46% minimum-provider state selects the intended neutral-dash expression.
 - `TokenRemain` is visible in the popover header, Dashboard sidebar lockup, navigation title, and native window title.
@@ -82,7 +82,7 @@ final result: passed
 
 - The app selects one of eleven image states from the lowest available provider quota.
 - Missing data uses the neutral state; zero quota uses the offline X-eye state.
-- The installed app bundle includes all eleven state images and `MyTokenRemain.icns`.
+- The installed app bundle includes `MyTokenRemain.icns` and the compiled `Assets.car`; no per-state mascot images ship.
 - Build, tests, signing, installation, and launch verification passed.
 
 ## Remaining polish

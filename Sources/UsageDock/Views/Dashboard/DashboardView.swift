@@ -112,7 +112,6 @@ struct DashboardView: View {
         } else {
             OnboardingView(
                 tracked: tracked,
-                robotAnimated: visibility.isVisible,
                 onChooseClaudeCookie: {
                     ClaudeCookieGuideWindowController.shared.show(store: store, openingSite: true)
                 }

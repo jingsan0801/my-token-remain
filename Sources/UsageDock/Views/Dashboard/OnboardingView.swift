@@ -6,7 +6,6 @@ import SwiftUI
 /// 「额度」页随时调整,这里不做任何不可逆决定。
 struct OnboardingView: View {
     @ObservedObject var tracked: TrackedProvidersStore
-    var robotAnimated = true
     /// Starts the claude.ai Cookie guide once onboarding completes with the
     /// Cookie source chosen. The view itself never touches credentials.
     var onChooseClaudeCookie: () -> Void = {}
@@ -57,11 +56,7 @@ struct OnboardingView: View {
             Spacer(minLength: 24)
 
             VStack(spacing: 10) {
-                TokenRemainFullBodyRobot(
-                    remainingPercent: nil,
-                    size: 72,
-                    animated: robotAnimated
-                )
+                MyTokenRemainMark(size: 84)
                 Text(L10n.text("onboarding.welcome"))
                     .wordmarkFont(26)
                     .foregroundStyle(DashboardTheme.text)

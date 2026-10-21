@@ -403,7 +403,7 @@ struct SettingsSection: View {
     /// confirmed on the spot rather than by looking down at the Dock.
     private var dockLogoSettings: some View {
         HStack(alignment: .center, spacing: 14) {
-            Image(nsImage: TokenRemainHeadLogoArtwork.image(slots: dockLogoSlots, size: 128, style: .dockTile))
+            Image(nsImage: MyTokenRemainArtwork.image(slots: dockLogoSlots, size: 128, style: .dockTile))
                 .resizable()
                 .interpolation(.high)
                 .frame(width: 56, height: 56)
@@ -431,7 +431,7 @@ struct SettingsSection: View {
         dockLogoSlotPicker(slot: 1, title: L10n.text("settings.dock_logo_bottom"))
     }
 
-    private var dockLogoSlots: [TokenRemainHeadLogoArtwork.Slot] {
+    private var dockLogoSlots: [MyTokenRemainArtwork.Slot] {
         let strategy = preferences.quotaSummaryStrategy
         return StatusBarPresentation.headLogoSlots(
             providers: preferences.dockLogoProviders,
@@ -455,7 +455,7 @@ struct SettingsSection: View {
         )
         return HStack(spacing: 6) {
             Circle()
-                .fill(Color(nsColor: TokenRemainHeadLogoArtwork.meterColor(for: selection.wrappedValue)))
+                .fill(Color(nsColor: MyTokenRemainArtwork.meterColor(for: selection.wrappedValue)))
                 .frame(width: 7, height: 7)
                 .accessibilityHidden(true)
             Text(title)

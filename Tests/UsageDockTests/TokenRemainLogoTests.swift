@@ -7,55 +7,55 @@ final class TokenRemainLogoTests: XCTestCase {
         // Claude 单条与 Codex 单条颜色不同,同档位也必须是不同的 key;
         // key 相同则跳过 Dock 重绘,混淆会让图标停在另一家的颜色上。
         XCTAssertNotEqual(
-            TokenRemainHeadLogoArtwork.renderKey(claudeRemaining: 45, codexRemaining: nil),
-            TokenRemainHeadLogoArtwork.renderKey(claudeRemaining: nil, codexRemaining: 45)
+            MyTokenRemainArtwork.renderKey(claudeRemaining: 45, codexRemaining: nil),
+            MyTokenRemainArtwork.renderKey(claudeRemaining: nil, codexRemaining: 45)
         )
         // 双条与单条、无数据分别可区分。
         XCTAssertNotEqual(
-            TokenRemainHeadLogoArtwork.renderKey(claudeRemaining: 45, codexRemaining: 45),
-            TokenRemainHeadLogoArtwork.renderKey(claudeRemaining: 45, codexRemaining: nil)
+            MyTokenRemainArtwork.renderKey(claudeRemaining: 45, codexRemaining: 45),
+            MyTokenRemainArtwork.renderKey(claudeRemaining: 45, codexRemaining: nil)
         )
         XCTAssertNotEqual(
-            TokenRemainHeadLogoArtwork.renderKey(claudeRemaining: nil, codexRemaining: nil),
-            TokenRemainHeadLogoArtwork.renderKey(claudeRemaining: 45, codexRemaining: nil)
+            MyTokenRemainArtwork.renderKey(claudeRemaining: nil, codexRemaining: nil),
+            MyTokenRemainArtwork.renderKey(claudeRemaining: 45, codexRemaining: nil)
         )
         // 相同输入必须稳定,内容去重才有意义。
         XCTAssertEqual(
-            TokenRemainHeadLogoArtwork.renderKey(claudeRemaining: 45, codexRemaining: 12),
-            TokenRemainHeadLogoArtwork.renderKey(claudeRemaining: 45, codexRemaining: 12)
+            MyTokenRemainArtwork.renderKey(claudeRemaining: 45, codexRemaining: 12),
+            MyTokenRemainArtwork.renderKey(claudeRemaining: 45, codexRemaining: 12)
         )
     }
 
     func testDockRenderKeyFollowsTheSelectedProviderPair() {
-        typealias Slot = TokenRemainHeadLogoArtwork.Slot
+        typealias Slot = MyTokenRemainArtwork.Slot
         // The historical convenience API is the default pair, not a separate
         // rendering path.
         XCTAssertEqual(
-            TokenRemainHeadLogoArtwork.renderKey(claudeRemaining: 45, codexRemaining: 12),
-            TokenRemainHeadLogoArtwork.renderKey(slots: [
+            MyTokenRemainArtwork.renderKey(claudeRemaining: 45, codexRemaining: 12),
+            MyTokenRemainArtwork.renderKey(slots: [
                 Slot(provider: .claude, remainingPercent: 45),
                 Slot(provider: .codex, remainingPercent: 12)
             ])
         )
         // Same values on a different pair, or the same pair swapped top and
         // bottom, is a different picture and must not be deduplicated away.
-        let claudeCursor = TokenRemainHeadLogoArtwork.renderKey(slots: [
+        let claudeCursor = MyTokenRemainArtwork.renderKey(slots: [
             Slot(provider: .claude, remainingPercent: 45),
             Slot(provider: .cursor, remainingPercent: 12)
         ])
         XCTAssertNotEqual(
             claudeCursor,
-            TokenRemainHeadLogoArtwork.renderKey(claudeRemaining: 45, codexRemaining: 12)
+            MyTokenRemainArtwork.renderKey(claudeRemaining: 45, codexRemaining: 12)
         )
         XCTAssertNotEqual(
             claudeCursor,
-            TokenRemainHeadLogoArtwork.renderKey(slots: [
+            MyTokenRemainArtwork.renderKey(slots: [
                 Slot(provider: .cursor, remainingPercent: 12),
                 Slot(provider: .claude, remainingPercent: 45)
             ])
         )
         XCTAssertEqual(
-            TokenRemainHeadLogoArtwork.moodRemaining([
+            MyTokenRemainArtwork.moodRemaining([
                 Slot(provider: .grok, remainingPercent: nil),
                 Slot(provider: .cursor, remainingPercent: 12)
             ]),
@@ -64,11 +64,11 @@ final class TokenRemainLogoTests: XCTestCase {
     }
 
     func testDockMeterColorsKeepClaudeAndCodexArtwork() {
-        let claude = TokenRemainHeadLogoArtwork.meterColor(for: .claude).usingColorSpace(.sRGB)
-        let codex = TokenRemainHeadLogoArtwork.meterColor(for: .codex).usingColorSpace(.sRGB)
+        let claude = MyTokenRemainArtwork.meterColor(for: .claude).usingColorSpace(.sRGB)
+        let codex = MyTokenRemainArtwork.meterColor(for: .codex).usingColorSpace(.sRGB)
         XCTAssertEqual(claude.map { Int(($0.redComponent * 255).rounded()) }, 217)
         XCTAssertEqual(codex.map { Int(($0.blueComponent * 255).rounded()) }, 251)
-        XCTAssertNotNil(TokenRemainHeadLogoArtwork.meterColor(for: .cursor).usingColorSpace(.sRGB))
+        XCTAssertNotNil(MyTokenRemainArtwork.meterColor(for: .cursor).usingColorSpace(.sRGB))
     }
 
     @MainActor
@@ -86,8 +86,8 @@ final class TokenRemainLogoTests: XCTestCase {
             quota: { $0 == .cursor ? cursor : nil }
         )
         XCTAssertEqual(slots, [
-            TokenRemainHeadLogoArtwork.Slot(provider: .cursor, remainingPercent: 70),
-            TokenRemainHeadLogoArtwork.Slot(provider: .claude, remainingPercent: nil)
+            MyTokenRemainArtwork.Slot(provider: .cursor, remainingPercent: 70),
+            MyTokenRemainArtwork.Slot(provider: .claude, remainingPercent: nil)
         ])
     }
 
@@ -210,53 +210,6 @@ final class TokenRemainLogoTests: XCTestCase {
         XCTAssertEqual(TokenRemainLogoState.resolve(remainingPercent: nil), .neutralDashes)
     }
 
-    func testLogoToneUsesProviderIdentityUntilQuotaIsCritical() {
-        XCTAssertEqual(
-            TokenRemainLogoTone.resolve(provider: .claude, remainingPercent: 10),
-            .provider(.claude)
-        )
-        XCTAssertEqual(
-            TokenRemainLogoTone.resolve(provider: .codex, remainingPercent: 64),
-            .provider(.codex)
-        )
-        XCTAssertEqual(
-            TokenRemainLogoTone.resolve(provider: .claude, remainingPercent: 9.99),
-            .critical
-        )
-        XCTAssertEqual(
-            TokenRemainLogoTone.resolve(provider: nil, remainingPercent: nil),
-            .neutral
-        )
-    }
-
-    func testEveryQuotaStateKeepsItsOwnPixelFace() {
-        XCTAssertEqual(PixelRobotMark.Face.allCases.count, 11)
-        XCTAssertEqual(PixelRobotMark.face(for: .excitedStars), .excitedStars)
-        XCTAssertEqual(PixelRobotMark.face(for: .calmDots), .calmDots)
-        XCTAssertEqual(PixelRobotMark.face(for: .neutralDashes), .neutralDashes)
-        XCTAssertEqual(PixelRobotMark.face(for: .cryingWarning), .cryingWarning)
-        XCTAssertEqual(PixelRobotMark.face(for: .offline), .offline)
-    }
-
-    func testPixelRobotMatrixIsCompleteForEveryFace() {
-        for face in PixelRobotMark.Face.allCases {
-            let matrix = PixelRobotMark.matrix(face: face)
-            XCTAssertEqual(matrix.count, PixelRobotMark.rows)
-            XCTAssertTrue(matrix.allSatisfy { $0.count == PixelRobotMark.columns })
-        }
-    }
-
-    func testPixelRobotUsesCanonicalOrbitSilhouette() {
-        let matrix = PixelRobotMark.matrix(face: .neutralDashes)
-        XCTAssertEqual(PixelRobotMark.columns, 16)
-        XCTAssertEqual(PixelRobotMark.rows, 16)
-        XCTAssertEqual(matrix[0][7], .cap)
-        XCTAssertEqual(matrix[7][0], .signal)
-        XCTAssertEqual(matrix[7][1], .body)
-        XCTAssertEqual(matrix[14][4], .bodyDim)
-        XCTAssertEqual(matrix[15][5], .empty)
-    }
-
     func testDockLogoQuotaMeterUsesTheActualRemainingPercent() {
         XCTAssertNil(TokenRemainLogoMeter.filledSegments(remainingPercent: nil))
         XCTAssertEqual(TokenRemainLogoMeter.filledSegments(remainingPercent: 0), 0)
@@ -264,35 +217,15 @@ final class TokenRemainLogoTests: XCTestCase {
         XCTAssertEqual(TokenRemainLogoMeter.filledSegments(remainingPercent: 100), 10)
     }
 
-    func testDockLogoKeepsRasterArtworkUpright() throws {
-        let size = NSSize(width: 32, height: 32)
-        let source = NSImage(size: size, flipped: false) { rect in
-            NSColor.blue.setFill()
-            NSRect(x: rect.minX, y: rect.minY, width: rect.width, height: rect.height / 2).fill()
-            NSColor.red.setFill()
-            NSRect(x: rect.minX, y: rect.midY, width: rect.width, height: rect.height / 2).fill()
-            return true
-        }
-        let rendered = TokenRemainHeadLogoArtwork.renderSourceUprightForTesting(
-            source,
-            size: size.width
+    func testDockRenderKeyTracksContinuousArcProgress() {
+        XCTAssertNotEqual(
+            MyTokenRemainArtwork.renderKey(claudeRemaining: 45.1, codexRemaining: nil),
+            MyTokenRemainArtwork.renderKey(claudeRemaining: 45.2, codexRemaining: nil)
         )
-
-        let sourceData = try XCTUnwrap(source.tiffRepresentation)
-        let sourceBitmap = try XCTUnwrap(NSBitmapImageRep(data: sourceData))
-        let renderedData = try XCTUnwrap(rendered.tiffRepresentation)
-        let renderedBitmap = try XCTUnwrap(NSBitmapImageRep(data: renderedData))
-
-        for y in [8, 24] {
-            let expected = try XCTUnwrap(
-                sourceBitmap.colorAt(x: 16, y: y)?.usingColorSpace(.deviceRGB)
-            )
-            let actual = try XCTUnwrap(
-                renderedBitmap.colorAt(x: 16, y: y)?.usingColorSpace(.deviceRGB)
-            )
-            XCTAssertEqual(actual.redComponent, expected.redComponent, accuracy: 0.08)
-            XCTAssertEqual(actual.blueComponent, expected.blueComponent, accuracy: 0.08)
-        }
+        XCTAssertNotEqual(
+            MyTokenRemainArtwork.renderKey(claudeRemaining: 9, codexRemaining: nil),
+            MyTokenRemainArtwork.renderKey(claudeRemaining: 50, codexRemaining: nil)
+        )
     }
 
     @MainActor
@@ -361,7 +294,7 @@ final class TokenRemainLogoTests: XCTestCase {
         let components = try XCTUnwrap(fill.split(separator: ":").last)
             .split(separator: ",").compactMap { Double($0) }
         XCTAssertEqual(components.count, 4)
-        let tile = TokenRemainHeadLogoArtwork.dockTileFill
+        let tile = MyTokenRemainArtwork.dockTileFill
         XCTAssertEqual(components[0], tile.red, accuracy: 0.002)
         XCTAssertEqual(components[1], tile.green, accuracy: 0.002)
         XCTAssertEqual(components[2], tile.blue, accuracy: 0.002)
@@ -391,8 +324,6 @@ final class TokenRemainLogoTests: XCTestCase {
 
     func testDockTileDrawsTheIconShapeWhileTheBareLogoStaysTransparent() throws {
         let size = NSSize(width: 256, height: 256)
-        // A transparent source stands in for the robot: only the tile shows.
-        let source = NSImage(size: size, flipped: false) { _ in true }
 
         // Rasterize into an explicit sRGB context: a TIFF round trip tags the
         // bitmap with a device space and shifts the color being checked.
@@ -417,17 +348,25 @@ final class TokenRemainLogoTests: XCTestCase {
             return NSColor(srgbRed: channel(0), green: channel(1), blue: channel(2), alpha: alpha)
         }
 
-        let tile = TokenRemainHeadLogoArtwork.renderDockTileForTesting(source, size: size.width)
+        let tile = MyTokenRemainArtwork.image(
+            slots: [.init(provider: .claude, remainingPercent: 60)],
+            size: size.width,
+            style: .dockTile
+        )
         // Outside the 824/1024 shape: transparent, as on any macOS icon grid.
         XCTAssertEqual(try color(tile, x: 4, y: 128).alphaComponent, 0, accuracy: 0.01)
         XCTAssertEqual(try color(tile, x: 30, y: 30).alphaComponent, 0, accuracy: 0.01)
         // Inside it: the Icon Composer navy.
         let inside = try color(tile, x: 128, y: 128)
         XCTAssertEqual(inside.alphaComponent, 1, accuracy: 0.01)
-        XCTAssertEqual(inside.redComponent, TokenRemainHeadLogoArtwork.dockTileFill.red, accuracy: 0.02)
-        XCTAssertEqual(inside.blueComponent, TokenRemainHeadLogoArtwork.dockTileFill.blue, accuracy: 0.02)
+        XCTAssertEqual(inside.redComponent, MyTokenRemainArtwork.dockTileFill.red, accuracy: 0.02)
+        XCTAssertEqual(inside.blueComponent, MyTokenRemainArtwork.dockTileFill.blue, accuracy: 0.02)
 
-        let bare = TokenRemainHeadLogoArtwork.renderSourceUprightForTesting(source, size: size.width)
+        let bare = MyTokenRemainArtwork.image(
+            slots: [.init(provider: .claude, remainingPercent: 60)],
+            size: size.width,
+            style: .bare
+        )
         XCTAssertEqual(try color(bare, x: 128, y: 128).alphaComponent, 0, accuracy: 0.01)
     }
 }

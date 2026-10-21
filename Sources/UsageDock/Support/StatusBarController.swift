@@ -54,9 +54,9 @@ enum StatusBarPresentation {
         providers: [ProviderQuota.Provider],
         strategy: QuotaSummaryStrategy,
         quota: (ProviderQuota.Provider) -> ProviderQuota?
-    ) -> [TokenRemainHeadLogoArtwork.Slot] {
+    ) -> [MyTokenRemainArtwork.Slot] {
         providers.map { provider in
-            TokenRemainHeadLogoArtwork.Slot(
+            MyTokenRemainArtwork.Slot(
                 provider: provider,
                 remainingPercent: UsageStore.logoQuotaSelection(
                     from: [quota(provider)],
@@ -453,10 +453,7 @@ final class StatusBarController: NSObject {
             strategy: summaryStrategy,
             quota: { store.headlineQuota(for: $0, strategy: summaryStrategy) }
         )
-        let state = TokenRemainLogoState.resolve(
-            remainingPercent: TokenRemainHeadLogoArtwork.moodRemaining(logoSlots)
-        )
-        let dockIconKey = TokenRemainHeadLogoArtwork.renderKey(slots: logoSlots)
+        let dockIconKey = MyTokenRemainArtwork.renderKey(slots: logoSlots)
         let dockIconHidden = PreferencesStore.shared.dockIconHidden
 
         let insights = UsageInsights(
@@ -468,7 +465,7 @@ final class StatusBarController: NSObject {
         // 菜单栏文字维持用户自选项;Dock logo 的表情与双进度条只比较
         // 设置里选定的两个应用，其他 provider 仍出现在 tooltip 与面板里。
         var tooltipLines = [
-            "MyTokenRemain · \(state.accessibilityDescription)",
+            "MyTokenRemain",
             insights.decisionHeadline()
         ]
         for provider in ProviderQuota.Provider.displayOrder {
@@ -520,7 +517,7 @@ final class StatusBarController: NSObject {
             lastDockIconKey = nil
         } else if dockIconKey != lastDockIconKey {
             lastDockIconKey = dockIconKey
-            NSApp.applicationIconImage = TokenRemainHeadLogoArtwork.image(
+            NSApp.applicationIconImage = MyTokenRemainArtwork.image(
                 slots: logoSlots,
                 size: 256,
                 style: .dockTile
