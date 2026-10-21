@@ -777,6 +777,7 @@
 "accounts.management.single_source" = "Diese App verwendet die aktuelle Anmeldung oder die unter Datenquellen konfigurierten Zugangsdaten.";
 "accounts.management.monitoring" = "Überwachung aktiv";
 "accounts.management.stopped" = "Überwachung gestoppt";
+"accounts.management.stopped_with_app" = "Mit der App gestoppt";
 "accounts.management.stop" = "Überwachung stoppen";
 "accounts.management.start" = "Überwachung starten";
 "accounts.management.stop_named" = "Überwachung von %1$@ stoppen";

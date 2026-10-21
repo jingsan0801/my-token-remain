@@ -777,6 +777,7 @@
 "accounts.management.single_source" = "This app uses its current login or credentials configured in Data Sources.";
 "accounts.management.monitoring" = "Monitoring enabled";
 "accounts.management.stopped" = "Monitoring stopped";
+"accounts.management.stopped_with_app" = "Stopped with the app";
 "accounts.management.stop" = "Stop monitoring";
 "accounts.management.start" = "Start monitoring";
 "accounts.management.stop_named" = "Stop monitoring %1$@";

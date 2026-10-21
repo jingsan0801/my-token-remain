@@ -70,10 +70,10 @@ struct AccountManagementTests {
         let fixture = try Fixture(providers: [.openrouter, .openrouter, .claude])
         defer { fixture.cleanUp() }
         let calls = FetchCalls()
-        let store = fixture.makeStore { profile, _ in
+        let store = fixture.makeStore(fetch: { profile, _ in
             await calls.record(profile.id)
             return Self.quota(profile.provider)
-        }
+        })
         let first = fixture.profiles[0]
         fixture.tracked.setEnabled(.openrouter, false)
         store.setProviderAccountEnabled(false, id: first.id)
@@ -92,6 +92,40 @@ struct AccountManagementTests {
         await store.refreshProviderAccount(first.id)
         #expect(await calls.ids == [first.id])
         #expect(store.providerAccountStates[first.id]?.quota != nil)
+    }
+
+    @Test("Accounts can be added while the app is stopped, without a refresh that never runs")
+    func addAccountWhileAppStopped() async throws {
+        let fixture = try Fixture(providers: [])
+        defer { fixture.cleanUp() }
+        fixture.tracked.setEnabled(.claude, false)
+        fixture.tracked.setEnabled(.openrouter, false)
+        let calls = FetchCalls()
+        let store = fixture.makeStore(
+            fetch: { profile, _ in
+                await calls.record(profile.id)
+                return Self.quota(profile.provider)
+            },
+            accountLogin: { _, _ in }
+        )
+
+        // CLI sign-in succeeds, but its follow-up quota read is gated on
+        // monitoring: the saved account must not spin as refreshing forever.
+        #expect(await store.addProviderAccount(provider: .claude, credential: nil))
+        let cliProfile = try #require(store.providerAccountProfiles.first { $0.provider == .claude && !$0.isSystem })
+        let cliState = try #require(store.providerAccountStates[cliProfile.id])
+        #expect(cliState.quota == nil)
+        #expect(!cliState.isRefreshing)
+        try await Task.sleep(for: .milliseconds(30))
+        #expect(await calls.ids.isEmpty)
+
+        // Key-backed accounts verify inline, so they land with data even
+        // while the app is stopped.
+        #expect(await store.addProviderAccount(provider: .openrouter, credential: "sk-test"))
+        let keyProfile = try #require(store.providerAccountProfiles.first { $0.provider == .openrouter && !$0.isSystem })
+        #expect(store.providerAccountStates[keyProfile.id]?.quota != nil)
+        #expect(store.providerAccountStates[keyProfile.id]?.isRefreshing == false)
+        #expect(await calls.ids == [keyProfile.id])
     }
 
     @Test("Stopped apps do not contribute cached account quotas to Dock and other headlines")
@@ -124,10 +158,10 @@ struct AccountManagementTests {
     func lateRefreshAfterRemoval() async throws {
         let fixture = try Fixture(providers: [.openrouter])
         defer { fixture.cleanUp() }
-        let store = fixture.makeStore { profile, _ in
+        let store = fixture.makeStore(fetch: { profile, _ in
             try await Task.sleep(for: .milliseconds(100))
             return Self.quota(profile.provider)
-        }
+        })
         let id = fixture.profiles[0].id
         let refresh = Task { await store.refreshProviderAccount(id) }
         let deadline = Date().addingTimeInterval(2)
@@ -187,7 +221,7 @@ struct AccountManagementTests {
     func cardNoticeIsScopedToTheSelectedAccount() async throws {
         let fixture = try Fixture(providers: [.deepseek])
         defer { fixture.cleanUp() }
-        let store = fixture.makeStore { _, _ in throw URLError(.notConnectedToInternet) }
+        let store = fixture.makeStore(fetch: { _, _ in throw URLError(.notConnectedToInternet) })
         let account = fixture.profiles[0]
 
         // The default source fails while validating a pasted key.
@@ -216,10 +250,10 @@ struct AccountManagementTests {
         let fixture = try Fixture(providers: [.deepseek])
         defer { fixture.cleanUp() }
         let calls = FetchCalls()
-        let store = fixture.makeStore { profile, _ in
+        let store = fixture.makeStore(fetch: { profile, _ in
             await calls.record(profile.id)
             return Self.quota(profile.provider)
-        }
+        })
         let account = fixture.profiles[0]
 
         #expect(await store.saveAPIKey("invalid", for: .deepseek) == false)
@@ -306,6 +340,9 @@ struct AccountManagementTests {
         func makeStore(
             fetch: @escaping @Sendable (ProviderAccountProfile, String?) async throws -> ProviderQuota = { profile, _ in
                 AccountManagementTests.quota(profile.provider)
+            },
+            accountLogin: @escaping @Sendable (ProviderQuota.Provider, URL) async throws -> Void = { _, _ in
+                throw CancellationError()
             }
         ) -> UsageStore {
             UsageStore(
@@ -317,7 +354,7 @@ struct AccountManagementTests {
                 providerAccountQuotaCache: accountCache,
                 credentialValidation: { _, _, _ in throw CancellationError() },
                 credentialSave: { _, _ in Issue.record("Unexpected credential write") },
-                accountFetch: fetch, accountLogin: { _, _ in throw CancellationError() }
+                accountFetch: fetch, accountLogin: accountLogin
             )
         }
 

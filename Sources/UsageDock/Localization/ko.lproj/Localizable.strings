@@ -777,6 +777,7 @@
 "accounts.management.single_source" = "이 앱은 현재 로그인 또는 데이터 소스에서 설정한 인증 정보를 사용합니다.";
 "accounts.management.monitoring" = "모니터링 중";
 "accounts.management.stopped" = "모니터링 중지됨";
+"accounts.management.stopped_with_app" = "앱과 함께 중지됨";
 "accounts.management.stop" = "모니터링 중지";
 "accounts.management.start" = "모니터링 시작";
 "accounts.management.stop_named" = "%1$@ 모니터링 중지";

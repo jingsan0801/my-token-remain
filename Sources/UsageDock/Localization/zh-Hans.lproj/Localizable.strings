@@ -777,6 +777,7 @@
 "accounts.management.single_source" = "此应用使用当前登录，或在「数据来源」中配置的凭证。";
 "accounts.management.monitoring" = "监控中";
 "accounts.management.stopped" = "已停止监控";
+"accounts.management.stopped_with_app" = "已随应用停止";
 "accounts.management.stop" = "停止监控";
 "accounts.management.start" = "开始监控";
 "accounts.management.stop_named" = "停止监控 %1$@";

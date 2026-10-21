@@ -777,6 +777,7 @@
 "accounts.management.single_source" = "Esta aplicación usa la sesión actual o las credenciales configuradas en Fuentes de datos.";
 "accounts.management.monitoring" = "Supervisión activa";
 "accounts.management.stopped" = "Supervisión detenida";
+"accounts.management.stopped_with_app" = "Detenida con la app";
 "accounts.management.stop" = "Detener supervisión";
 "accounts.management.start" = "Iniciar supervisión";
 "accounts.management.stop_named" = "Detener supervisión de %1$@";

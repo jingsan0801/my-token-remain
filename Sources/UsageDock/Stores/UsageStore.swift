@@ -1603,9 +1603,12 @@ final class UsageStore: ObservableObject {
             providerAccountProfiles = providerAccountsStore.allProfiles
             providerAccountsStore.setSelection(.account(profile.id), for: provider)
             providerAccountSelections = providerAccountsStore.selections
+            // A provider whose monitoring is off runs no account refresh, so
+            // the new account must not pose as refreshing until it is resumed.
+            let willRefresh = initialQuota == nil && tracked.isEnabled(provider)
             providerAccountStates[profile.id] = ProviderAccountState(
                 quota: initialQuota,
-                isRefreshing: initialQuota == nil
+                isRefreshing: willRefresh
             )
             if initialQuota != nil {
                 providerAccountQuotaCache.save(currentProviderAccountQuotas())
@@ -1613,7 +1616,9 @@ final class UsageStore: ObservableObject {
             }
             // Official sign-in is complete. Quota availability is a separate,
             // bounded refresh and must not keep the login form waiting.
-            Task { await refreshProviderAccount(profile.id) }
+            if willRefresh {
+                Task { await refreshProviderAccount(profile.id) }
+            }
             return true
         } catch {
             if attemptedSecretSave {

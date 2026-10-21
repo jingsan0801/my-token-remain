@@ -309,15 +309,51 @@ private struct ProviderAccountManagementCard: View {
         Divider().overlay(DashboardSurface.border).padding(.vertical, 8)
     }
 
+    /// A row's state combines the switches that govern it: app-level
+    /// monitoring, the parked default source, and the account's own switch.
+    /// Dot and words both derive from it, so they cannot disagree.
+    private enum RowState {
+        case live
+        /// Default source parked while managed accounts keep running.
+        case parked
+        /// Managed account paused by its own switch.
+        case paused
+        /// Provider monitoring is off; every row is stopped regardless of its
+        /// own switch, which stays untouched for when monitoring resumes.
+        case stoppedWithApp
+
+        var isLive: Bool { self == .live }
+    }
+
+    private func rowState(_ profile: ProviderAccountProfile) -> RowState {
+        guard isMonitoring else { return .stoppedWithApp }
+        if profile.isSystem {
+            return store.isSystemSourceEnabled(provider) ? .live : .parked
+        }
+        return profile.isEnabled ? .live : .paused
+    }
+
+    private func statusText(for state: RowState, isSystem: Bool) -> String {
+        switch state {
+        case .live:
+            L10n.text(isSystem ? "accounts.management.system_note" : "accounts.management.active")
+        case .parked:
+            L10n.text("accounts.management.stopped")
+        case .paused:
+            L10n.text("accounts.management.paused")
+        case .stoppedWithApp:
+            L10n.text("accounts.management.stopped_with_app")
+        }
+    }
+
     /// One line per account: who it is and its state on the left; the enable
     /// switch and a menu for the occasional actions on the right, so the list
     /// reads as a list instead of a wall of buttons.
     private func accountRow(_ profile: ProviderAccountProfile) -> some View {
-        let sourceEnabled = !profile.isSystem || store.isSystemSourceEnabled(provider)
-        let isLive = isMonitoring && sourceEnabled && (profile.isSystem || profile.isEnabled)
+        let state = rowState(profile)
         return HStack(alignment: .top, spacing: 10) {
             Circle()
-                .fill(isLive ? DashboardTheme.success : DashboardTheme.mutedText)
+                .fill(state.isLive ? DashboardTheme.success : DashboardTheme.mutedText)
                 .frame(width: 7, height: 7)
                 .padding(.top, 5)
                 .accessibilityHidden(true)
@@ -326,9 +362,7 @@ private struct ProviderAccountManagementCard: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(DashboardTheme.text)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(L10n.text(profile.isSystem
-                    ? (sourceEnabled ? "accounts.management.system_note" : "accounts.management.stopped")
-                    : (profile.isEnabled ? "accounts.management.active" : "accounts.management.paused")))
+                Text(statusText(for: state, isSystem: profile.isSystem))
                     .font(.system(size: 10.5))
                     .foregroundStyle(DashboardTheme.mutedText)
                     .fixedSize(horizontal: false, vertical: true)
@@ -402,7 +436,7 @@ private struct ProviderAccountManagementCard: View {
                     editingProfile = profile
                     isPresentingSetup = true
                 }
-                .disabled(!isMonitoring || store.isAddingProviderAccount(provider))
+                .disabled(store.isAddingProviderAccount(provider))
             }
             Divider()
             Button(L10n.text("accounts.remove"), role: .destructive) {
@@ -433,7 +467,7 @@ private struct ProviderAccountManagementCard: View {
                 }
                 .usageDockActionButtonStyle()
                 .controlSize(.small)
-                .disabled(!isMonitoring || store.isAddingProviderAccount(provider))
+                .disabled(store.isAddingProviderAccount(provider))
             }
             Spacer(minLength: 0)
             Button(action: openDataSources) {
