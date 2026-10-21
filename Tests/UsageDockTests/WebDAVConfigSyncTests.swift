@@ -11,7 +11,8 @@ struct WebDAVConfigSyncTests {
             trackedProviders: .init(
                 enabled: ["Claude Code", "Codex"],
                 order: ["Claude Code", "Codex", "Cursor"],
-                hiddenFromManagement: []
+                hiddenFromManagement: [],
+                disabledSystemSources: ["Kimi"]
             ),
             accounts: .init(
                 managedProfiles: [
@@ -41,10 +42,21 @@ struct WebDAVConfigSyncTests {
         #expect(decoded.format == ConfigSyncPayload.currentFormat)
         #expect(decoded.sourceDevice == "Test Mac")
         #expect(decoded.trackedProviders.enabled == ["Claude Code", "Codex"])
+        #expect(decoded.trackedProviders.disabledSystemSources == ["Kimi"])
         #expect(decoded.accounts.managedProfiles.first?.displayName == "工作号")
         #expect(decoded.secrets.providerSecrets["DeepSeek"] == "sk-test")
         #expect(decoded.accountCount == 1)
         #expect(decoded.secretCount == 3)
+    }
+
+    @Test("A v1 payload still imports with every default source enabled")
+    func legacyPayloadKeepsSourcesEnabled() throws {
+        var payload = samplePayload()
+        payload.formatVersion = 1
+        payload.trackedProviders.disabledSystemSources = nil
+        let decoded = try ConfigSyncPayload.decoded(from: payload.encoded())
+        #expect(decoded.formatVersion == 1)
+        #expect(decoded.trackedProviders.disabledSystemSources == nil)
     }
 
     @Test("Foreign payloads and newer versions are rejected")

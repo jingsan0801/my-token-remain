@@ -311,6 +311,49 @@ final class UsageStore: ObservableObject {
         return providerAccountStates[id]?.notice
     }
 
+    /// Card-level notice. A failure may only speak for a source the card is
+    /// actually showing: an account-scoped card uses that account's notice,
+    /// and the all-accounts view ignores the default source once managed
+    /// accounts have pushed it out of the visible set. Its failure stays
+    /// diagnosable in Data Sources and Account Management.
+    func cardNotice(for provider: ProviderQuota.Provider) -> String? {
+        guard provider.multiAccountCapability != nil else { return providerNotices[provider] }
+        switch accountSelection(for: provider) {
+        case .account(let id):
+            return providerAccountStates[id]?.notice
+        case .all:
+            let snapshots = accountSnapshots(for: provider)
+            let hasManaged = snapshots.contains { !$0.profile.isSystem }
+            let showsSystem = snapshots.contains { $0.profile.isSystem }
+            guard !hasManaged || showsSystem else { return nil }
+            return providerNotices[provider]
+        }
+    }
+
+    func isSystemSourceEnabled(_ provider: ProviderQuota.Provider) -> Bool {
+        tracked.isSystemSourceEnabled(provider)
+    }
+
+    /// Enabling refreshes at once; disabling drops the stale explanation but
+    /// keeps the last reading so the card can still show cached data.
+    func setSystemSourceEnabled(_ enabled: Bool, for provider: ProviderQuota.Provider) {
+        tracked.setSystemSourceEnabled(enabled, provider)
+        if enabled {
+            auxProviderRetryAfter[provider] = nil
+            lastAuxProviderAttempts[provider] = nil
+            Task { await refreshProviderAccount(.system(provider)) }
+            return
+        }
+        providerNotices[provider] = nil
+        var state = providerAccountStates[.system(provider)] ?? ProviderAccountState()
+        state.notice = nil
+        state.isRefreshing = false
+        providerAccountStates[.system(provider)] = state
+        if accountSelection(for: provider) == .account(.system(provider)) {
+            setAccountSelection(.all, for: provider)
+        }
+    }
+
     var localUsageSourceIDs: [String] {
         discoveredLocalUsageSourceIDs.sorted {
             LocalUsageSourceCatalog.sortKey($0) < LocalUsageSourceCatalog.sortKey($1)
@@ -595,6 +638,23 @@ final class UsageStore: ObservableObject {
             }
             .store(in: &cancellables)
 
+        // A config import can park a source without going through this store;
+        // retire its explanation and spinner as soon as the state changes.
+        tracked.$disabledSystemSources
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] disabled in
+                guard let self else { return }
+                for provider in disabled {
+                    self.providerNotices[provider] = nil
+                    var state = self.providerAccountStates[.system(provider)] ?? ProviderAccountState()
+                    state.notice = nil
+                    state.isRefreshing = false
+                    self.providerAccountStates[.system(provider)] = state
+                }
+            }
+            .store(in: &cancellables)
+
         Task { @MainActor [weak self] in
             self?.start()
         }
@@ -703,12 +763,18 @@ final class UsageStore: ObservableObject {
         // 60 秒节奏不能在退避期内每分钟重新发起一次最长 30 秒的 PTY 探针。
         // 用户的手动刷新(forceClaude)仍可穿透。
         let claudeBackoffActive = claudeRetryAfter.map { now < $0 } ?? false
-        let shouldRefreshClaude = tracked.isEnabled(.claude)
+        // The cadence decides when this provider is due; the source toggle
+        // decides whether the default login may be read. Managed Claude/Codex
+        // accounts keep the cadence even when the default source is parked.
+        let claudeDue = tracked.isEnabled(.claude)
             && (
                 forceClaude
                     || (!claudeBackoffActive
                         && autoDue(since: lastClaudeAttempt, interval: localAIInterval))
             )
+        let claudeSystemSourceEnabled = tracked.isSystemSourceEnabled(.claude)
+        let shouldRefreshClaude = claudeDue && claudeSystemSourceEnabled
+        let codexSystemSourceEnabled = tracked.isSystemSourceEnabled(.codex)
 
         let codexAPIDue = forceClaude
             || autoDue(since: lastCodexAPIAttempt, interval: localAIInterval)
@@ -735,7 +801,7 @@ final class UsageStore: ObservableObject {
         let codexEnabled = tracked.isEnabled(.codex)
         let hostQuotaRouter = self.hostQuotaRouter
         let codexRouteIsExternal = hostQuotaRouter.route(for: .codex).isExternal
-        let dueAuxProviders = Self.auxProviders.filter { provider in
+        let dueProviderSources = Self.auxProviders.filter { provider in
             guard tracked.isEnabled(provider) else { return false }
             if forceClaude { return true }
             if let retryAfter = auxProviderRetryAfter[provider], now < retryAfter {
@@ -746,8 +812,11 @@ final class UsageStore: ObservableObject {
                 interval: auxiliaryInterval
             )
         }
-        let managedDueProviders = Set(dueAuxProviders)
-            .union(shouldRefreshClaude ? [.claude] : [])
+        let dueAuxProviders = dueProviderSources.filter {
+            tracked.isSystemSourceEnabled($0)
+        }
+        let managedDueProviders = Set(dueProviderSources)
+            .union(claudeDue ? [.claude] : [])
             .union(codexAPIDue ? [.codex] : [])
         let dueManagedProfiles = providerAccountProfiles.filter {
             $0.kind == .managed && $0.isEnabled && managedDueProviders.contains($0.provider)
@@ -768,7 +837,7 @@ final class UsageStore: ObservableObject {
             providerAccountStates[id] = state
         }
         if Self.shouldRefreshCodex(
-            enabled: codexEnabled,
+            enabled: codexEnabled && codexSystemSourceEnabled,
             routeIsExternal: codexRouteIsExternal,
             apiDue: codexAPIDue,
             localSnapshotDue: codexLocalDue
@@ -797,7 +866,7 @@ final class UsageStore: ObservableObject {
                 }
             }
             if Self.shouldRefreshCodex(
-                enabled: codexEnabled,
+                enabled: codexEnabled && codexSystemSourceEnabled,
                 routeIsExternal: codexRouteIsExternal,
                 apiDue: codexAPIDue,
                 localSnapshotDue: codexLocalDue
@@ -870,6 +939,9 @@ final class UsageStore: ObservableObject {
     ) {
         switch output {
         case .claude(let revision, let claudeResult):
+            // A source parked while the request was in flight must not revive
+            // its failure (or overwrite the card) when the answer lands.
+            guard tracked.isSystemSourceEnabled(.claude) else { return }
             guard !Task.isCancelled, revision == credentialRevisions[.claude, default: 0] else { return }
             lastClaudeAttempt = now
             switch claudeResult {
@@ -954,6 +1026,7 @@ final class UsageStore: ObservableObject {
             providerAccountStates[profile.id] = state
 
         case .codex(let codexResult):
+            guard tracked.isSystemSourceEnabled(.codex) else { return }
             if codexAPIDue { lastCodexAPIAttempt = now }
             lastCodexLocalAttempt = now
             switch codexResult {
@@ -978,6 +1051,7 @@ final class UsageStore: ObservableObject {
             syncSystemAccountNotice(.codex)
 
         case .auxiliary(let provider, let revision, let auxResult):
+            guard tracked.isSystemSourceEnabled(provider) else { return }
             guard revision == credentialRevisions[provider, default: 0] else { return }
             lastAuxProviderAttempts[provider] = now
             switch auxResult {
@@ -1619,16 +1693,26 @@ final class UsageStore: ObservableObject {
     }
 
     func removeProviderAccount(_ id: ProviderAccountID) {
-        guard !id.rawValue.hasPrefix("system."), providerAccountsStore.remove(id) != nil else { return }
+        guard !id.rawValue.hasPrefix("system."),
+              let removed = providerAccountsStore.remove(id) else { return }
         providerAccountProfiles = providerAccountsStore.allProfiles
         providerAccountSelections = providerAccountsStore.selections
         providerAccountStates[id] = nil
         providerAccountQuotaCache.save(currentProviderAccountQuotas())
+        // The default source was parked only to coexist with accounts. With no
+        // managed account left there is nothing else to read, so restore it
+        // instead of leaving an invisible stopped provider.
+        if !providerAccountProfiles.contains(where: {
+            $0.provider == removed.provider && !$0.isSystem
+        }) {
+            tracked.setSystemSourceEnabled(true, removed.provider)
+        }
     }
 
     func refreshProviderAccount(_ id: ProviderAccountID) async {
         guard let profile = providerAccountProfiles.first(where: { $0.id == id }),
               profile.isEnabled, tracked.isEnabled(profile.provider) else { return }
+        if profile.isSystem, !tracked.isSystemSourceEnabled(profile.provider) { return }
         if profile.isSystem {
             switch profile.provider {
             case .claude:
@@ -1672,6 +1756,7 @@ final class UsageStore: ObservableObject {
         _ provider: ProviderQuota.Provider,
         preservingCachedQuota: Bool = false
     ) async {
+        guard tracked.isSystemSourceEnabled(provider) else { return }
         let revision = credentialRevisions[provider, default: 0]
         let results = await Self.fetchAux(providers: [provider])
         guard !Task.isCancelled, revision == credentialRevisions[provider, default: 0],
@@ -1714,7 +1799,7 @@ final class UsageStore: ObservableObject {
         let id = ProviderAccountID.system(provider)
         guard providerAccountProfiles.contains(where: { $0.id == id }) else { return }
         var state = providerAccountStates[id] ?? ProviderAccountState()
-        state.notice = providerNotices[provider]
+        state.notice = tracked.isSystemSourceEnabled(provider) ? providerNotices[provider] : nil
         state.isRefreshing = false
         providerAccountStates[id] = state
     }

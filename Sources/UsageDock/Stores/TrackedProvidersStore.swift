@@ -14,6 +14,7 @@ final class TrackedProvidersStore: ObservableObject {
     static let connectedKey = "tokenRemain.connectedProviders.v1"
     static let detectedInstallationsKey = "tokenRemain.detectedInstallations.v1"
     static let managementHiddenKey = "tokenRemain.accountManagementHidden.v1"
+    static let disabledSystemSourcesKey = "tokenRemain.disabledSystemSources.v1"
     static let detectionMonitoringIntervalSeconds: TimeInterval = 5 * 60
 
     /// UI 展示与遍历用的稳定顺序。
@@ -32,6 +33,10 @@ final class TrackedProvidersStore: ObservableObject {
     /// stopped; turning monitoring back on anywhere brings its card back.
     /// Saved accounts and credentials are never touched by removal.
     @Published private(set) var hiddenFromManagement: Set<ProviderQuota.Provider>
+    /// Providers whose default credential channel (the "system" account) the
+    /// user parked. Managed accounts keep their own refresh cadence; an empty
+    /// set preserves the historical behavior of always reading the default.
+    @Published private(set) var disabledSystemSources: Set<ProviderQuota.Provider>
 
     private let defaults: UserDefaults
     private var detectionTask: Task<Void, Never>?
@@ -55,6 +60,8 @@ final class TrackedProvidersStore: ObservableObject {
         order = Self.mergedOrder(savedOrder)
         let rawHidden = (defaults.array(forKey: Self.managementHiddenKey) as? [String]) ?? []
         hiddenFromManagement = Set(rawHidden.compactMap(ProviderQuota.Provider.init(rawValue:)))
+        let rawDisabledSystem = (defaults.array(forKey: Self.disabledSystemSourcesKey) as? [String]) ?? []
+        disabledSystemSources = Set(rawDisabledSystem.compactMap(ProviderQuota.Provider.init(rawValue:)))
     }
 
     /// enabled 中按稳定顺序排列的 provider 列表。
@@ -109,6 +116,22 @@ final class TrackedProvidersStore: ObservableObject {
         connected.contains(provider)
     }
 
+    /// The provider's default credential channel is a source of its own. It can
+    /// be parked without stopping the provider, so a stale local CLI login or
+    /// an unused global key stops producing failures beside real accounts.
+    func isSystemSourceEnabled(_ provider: ProviderQuota.Provider) -> Bool {
+        !disabledSystemSources.contains(provider)
+    }
+
+    func setSystemSourceEnabled(_ enabled: Bool, _ provider: ProviderQuota.Provider) {
+        if enabled {
+            guard disabledSystemSources.remove(provider) != nil else { return }
+        } else {
+            guard disabledSystemSources.insert(provider).inserted else { return }
+        }
+        persistDisabledSystemSources()
+    }
+
     /// 只在一次真实读取成功后调用。连接历史不因后续失败、清除 Key 或
     /// 停止追踪而删除，确保失效的数据链仍然可见、可诊断。
     func markConnected(_ provider: ProviderQuota.Provider) {
@@ -124,14 +147,17 @@ final class TrackedProvidersStore: ObservableObject {
     func applySyncedState(
         enabled newEnabled: Set<ProviderQuota.Provider>,
         order newOrder: [ProviderQuota.Provider],
-        hiddenFromManagement newHidden: Set<ProviderQuota.Provider>
+        hiddenFromManagement newHidden: Set<ProviderQuota.Provider>,
+        disabledSystemSources newDisabledSystemSources: Set<ProviderQuota.Provider>
     ) {
         enabled = newEnabled.intersection(Set(Self.allProviders))
         order = Self.mergedOrder(newOrder.map(\.rawValue))
         hiddenFromManagement = newHidden.intersection(Set(Self.allProviders))
+        disabledSystemSources = newDisabledSystemSources.intersection(Set(Self.allProviders))
         persistEnabled()
         persistOrder()
         persistHidden()
+        persistDisabledSystemSources()
     }
 
     func setEnabled(_ provider: ProviderQuota.Provider, _ isOn: Bool) {
@@ -258,6 +284,13 @@ final class TrackedProvidersStore: ObservableObject {
         defaults.set(
             Self.allProviders.filter(hiddenFromManagement.contains).map(\.rawValue),
             forKey: Self.managementHiddenKey
+        )
+    }
+
+    private func persistDisabledSystemSources() {
+        defaults.set(
+            Self.allProviders.filter(disabledSystemSources.contains).map(\.rawValue),
+            forKey: Self.disabledSystemSourcesKey
         )
     }
 

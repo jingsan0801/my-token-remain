@@ -361,7 +361,6 @@ struct DashboardView: View {
         case .limits:
             LimitsSection(
                 insights: insights,
-                notices: store.providerNotices,
                 serviceStatuses: store.serviceStatuses,
                 store: store,
                 reorderInteraction: limitsReorderInteraction

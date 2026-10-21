@@ -151,7 +151,8 @@ final class ConfigSyncController: ObservableObject {
         let trackedState = ConfigSyncPayload.TrackedState(
             enabled: tracked.enabled.map(\.rawValue).sorted(),
             order: tracked.order.map(\.rawValue),
-            hiddenFromManagement: tracked.hiddenFromManagement.map(\.rawValue).sorted()
+            hiddenFromManagement: tracked.hiddenFromManagement.map(\.rawValue).sorted(),
+            disabledSystemSources: tracked.disabledSystemSources.map(\.rawValue).sorted()
         )
 
         var syncedProfiles: [ConfigSyncPayload.AccountsState.SyncedProfile] = []
@@ -255,7 +256,9 @@ final class ConfigSyncController: ObservableObject {
         tracked.applySyncedState(
             enabled: Set(payload.trackedProviders.enabled.compactMap(ProviderQuota.Provider.init(rawValue:))),
             order: payload.trackedProviders.order.compactMap(ProviderQuota.Provider.init(rawValue:)),
-            hiddenFromManagement: Set(payload.trackedProviders.hiddenFromManagement.compactMap(ProviderQuota.Provider.init(rawValue:)))
+            hiddenFromManagement: Set(payload.trackedProviders.hiddenFromManagement.compactMap(ProviderQuota.Provider.init(rawValue:))),
+            disabledSystemSources: Set((payload.trackedProviders.disabledSystemSources ?? [])
+                .compactMap(ProviderQuota.Provider.init(rawValue:)))
         )
 
         for synced in payload.accounts.managedProfiles {

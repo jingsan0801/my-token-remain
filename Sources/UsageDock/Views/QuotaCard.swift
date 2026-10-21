@@ -680,7 +680,11 @@ struct QuotaCard: View {
         } label: {
             Label(L10n.text("action.refresh"), systemImage: "arrow.clockwise")
         }
-        .disabled(snapshot.isRefreshing || !snapshot.profile.isEnabled)
+        .disabled(
+            snapshot.isRefreshing
+                || !snapshot.profile.isEnabled
+                || (snapshot.profile.isSystem && !store.isSystemSourceEnabled(provider))
+        )
 
         // The system account mirrors this Mac's own login for the provider, so
         // TokenRemain must not rename, pause, or delete it.
@@ -956,15 +960,18 @@ struct CodexResetCreditsCard: View {
 
 /// Prominent recovery guidance pinned beside the provider name. Keeping it in
 /// the fixed header makes login/install failures visible even when the quota
-/// rows below need to scroll.
+/// rows below need to scroll. The text is the failure's own localized message:
+/// a fixed "sign in again" line would mislabel missing keys, network errors
+/// and third-party logins as an expired session.
 private struct QuotaConnectionNotice: View {
     let message: String
 
     var body: some View {
         Label {
-            Text(L10n.text("quota.login_recovery_hint"))
+            Text(message)
                 .lineLimit(1)
                 .minimumScaleFactor(0.72)
+                .truncationMode(.tail)
         } icon: {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 9, weight: .bold))
@@ -982,7 +989,7 @@ private struct QuotaConnectionNotice: View {
                 .stroke(DashboardTheme.warning.opacity(0.42), lineWidth: 1)
         }
         .help(message)
-        .accessibilityLabel(L10n.text("quota.login_recovery_hint"))
+        .accessibilityLabel(message)
     }
 }
 

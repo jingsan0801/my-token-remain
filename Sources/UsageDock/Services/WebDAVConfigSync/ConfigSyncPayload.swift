@@ -6,7 +6,10 @@ import Foundation
 /// 文件来源的密钥——那些不属于「本 App 持有的配置」。
 struct ConfigSyncPayload: Codable, Sendable {
     static let currentFormat = "tokenremain-config-sync"
-    static let currentFormatVersion = 1
+    /// v2 adds `trackedProviders.disabledSystemSources`. The field is optional
+    /// so v1 payloads still import; a v1-only client rejects v2 rather than
+    /// silently resurrecting a source the user parked.
+    static let currentFormatVersion = 2
 
     var format: String = Self.currentFormat
     var formatVersion: Int = Self.currentFormatVersion
@@ -21,6 +24,8 @@ struct ConfigSyncPayload: Codable, Sendable {
         var enabled: [String]
         var order: [String]
         var hiddenFromManagement: [String]
+        /// nil = v1 payload (every default source was still enabled).
+        var disabledSystemSources: [String]? = nil
     }
 
     struct AccountsState: Codable, Sendable, Equatable {

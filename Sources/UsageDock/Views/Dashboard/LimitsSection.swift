@@ -9,7 +9,6 @@ struct LimitsSection: View {
     private static let reorderCoordinateSpace = "tokenremain.dashboard.limits.direct-reorder"
 
     let insights: UsageInsights
-    var notices: [ProviderQuota.Provider: String] = [:]
     var serviceStatuses: [ProviderQuota.Provider: ProviderServiceStatus] = [:]
     @ObservedObject var store: UsageStore
     @ObservedObject var tracked: TrackedProvidersStore = .shared
@@ -23,8 +22,7 @@ struct LimitsSection: View {
     }
 
     private func notice(for provider: ProviderQuota.Provider) -> String? {
-        guard provider.multiAccountCapability != nil else { return notices[provider] }
-        return store.displayedNotice(for: provider) ?? notices[provider]
+        store.cardNotice(for: provider)
     }
 
     var body: some View {

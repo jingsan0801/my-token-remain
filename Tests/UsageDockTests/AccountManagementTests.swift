@@ -183,6 +183,78 @@ struct AccountManagementTests {
         #expect(!relaunched.isHiddenFromManagement(.claude))
     }
 
+    @Test("An account-scoped card never borrows the default source's failure")
+    func cardNoticeIsScopedToTheSelectedAccount() async throws {
+        let fixture = try Fixture(providers: [.deepseek])
+        defer { fixture.cleanUp() }
+        let store = fixture.makeStore { _, _ in throw URLError(.notConnectedToInternet) }
+        let account = fixture.profiles[0]
+
+        // The default source fails while validating a pasted key.
+        #expect(await store.saveAPIKey("invalid", for: .deepseek) == false)
+        let defaultNotice = try #require(store.providerNotices[.deepseek])
+
+        store.setAccountSelection(.account(account.id), for: .deepseek)
+        #expect(store.cardNotice(for: .deepseek) == nil)
+
+        await store.refreshProviderAccount(account.id)
+        let accountNotice = try #require(store.providerAccountStates[account.id]?.notice)
+        #expect(store.cardNotice(for: .deepseek) == accountNotice)
+
+        // The hidden default source is not part of the all-accounts reading.
+        store.setAccountSelection(.all, for: .deepseek)
+        #expect(store.cardNotice(for: .deepseek) == nil)
+
+        // With no managed account left, the card represents the default source
+        // again and may explain its failure.
+        store.removeProviderAccount(account.id)
+        #expect(store.cardNotice(for: .deepseek) == defaultNotice)
+    }
+
+    @Test("Parking the default source clears its failure while accounts keep refreshing")
+    func parkingDefaultSourceKeepsAccounts() async throws {
+        let fixture = try Fixture(providers: [.deepseek])
+        defer { fixture.cleanUp() }
+        let calls = FetchCalls()
+        let store = fixture.makeStore { profile, _ in
+            await calls.record(profile.id)
+            return Self.quota(profile.provider)
+        }
+        let account = fixture.profiles[0]
+
+        #expect(await store.saveAPIKey("invalid", for: .deepseek) == false)
+        #expect(store.providerNotices[.deepseek] != nil)
+        store.setAccountSelection(.account(.system(.deepseek)), for: .deepseek)
+
+        store.setSystemSourceEnabled(false, for: .deepseek)
+
+        #expect(!store.isSystemSourceEnabled(.deepseek))
+        #expect(store.providerNotices[.deepseek] == nil)
+        #expect(store.accountSelection(for: .deepseek) == .all)
+        #expect(!fixture.tracked.isSystemSourceEnabled(.deepseek))
+        #expect(!TrackedProvidersStore(defaults: fixture.defaults).isSystemSourceEnabled(.deepseek))
+
+        await store.refreshProviderAccount(account.id)
+        #expect(await calls.ids == [account.id])
+        #expect(store.providerAccountStates[account.id]?.quota != nil)
+    }
+
+    @Test("Removing the last managed account restores the parked default source")
+    func removingLastAccountRestoresDefaultSource() throws {
+        let fixture = try Fixture(providers: [.openrouter])
+        defer { fixture.cleanUp() }
+        let store = fixture.makeStore()
+        let profile = fixture.profiles[0]
+
+        store.setSystemSourceEnabled(false, for: .openrouter)
+        #expect(!store.isSystemSourceEnabled(.openrouter))
+
+        store.removeProviderAccount(profile.id)
+
+        #expect(store.isSystemSourceEnabled(.openrouter))
+        #expect(fixture.tracked.isSystemSourceEnabled(.openrouter))
+    }
+
     nonisolated private static func quota(_ provider: ProviderQuota.Provider) -> ProviderQuota {
         ProviderQuota(
             provider: provider,

@@ -292,6 +292,28 @@ struct TrackedProvidersStoreTests {
         #expect(detections.first { $0.provider == .zai }?.installed == true)
     }
 
+    @Test("A parked default source persists and follows a config import")
+    func disabledSystemSourcesPersist() {
+        let defaults = testDefaults()
+        var store = TrackedProvidersStore(defaults: defaults)
+        store.completeOnboarding(enabled: [.kimi, .cursor])
+        store.setSystemSourceEnabled(false, .kimi)
+        #expect(!store.isSystemSourceEnabled(.kimi))
+
+        store = TrackedProvidersStore(defaults: defaults)
+        #expect(!store.isSystemSourceEnabled(.kimi))
+        #expect(store.isSystemSourceEnabled(.cursor))
+
+        store.applySyncedState(
+            enabled: [.kimi, .cursor],
+            order: [.kimi, .cursor],
+            hiddenFromManagement: [],
+            disabledSystemSources: [.cursor]
+        )
+        #expect(store.isSystemSourceEnabled(.kimi))
+        #expect(!store.isSystemSourceEnabled(.cursor))
+    }
+
     private func testDefaults() -> UserDefaults {
         let suiteName = "TrackedProvidersStoreTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!

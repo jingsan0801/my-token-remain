@@ -130,6 +130,12 @@ private struct ProviderAccountManagementCard: View {
         store.providerAccountProfiles.filter { $0.provider == provider }
     }
 
+    /// A default source only needs its own switch when another source exists;
+    /// otherwise it would duplicate the app-level monitoring toggle.
+    private var hasManagedProfiles: Bool {
+        profiles.contains { !$0.isSystem }
+    }
+
     var body: some View {
         DashboardCard {
             VStack(alignment: .leading, spacing: 0) {
@@ -307,7 +313,8 @@ private struct ProviderAccountManagementCard: View {
     /// switch and a menu for the occasional actions on the right, so the list
     /// reads as a list instead of a wall of buttons.
     private func accountRow(_ profile: ProviderAccountProfile) -> some View {
-        let isLive = isMonitoring && (profile.isSystem || profile.isEnabled)
+        let sourceEnabled = !profile.isSystem || store.isSystemSourceEnabled(provider)
+        let isLive = isMonitoring && sourceEnabled && (profile.isSystem || profile.isEnabled)
         return HStack(alignment: .top, spacing: 10) {
             Circle()
                 .fill(isLive ? DashboardTheme.success : DashboardTheme.mutedText)
@@ -320,7 +327,7 @@ private struct ProviderAccountManagementCard: View {
                     .foregroundStyle(DashboardTheme.text)
                     .fixedSize(horizontal: false, vertical: true)
                 Text(L10n.text(profile.isSystem
-                    ? "accounts.management.system_note"
+                    ? (sourceEnabled ? "accounts.management.system_note" : "accounts.management.stopped")
                     : (profile.isEnabled ? "accounts.management.active" : "accounts.management.paused")))
                     .font(.system(size: 10.5))
                     .foregroundStyle(DashboardTheme.mutedText)
@@ -339,8 +346,42 @@ private struct ProviderAccountManagementCard: View {
                 .help(L10n.text(profile.isEnabled ? "accounts.disable" : "accounts.enable"))
 
                 accountMenu(profile)
+            } else if hasManagedProfiles {
+                Toggle(profile.accountDisplayName, isOn: Binding(
+                    get: { store.isSystemSourceEnabled(provider) },
+                    set: { store.setSystemSourceEnabled($0, for: provider) }
+                ))
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .controlSize(.small)
+                .tint(DashboardTheme.violet)
+                .help(L10n.text(
+                    store.isSystemSourceEnabled(provider) ? "accounts.disable" : "accounts.enable"
+                ))
+
+                systemSourceMenu()
             }
         }
+    }
+
+    /// The default source's credential/authorization lives on the Data Sources
+    /// page, so its only "edit" action is the route there.
+    private func systemSourceMenu() -> some View {
+        Menu {
+            Button(action: openDataSources) {
+                Label(L10n.text("nav.data_sources"), systemImage: "arrow.up.right")
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(DashboardTheme.secondaryText)
+                .frame(width: 22, height: 18)
+                .contentShape(Rectangle())
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .accessibilityLabel(L10n.text("nav.data_sources"))
     }
 
     private func setEnabled(_ enabled: Bool, _ profile: ProviderAccountProfile) {

@@ -115,7 +115,8 @@ struct DataSourcesSection: View {
                 name: sourceName(for: provider),
                 detail: store.providerNotices[provider] ?? sourceDetail(for: provider),
                 healthy: quota != nil && store.providerNotices[provider] == nil,
-                capturedAt: quota?.capturedAt
+                capturedAt: quota?.capturedAt,
+                disabled: !store.isSystemSourceEnabled(provider)
             )
             providerCredentialRow(for: provider)
         case .ccusage:
@@ -389,11 +390,16 @@ private struct SourceHealthRow: View {
     let detail: String
     let healthy: Bool
     let capturedAt: Date?
+    var disabled: Bool = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Circle()
-                .fill(healthy ? DashboardTheme.success : DashboardTheme.warning)
+                .fill(
+                    disabled
+                        ? DashboardTheme.mutedText
+                        : (healthy ? DashboardTheme.success : DashboardTheme.warning)
+                )
                 .frame(width: 8, height: 8)
                 .padding(.top, 5)
             VStack(alignment: .leading, spacing: 3) {
@@ -407,9 +413,17 @@ private struct SourceHealthRow: View {
             }
             Spacer(minLength: 12)
             VStack(alignment: .trailing, spacing: 3) {
-                Text(healthy ? L10n.text("datasource.healthy") : L10n.text("datasource.broken"))
+                Text(
+                    disabled
+                        ? L10n.text("accounts.management.stopped")
+                        : (healthy ? L10n.text("datasource.healthy") : L10n.text("datasource.broken"))
+                )
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(healthy ? DashboardTheme.success : DashboardTheme.warning)
+                    .foregroundStyle(
+                        disabled
+                            ? DashboardTheme.mutedText
+                            : (healthy ? DashboardTheme.success : DashboardTheme.warning)
+                    )
                 if let capturedAt {
                     Text(capturedAt.formatted(date: .omitted, time: .shortened))
                         .numericFont(10)
