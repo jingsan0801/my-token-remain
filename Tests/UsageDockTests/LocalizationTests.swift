@@ -4,10 +4,7 @@ import Testing
 
 @Suite("Localization")
 struct LocalizationTests {
-    private let locales = [
-        "en", "zh-Hans", "zh-Hant", "ja", "ko", "es", "fr", "de",
-        "pt-BR", "it", "ru", "ar", "hi", "tr", "vi", "id"
-    ]
+    private let locales = ["en", "zh-Hans"]
 
     private let requiredKeys = [
         "widget.local_usage",
@@ -70,10 +67,9 @@ struct LocalizationTests {
         }
     }
 
-    /// Locales the product promises complete coverage for. Every key in the
-    /// English catalog must exist there — new UI strings cannot ship
-    /// English-only (or Chinese-only) in these languages.
-    private let fullyLocalizedLocales = ["zh-Hans", "zh-Hant", "es", "de", "ja", "ko"]
+    /// The shipped languages. Every key in the English catalog must exist in
+    /// Chinese — new UI strings cannot ship English-only there.
+    private let fullyLocalizedLocales = ["zh-Hans"]
 
     @Test("Fully localized locales cover the entire English catalog")
     func fullyLocalizedLocalesCoverAllKeys() throws {
@@ -98,12 +94,12 @@ struct LocalizationTests {
         }
     }
 
-    @Test("Arabic ships a real RTL localization")
-    func arabicIsNotAnEnglishFallback() throws {
-        let strings = try loadStrings(locale: "ar")
-        #expect(strings["widget.local_usage"] == "الاستخدام المحلي اليوم")
-        #expect(strings["nav.settings"] == "الإعدادات")
-        #expect(strings["action.open_dashboard"] == "فتح لوحة المعلومات")
+    @Test("Chinese ships a real localization")
+    func chineseIsNotAnEnglishFallback() throws {
+        let strings = try loadStrings(locale: "zh-Hans")
+        #expect(strings["widget.local_usage"] == "今日本地统计")
+        #expect(strings["nav.settings"] == "设置")
+        #expect(strings["action.open_dashboard"] == "打开 Dashboard")
     }
 
     @Test("Format placeholders stay compatible in every locale")

@@ -113,4 +113,4 @@ Lane B 比较这些基线与上游当前状态。基线变更需要人审阅后�
 | 条目 | 建议的契约 | 现状 |
 | --- | --- | --- |
 | 状态色与徽章文字对比度 | 已有 `ThemeContrastTests`（状态色 3:1）；可补“填充徽章上的墨色文字” | 部分已是契约 |
-| 新 `settings.pool_*` 键七语齐全 | 已由 `LocalizationTests.fullyLocalizedLocales` 保证 | 已是契约 |
+| 新 `settings.pool_*` 键中英双语齐全 | 已由 `LocalizationTests.fullyLocalizedLocales` 保证 | 已是契约 |

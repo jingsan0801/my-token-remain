@@ -247,7 +247,7 @@
 "overview.risk_panel_title" = "风险提示";
 "overview.scarcest_window" = "最紧张窗口";
 "privacy.feed_managed" = "AI 精选动态由内置策略自动同步；用户无需选择账号或管理数据源。";
-"privacy.local_only" = "本机日志、Token 明细、模型使用记录和凭证留在本机；MyTokenRemain 只下载公开价格表。";
+"privacy.local_only" = "本机日志、模型使用记录和凭证留在本机；MyTokenRemain 只下载公开价格表。";
 "privacy.readonly_credentials" = "所有工具凭证均为只读：绝不刷新 token、绝不写回，认证始终由各工具自行处理。";
 "privacy.title" = "隐私";
 "privacy.zai_key" = "Z.ai API Key 仅保存在本机钥匙串，不进入源码、日志或任何网络请求（额度查询本身除外）。";
@@ -702,3 +702,13 @@
 "service.zai.balance_requires_china" = "API 余额查询仅支持中国区域。";
 
 "service.zai.balance_query_failed" = "智谱 API 余额查询失败。请重试或检查 API Key 的权限。";
+
+"overview.kpi.min_remaining" = "最低可用额度";
+
+"sync.status" = "同步状态";
+
+"sync.healthy" = "全部数据源正常";
+
+"sync.loading" = "正在读取数据…";
+
+"sync.partial_error" = "部分数据源异常";

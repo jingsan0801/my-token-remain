@@ -59,6 +59,78 @@ struct LimitsSection: View {
         .accessibilityLabel(L10n.text("limits.refresh_all"))
     }
 
+    private enum GridEntry: Hashable {
+        case provider(ProviderQuota.Provider)
+        case addProvider
+    }
+
+    /// A plain row layout instead of `LazyVGrid`: resizing the dashboard with
+    /// several glass cards used to send the lazy grid into a measurement loop
+    /// (100% CPU, unresponsive window). Two/three columns keep the original
+    /// widths; the gap between the thresholds stops the page scrollbar from
+    /// flipping the column count back and forth.
+    @State private var columnCount = 2
+
+    private var gridEntries: [GridEntry] {
+        var entries = tracked.enabledOrdered.map(GridEntry.provider)
+        if !tracked.disabledOrdered.isEmpty {
+            entries.append(.addProvider)
+        }
+        return entries
+    }
+
+    private var entryRows: [[GridEntry]] {
+        let entries = gridEntries
+        let columns = max(1, columnCount)
+        return stride(from: 0, to: entries.count, by: columns).map { start in
+            Array(entries[start..<min(start + columns, entries.count)])
+        }
+    }
+
+    private func updateColumnCount(for width: CGFloat) {
+        let target: Int
+        if width >= 940 {
+            target = 3
+        } else if width <= 900 {
+            target = 2
+        } else {
+            target = columnCount
+        }
+        guard target != columnCount else { return }
+        columnCount = target
+    }
+
+    @ViewBuilder
+    private func quotaCard(_ provider: ProviderQuota.Provider) -> some View {
+        QuotaCard(
+            provider: provider,
+            quota: quota(for: provider),
+            serviceStatus: serviceStatuses[provider],
+            notice: notice(for: provider),
+            store: store
+        )
+            .directReorder(
+                item: provider,
+                candidates: tracked.enabledOrdered,
+                coordinateSpace: Self.reorderCoordinateSpace,
+                interaction: reorderInteraction,
+                layout: .grid(spacing: 14),
+                move: { source, target in
+                    tracked.move(source, to: target)
+                }
+            )
+            .help(L10n.text("quota.drag_help"))
+            .accessibilityHint(L10n.text("quota.drag_accessibility"))
+            .contextMenu {
+                Button(role: .destructive) {
+                    withAnimation(.snappy) { tracked.setEnabled(provider, false) }
+                } label: {
+                    Label(L10n.format("limits.stop_tracking_named", provider.displayName), systemImage: "minus.circle")
+                }
+            }
+            .zIndex(reorderInteraction.isDragging(provider) ? 10_000 : 0)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             SectionTitleHeader(
@@ -69,49 +141,30 @@ struct LimitsSection: View {
                 refreshAllButton
             }
 
-            LazyVGrid(
-                columns: [GridItem(.adaptive(minimum: 300, maximum: 460), spacing: 14, alignment: .top)],
-                alignment: .leading,
-                spacing: 14
-            ) {
-                ForEach(tracked.enabledOrdered, id: \.self) { provider in
-                    QuotaCard(
-                        provider: provider,
-                        quota: quota(for: provider),
-                        serviceStatus: serviceStatuses[provider],
-                        notice: notice(for: provider),
-                        store: store
-                    )
-                        .frame(maxWidth: .infinity, alignment: .top)
-                        .directReorder(
-                            item: provider,
-                            candidates: tracked.enabledOrdered,
-                            coordinateSpace: Self.reorderCoordinateSpace,
-                            interaction: reorderInteraction,
-                            layout: .grid(spacing: 14),
-                            move: { source, target in
-                                tracked.move(source, to: target)
-                            }
-                        )
-                        .help(L10n.text("quota.drag_help"))
-                        .accessibilityHint(L10n.text("quota.drag_accessibility"))
-                        .contextMenu {
-                            Button(role: .destructive) {
-                                withAnimation(.snappy) { tracked.setEnabled(provider, false) }
-                            } label: {
-                                Label(L10n.format("limits.stop_tracking_named", provider.displayName), systemImage: "minus.circle")
+            VStack(alignment: .leading, spacing: 14) {
+                ForEach(Array(entryRows.enumerated()), id: \.offset) { _, row in
+                    HStack(alignment: .top, spacing: 14) {
+                        ForEach(row, id: \.self) { entry in
+                            switch entry {
+                            case .provider(let provider):
+                                quotaCard(provider)
+                                    .frame(maxWidth: .infinity, alignment: .top)
+                            case .addProvider:
+                                AddProviderTile(tracked: tracked)
+                                    .frame(maxWidth: .infinity, alignment: .top)
                             }
                         }
-                        // Apply the stacking trait after help/context-menu
-                        // wrappers so the lifted card is the grid's top sibling
-                        // and visibly covers every card it crosses.
-                        .zIndex(reorderInteraction.isDragging(provider) ? 10_000 : 0)
+                        ForEach(0..<max(0, columnCount - row.count), id: \.self) { _ in
+                            Color.clear
+                                .frame(maxWidth: .infinity, alignment: .top)
+                        }
+                    }
                 }
-
-                if !tracked.disabledOrdered.isEmpty {
-                    AddProviderTile(tracked: tracked)
-                        .frame(maxWidth: .infinity, alignment: .top)
-                }
+            }
+            .onGeometryChange(for: CGFloat.self) { proxy in
+                proxy.size.width
+            } action: { width in
+                updateColumnCount(for: width)
             }
         }
         .coordinateSpace(name: Self.reorderCoordinateSpace)

@@ -7,7 +7,7 @@ struct QuotaCard: View {
     /// Give ordinary two-window cards room for reset, pace and freshness labels.
     /// Bounded content can grow for wrapping text; larger collections keep this
     /// shared slot and scroll below the pinned provider header.
-    static let dashboardContentHeight: CGFloat = 224
+    static let dashboardContentHeight: CGFloat = 248
     /// Reserve one shared title slot for every grid card so quota rows stay
     /// aligned even when a compact connection warning is present.
     private static let headerHeight: CGFloat = 26
@@ -306,49 +306,50 @@ struct QuotaCard: View {
     }
 
     private var header: some View {
-        HStack(alignment: .top, spacing: 8) {
-            HStack(spacing: 8) {
-                BrandIcon(provider: provider)
-                    .foregroundStyle(DashboardTheme.text)
-                    .frame(width: 20, height: 20)
-                Text(provider.displayName)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(DashboardTheme.text)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.82)
-                    .layoutPriority(2)
-            }
-            .padding(.top, 3)
-            .directReorderHandle()
-
-            // Deliberately outside every `directReorderHandle` region so the
-            // menu and the add button never start a card drag.
-            accountControls
-
-            if let serviceStatus, serviceStatus.isAbnormal {
-                ServiceStatusBadge(status: serviceStatus)
-                    .padding(.top, 2)
-            }
-
-            Color.clear
-                .frame(maxWidth: .infinity, minHeight: 22)
-                .contentShape(Rectangle())
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .top, spacing: 8) {
+                HStack(spacing: 8) {
+                    BrandIcon(provider: provider)
+                        .foregroundStyle(DashboardTheme.text)
+                        .frame(width: 20, height: 20)
+                    Text(provider.displayName)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(DashboardTheme.text)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.82)
+                        .layoutPriority(2)
+                }
+                .padding(.top, 3)
                 .directReorderHandle()
 
-            quotaRefreshButton
-
-            if let plan = quota?.planName, !plan.isEmpty {
-                TagPill(text: plan)
-                    .padding(.top, 2)
+                Color.clear
+                    .frame(maxWidth: .infinity, minHeight: 22, maxHeight: 22)
+                    .contentShape(Rectangle())
                     .directReorderHandle()
+
+                quotaRefreshButton
+            }
+
+            // Metadata gets its own row: a narrow grid column cannot fit the
+            // provider name, account menu, refresh and plan pill side by side,
+            // and hiding any of them behind truncation is worse than one
+            // extra line.
+            HStack(alignment: .center, spacing: 6) {
+                accountControls
+
+                if let serviceStatus, serviceStatus.isAbnormal {
+                    ServiceStatusBadge(status: serviceStatus)
+                }
+
+                Spacer(minLength: 0)
+
+                if let plan = quota?.planName, !plan.isEmpty {
+                    TagPill(text: plan)
+                        .directReorderHandle()
+                }
             }
         }
-        .frame(
-            maxWidth: .infinity,
-            minHeight: Self.headerHeight,
-            maxHeight: Self.headerHeight,
-            alignment: .top
-        )
+        .frame(maxWidth: .infinity, minHeight: Self.headerHeight, alignment: .top)
         .contentShape(Rectangle())
     }
 
