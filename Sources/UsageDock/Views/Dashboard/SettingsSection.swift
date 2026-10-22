@@ -577,10 +577,6 @@ struct SettingsSection: View {
                 }
             }
 
-#if TOKENREMAIN_CLOUD_SYNC
-            CrossDeviceSyncSettingsCard()
-#endif
-
             WebDAVSyncSettingsCard(store: store)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

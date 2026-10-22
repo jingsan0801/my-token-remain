@@ -16,34 +16,25 @@ require_contract_value() {
     || fail "missing contract value '$expected'"
 }
 
-dev_contract="$("$BUILD_SCRIPT" --print-install-contract)"
-sync_contract="$(USAGEDOCK_SYNC_RELEASE=1 "$BUILD_SCRIPT" --print-install-contract)"
+# Fork note: this fork ships a single app identity. Both plain and archive
+# builds must agree on that identity; only the release configuration differs.
+contract="$("$BUILD_SCRIPT" --print-install-contract)"
 
-require_contract_value "$dev_contract" "sync_release=0"
-require_contract_value "$dev_contract" "app_name=TokenRemain Dev"
-require_contract_value "$dev_contract" "executable=UsageDockDev"
-require_contract_value "$dev_contract" "bundle_id=com.jingsan0801.mytokenremain.dev"
-require_contract_value "$dev_contract" \
-  "installed_app=/Users/jamesli/Applications/TokenRemain Dev.app"
-require_contract_value "$dev_contract" \
-  "stable_sync_app=/Users/jamesli/Applications/TokenRemain.app"
+require_contract_value "$contract" "archive=0"
+require_contract_value "$contract" "app_name=MyTokenRemain"
+require_contract_value "$contract" "executable=UsageDock"
+require_contract_value "$contract" "bundle_id=com.jingsan0801.mytokenremain"
+/usr/bin/grep -Fq 'ARCHIVE_MODE=1' "$BUILD_SCRIPT" \
+  || fail "archive mode is not derived from the build mode"
 
-require_contract_value "$sync_contract" "sync_release=1"
-require_contract_value "$sync_contract" "app_name=TokenRemain"
-require_contract_value "$sync_contract" "executable=UsageDock"
-require_contract_value "$sync_contract" "bundle_id=com.jingsan0801.mytokenremain"
-require_contract_value "$sync_contract" \
-  "installed_app=/Users/jamesli/Applications/TokenRemain.app"
-
-if [[ "$dev_contract" == *"installed_app=/Users/jamesli/Applications/TokenRemain.app"* ]]; then
-  fail "development mode can still overwrite the stable sync app"
-fi
+installed_app="$(/usr/bin/awk -F= '$1 == "installed_app" { print $2 }' <<<"$contract")"
+[[ -n "$installed_app" ]] || fail "the contract does not name the installed app"
+[[ "$installed_app" == */MyTokenRemain.app ]] \
+  || fail "the installed app path is not the single stable bundle: $installed_app"
 
 /usr/bin/grep -Fq 'verify_bundle_for_mode "$APP_BUNDLE"' "$BUILD_SCRIPT" \
   || fail "staged bundles are not verified before installation"
 /usr/bin/grep -Fq 'verify_bundle_for_mode "$INCOMING_APP"' "$BUILD_SCRIPT" \
   || fail "incoming bundles are not verified before replacement"
-/usr/bin/grep -Fq 'Private sync source upload succeeded' "$BUILD_SCRIPT" \
-  || fail "sync binary marker verification is missing"
 
-echo "installation isolation verified: development and sync builds use protected paths"
+echo "installation isolation verified: a single stable bundle with verified staging"

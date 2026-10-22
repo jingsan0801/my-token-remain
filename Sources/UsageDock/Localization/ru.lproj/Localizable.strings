@@ -4,17 +4,12 @@
 "nav.group.system" = "СИСТЕМА";
 "nav.overview" = "Обзор";
 "nav.limits" = "Лимиты";
-"nav.devices" = "Устройства";
 "nav.data_sources" = "Источники данных";
 "nav.settings" = "Настройки";
 "section.overview.subtitle" = "Риск квоты и актуальные официальные квоты";
 "section.limits.subtitle" = "Официальные окна квот ваших ИИ-инструментов";
-"section.devices.subtitle" = "Этот Mac и будущий мониторинг между устройствами";
 "section.data_sources.subtitle" = "Состояние источников и конфиденциальность";
 "section.settings.subtitle" = "Запуск, обновление и управление приложением";
-"sync.partial_error" = "Некоторые источники требуют внимания";
-"sync.loading" = "Загрузка данных…";
-"sync.healthy" = "Все источники работают";
 "risk.badge.low" = "НИЗКИЙ";
 "risk.badge.medium" = "СРЕДНИЙ";
 "risk.badge.high" = "ВЫСОКИЙ";

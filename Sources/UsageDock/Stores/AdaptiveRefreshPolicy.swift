@@ -3,8 +3,8 @@ import Foundation
 /// Keeps refresh work proportional to the chance that quota data changed.
 /// Active local Codex/Claude sessions and visible UI retain minute-level
 /// freshness. Once both are idle, expensive scans and account requests fall
-/// back to at least five minutes; Apple devices still receive periodic Mac
-/// snapshots without keeping an otherwise idle Mac on a one-minute work loop.
+/// back to at least five minutes instead of keeping an idle Mac on a
+/// one-minute work loop.
 enum AdaptiveRefreshPolicy {
     static let activeInterval: TimeInterval = 60
     static let idleInterval: TimeInterval = 5 * 60
@@ -30,30 +30,21 @@ enum AdaptiveRefreshPolicy {
 
     static func localAIQuotaInterval(
         preferred: TimeInterval?,
-        lowLatencySyncEnabled: Bool,
         localSessionActive: Bool,
         primarySurfaceVisible: Bool
     ) -> TimeInterval? {
         if localSessionActive || primarySurfaceVisible {
-            if let preferred {
-                return min(preferred, activeInterval)
-            }
-            return lowLatencySyncEnabled ? activeInterval : nil
+            guard let preferred else { return nil }
+            return min(preferred, activeInterval)
         }
-        if let preferred {
-            return max(preferred, idleInterval)
-        }
-        return lowLatencySyncEnabled ? idleInterval : nil
+        guard let preferred else { return nil }
+        return max(preferred, idleInterval)
     }
 
     /// Providers unrelated to local Codex/Claude work keep the cadence the user
-    /// selected. Apple-device sync uses a restrained five-minute fallback when
-    /// the user selected manual-only refresh so it can still publish changes.
-    static func auxiliaryQuotaInterval(
-        preferred: TimeInterval?,
-        lowLatencySyncEnabled: Bool
-    ) -> TimeInterval? {
-        preferred ?? (lowLatencySyncEnabled ? idleInterval : nil)
+    /// selected.
+    static func auxiliaryQuotaInterval(preferred: TimeInterval?) -> TimeInterval? {
+        preferred
     }
 
     /// The inexpensive activity probe remains minute-level so a newly started

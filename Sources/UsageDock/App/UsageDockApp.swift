@@ -61,7 +61,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             feedStore: feedStore,
             launchAtLogin: launchAtLogin
         )
-        DirectSyncController.shared.attach(to: store)
         ConfigSyncController.shared.accountsStoreProvider = { [weak self] in
             self?.store.providerAccountsStore
         }
@@ -100,13 +99,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.statusBarController?.showDashboard(section: .dataSources)
             }
         }
-#if TOKENREMAIN_CLOUD_SYNC
-        // Website-distributed production builds update themselves through the
-        // signed Sparkle appcast. Development builds never start the updater,
-        // so they cannot replace the stable CloudKit-enabled application.
+        // Fork note: the updater is a no-op stub in this fork; it never
+        // contacts an update feed.
         AppUpdateController.shared.start()
-        CrossDeviceSyncController.shared.attach(to: store)
-#endif
 
         if arguments.contains("--enable-launch-at-login") {
             launchAtLogin.setEnabled(true)
@@ -163,10 +158,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ notification: Notification) {
-#if TOKENREMAIN_CLOUD_SYNC
         AppUpdateController.shared.checkIfDue()
-        CrossDeviceSyncController.shared.checkNow()
-#endif
     }
 
     func application(

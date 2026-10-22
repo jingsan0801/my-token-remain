@@ -173,15 +173,12 @@ struct AlibabaTokenPlanTests {
         #expect(try await fast.fetch(configuration: raw).primary.remainingCredits == 1250)
     }
 
-    @Test func creditsCacheIsOptionalAndNotInMobileAllowlist() throws {
+    @Test func creditsCacheIsOptional() throws {
         let old = Data(#"{"usedPercent":25,"windowMinutes":300,"resetsAt":null}"#.utf8)
         #expect(try JSONDecoder().decode(QuotaWindow.self, from: old).remainingCredits == nil)
         let quota = try AlibabaTokenPlanUsageService.parse(Data(teamJSON.utf8), configuration: config(), now: now)
         let encoded = try JSONEncoder().encode(quota)
         #expect(try JSONDecoder().decode(ProviderQuota.self, from: encoded).primary.remainingCredits == 1250)
-        #expect(!MobileSnapshotRedactor.publishedProviders.contains(.alibabaTokenPlan))
-        let snapshot = MobileSnapshotRedactor.makeSnapshot(from: [.alibabaTokenPlan: quota], sourceInstanceID: UUID(), sequence: 1, generatedAt: now)
-        #expect(snapshot.providers.isEmpty)
     }
 }
 

@@ -8,37 +8,21 @@ struct AdaptiveRefreshPolicyTests {
     func localAIIntervals() {
         #expect(AdaptiveRefreshPolicy.localAIQuotaInterval(
             preferred: 300,
-            lowLatencySyncEnabled: false,
             localSessionActive: true,
             primarySurfaceVisible: false
         ) == 60)
         #expect(AdaptiveRefreshPolicy.localAIQuotaInterval(
             preferred: 60,
-            lowLatencySyncEnabled: false,
             localSessionActive: false,
             primarySurfaceVisible: false
         ) == 300)
         #expect(AdaptiveRefreshPolicy.localAIQuotaInterval(
             preferred: 1_800,
-            lowLatencySyncEnabled: false,
             localSessionActive: false,
             primarySurfaceVisible: false
         ) == 1_800)
         #expect(AdaptiveRefreshPolicy.localAIQuotaInterval(
             preferred: nil,
-            lowLatencySyncEnabled: true,
-            localSessionActive: false,
-            primarySurfaceVisible: false
-        ) == 300)
-        #expect(AdaptiveRefreshPolicy.localAIQuotaInterval(
-            preferred: nil,
-            lowLatencySyncEnabled: true,
-            localSessionActive: true,
-            primarySurfaceVisible: false
-        ) == 60)
-        #expect(AdaptiveRefreshPolicy.localAIQuotaInterval(
-            preferred: nil,
-            lowLatencySyncEnabled: false,
             localSessionActive: true,
             primarySurfaceVisible: false
         ) == nil)
@@ -75,17 +59,11 @@ struct AdaptiveRefreshPolicyTests {
     @Test("Unrelated providers retain the user's cadence")
     func auxiliaryIntervals() {
         #expect(AdaptiveRefreshPolicy.auxiliaryQuotaInterval(
-            preferred: 60,
-            lowLatencySyncEnabled: false
+            preferred: 60
         ) == 60)
         #expect(AdaptiveRefreshPolicy.auxiliaryQuotaInterval(
-            preferred: nil,
-            lowLatencySyncEnabled: false
+            preferred: nil
         ) == nil)
-        #expect(AdaptiveRefreshPolicy.auxiliaryQuotaInterval(
-            preferred: nil,
-            lowLatencySyncEnabled: true
-        ) == 300)
     }
 
     @Test("Provider errors back off independently and cap at five minutes")
@@ -108,58 +86,6 @@ struct AdaptiveRefreshPolicyTests {
         // 服务端 Retry-After 直接作为首次底数时同样不被放大到第一档以下。
         #expect(AdaptiveRefreshPolicy.escalatedRetryDelay(base: 60, consecutiveFailures: 1) == 60)
     }
-
-    #if TOKENREMAIN_CLOUD_SYNC
-    @Test("Sync fingerprint ignores capture-only churn but detects quota changes")
-    func contentFingerprint() {
-        let start = Date(timeIntervalSince1970: 1_784_764_800)
-        func quota(
-            usedPercent: Double,
-            capturedAt: Date,
-            balance: Double = 10
-        ) -> ProviderQuota {
-            ProviderQuota(
-                provider: .claude,
-                primary: QuotaWindow(
-                    usedPercent: usedPercent,
-                    windowMinutes: 300,
-                    resetsAt: start + 300,
-                    remainingBalance: QuotaBalance(amount: balance, currencyCode: "USD")
-                ),
-                secondary: nil,
-                planName: "Pro",
-                capturedAt: capturedAt
-            )
-        }
-        let first = SyncContentFingerprint.make(
-            quotas: [.claude: quota(usedPercent: 42, capturedAt: start)],
-            history: nil,
-            includesUsageHistory: false
-        )
-        let recaptured = SyncContentFingerprint.make(
-            quotas: [.claude: quota(usedPercent: 42, capturedAt: start + 60)],
-            history: nil,
-            includesUsageHistory: false
-        )
-        let changed = SyncContentFingerprint.make(
-            quotas: [.claude: quota(usedPercent: 43, capturedAt: start + 60)],
-            history: nil,
-            includesUsageHistory: false
-        )
-        let balanceChanged = SyncContentFingerprint.make(
-            quotas: [.claude: quota(
-                usedPercent: 42,
-                capturedAt: start + 60,
-                balance: 9
-            )],
-            history: nil,
-            includesUsageHistory: false
-        )
-        #expect(first == recaptured)
-        #expect(first != changed)
-        #expect(first != balanceChanged)
-    }
-    #endif
 }
 
 @Suite("Transport failure notice suppression")

@@ -7,15 +7,9 @@ let package = Package(
     products: [
         .executable(name: "UsageDock", targets: ["UsageDock"])
     ],
-    dependencies: [
-        .package(path: "Packages/TokenRemainSyncKit")
-    ],
     targets: [
         .executableTarget(
             name: "UsageDock",
-            dependencies: [
-                .product(name: "TokenRemainSyncKit", package: "TokenRemainSyncKit")
-            ],
             path: "Sources/UsageDock",
             exclude: ["Resources", "Localization"]
         ),

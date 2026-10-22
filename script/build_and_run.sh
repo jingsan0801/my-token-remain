@@ -2,6 +2,10 @@
 set -euo pipefail
 
 MODE="${1:-run}"
+ARCHIVE_MODE=0
+if [[ "$MODE" == "--archive" || "$MODE" == "archive" ]]; then
+  ARCHIVE_MODE=1
+fi
 PRODUCT_NAME="UsageDock"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
@@ -11,63 +15,29 @@ BROADCAST_BASE_URL="${TOKENREMAIN_BROADCAST_BASE_URL:-https://api.tokenremain.co
 # the Claude Code keychain item across UsageDock rebuilds.
 SIGNING_IDENTITY="${USAGEDOCK_SIGNING_IDENTITY:-}"
 
-# Future CloudKit distribution is deliberately opt-in. Normal local builds keep
-# their Apple Development signing behavior and receive no CloudKit entitlement.
-# To produce a profile-backed sync build, set all of:
-#   USAGEDOCK_SYNC_RELEASE=1
-#   USAGEDOCK_SYNC_PROVISIONING_PROFILE=/absolute/path/to/profile.provisionprofile
-#   USAGEDOCK_SYNC_SIGNING_IDENTITY=<certificate SHA-1 or unambiguous common name>
-#   USAGEDOCK_SYNC_ICLOUD_ENVIRONMENT=Production   # optional when profile type is unambiguous
-# An Apple Development identity is also accepted for a profile-backed development
-# build, but only a Developer ID identity receives a signing timestamp.
-SYNC_RELEASE_MODE="${USAGEDOCK_SYNC_RELEASE:-0}"
-SYNC_PROVISIONING_PROFILE="${USAGEDOCK_SYNC_PROVISIONING_PROFILE:-}"
-SYNC_SIGNING_IDENTITY="${USAGEDOCK_SYNC_SIGNING_IDENTITY:-}"
-SYNC_REQUESTED_ICLOUD_ENVIRONMENT="${USAGEDOCK_SYNC_ICLOUD_ENVIRONMENT:-}"
-SYNC_ENTITLEMENTS_TEMPLATE="$ROOT_DIR/Resources/UsageDockSync.entitlements"
-SYNC_WORK_DIR=""
-SYNC_RESOLVED_ENTITLEMENTS=""
-SYNC_EXPECTED_KEYCHAIN_GROUP=""
-SYNC_EXPECTED_APPLICATION_IDENTIFIER=""
-SYNC_EXPECTED_TEAM_IDENTIFIER=""
-SYNC_EXPECTED_ICLOUD_ENVIRONMENT=""
-SYNC_EXPECTED_APNS_ENVIRONMENT=""
-SYNC_EXPECTED_GET_TASK_ALLOW="false"
+# `--archive` produces a release-configured, stripped, universal bundle for
+# local packaging. Plain `run`/`--verify` builds keep their debug symbols so
+# lldb works against them.
 SIGNING_COMMON_NAME=""
 ARCHIVE_DIR="${USAGEDOCK_ARCHIVE_DIR:-$ROOT_DIR/dist-release}"
 
-# A non-sync development build must never replace or stop the production sync
-# app. It gets its own bundle, bundle identifier, executable/process name, and
-# installed path. Only a profile-backed sync build may target TokenRemain.app.
 # Fork note: this personal fork ships a single app identity — there is no Dev
-# variant. Plain builds use the same name, executable and bundle id as the
-# sync release, so Keychain items and UserDefaults live in one namespace and
-# there is exactly one installed MyTokenRemain.
-if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
-  APP_NAME="MyTokenRemain"
-  EXECUTABLE_NAME="UsageDock"
-  BUNDLE_ID="com.jingsan0801.mytokenremain"
-  LEGACY_INSTALLED_APPS=(
-    "$INSTALL_DIR/UsageDock.app"
-    "$INSTALL_DIR/Token Remain.app"
-    "$INSTALL_DIR/TokenRemain.app"
-  )
-else
-  APP_NAME="MyTokenRemain"
-  EXECUTABLE_NAME="UsageDock"
-  BUNDLE_ID="com.jingsan0801.mytokenremain"
-  LEGACY_INSTALLED_APPS=(
-    "$INSTALL_DIR/UsageDock.app"
-    "$INSTALL_DIR/Token Remain.app"
-    "$INSTALL_DIR/TokenRemain.app"
-    "$INSTALL_DIR/MyTokenRemain Dev.app"
-    "$INSTALL_DIR/UsageDock Dev.app"
-    "$INSTALL_DIR/TokenRemain Dev.app"
-  )
-fi
+# variant. Plain builds use the same name, executable and bundle id in one
+# Keychain/UserDefaults namespace, so there is exactly one installed
+# MyTokenRemain.
+APP_NAME="MyTokenRemain"
+EXECUTABLE_NAME="UsageDock"
+BUNDLE_ID="com.jingsan0801.mytokenremain"
+LEGACY_INSTALLED_APPS=(
+  "$INSTALL_DIR/UsageDock.app"
+  "$INSTALL_DIR/Token Remain.app"
+  "$INSTALL_DIR/TokenRemain.app"
+  "$INSTALL_DIR/MyTokenRemain Dev.app"
+  "$INSTALL_DIR/UsageDock Dev.app"
+  "$INSTALL_DIR/TokenRemain Dev.app"
+)
 APP_BUNDLE="$DIST_DIR/$APP_NAME.app"
 INSTALLED_APP="$INSTALL_DIR/$APP_NAME.app"
-STABLE_SYNC_APP="$INSTALL_DIR/MyTokenRemain.app"
 APP_CONTENTS="$APP_BUNDLE/Contents"
 APP_MACOS="$APP_CONTENTS/MacOS"
 APP_RESOURCES="$APP_CONTENTS/Resources"
@@ -93,9 +63,6 @@ resolve_signing_common_name() {
 }
 
 cleanup_build_artifacts() {
-  if [[ -n "$SYNC_WORK_DIR" && -d "$SYNC_WORK_DIR" ]]; then
-    rm -rf "$SYNC_WORK_DIR"
-  fi
   # The staged bundle is only an intermediate. Keeping it under `dist/`
   # registers a second TokenRemain with LaunchServices and Developer Tools.
   # The signed installed copy under ~/Applications is the sole runnable app.
@@ -107,237 +74,12 @@ cleanup_build_artifacts() {
 }
 trap cleanup_build_artifacts EXIT
 
-if [[ "$SYNC_RELEASE_MODE" != "0" && "$SYNC_RELEASE_MODE" != "1" ]]; then
-  echo "USAGEDOCK_SYNC_RELEASE must be 0 or 1." >&2
-  exit 2
-fi
-if [[ "$MODE" == "--archive" || "$MODE" == "archive" ]]; then
-  if [[ "$SYNC_RELEASE_MODE" != "1" ]]; then
-    echo "Archive mode requires USAGEDOCK_SYNC_RELEASE=1." >&2
-    exit 2
-  fi
-  if [[ "$SYNC_REQUESTED_ICLOUD_ENVIRONMENT" != "Production" ]]; then
-    echo "Archive mode requires USAGEDOCK_SYNC_ICLOUD_ENVIRONMENT=Production." >&2
-    exit 2
-  fi
-fi
-if [[ "$SYNC_RELEASE_MODE" == "0" \
-  && ( -n "$SYNC_PROVISIONING_PROFILE" \
-    || -n "$SYNC_SIGNING_IDENTITY" \
-    || -n "$SYNC_REQUESTED_ICLOUD_ENVIRONMENT" ) ]]; then
-  echo "Set USAGEDOCK_SYNC_RELEASE=1 to use sync signing or CloudKit environment options." >&2
-  exit 2
-fi
-if [[ -n "$SYNC_REQUESTED_ICLOUD_ENVIRONMENT" \
-  && "$SYNC_REQUESTED_ICLOUD_ENVIRONMENT" != "Development" \
-  && "$SYNC_REQUESTED_ICLOUD_ENVIRONMENT" != "Production" ]]; then
-  echo "USAGEDOCK_SYNC_ICLOUD_ENVIRONMENT must be Development or Production." >&2
-  exit 2
-fi
-
-prepare_sync_signing() {
-  if [[ ! -r "$SYNC_PROVISIONING_PROFILE" ]]; then
-    echo "USAGEDOCK_SYNC_PROVISIONING_PROFILE must name a readable macOS provisioning profile." >&2
-    exit 1
-  fi
-  if [[ -z "$SYNC_SIGNING_IDENTITY" ]]; then
-    echo "USAGEDOCK_SYNC_SIGNING_IDENTITY is required when USAGEDOCK_SYNC_RELEASE=1." >&2
-    exit 1
-  fi
-  SIGNING_COMMON_NAME="$(resolve_signing_common_name "$SYNC_SIGNING_IDENTITY")"
-  if [[ -z "$SIGNING_COMMON_NAME" ]]; then
-    echo "Could not resolve the requested signing identity." >&2
-    exit 1
-  fi
-  if [[ ! -r "$SYNC_ENTITLEMENTS_TEMPLATE" ]]; then
-    echo "Missing sync entitlement template: $SYNC_ENTITLEMENTS_TEMPLATE" >&2
-    exit 1
-  fi
-
-  SYNC_WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/usagedock-sync.XXXXXX")"
-  local profile_plist="$SYNC_WORK_DIR/profile.plist"
-  if ! /usr/bin/security cms -D -i "$SYNC_PROVISIONING_PROFILE" > "$profile_plist"; then
-    echo "Could not decode the sync provisioning profile." >&2
-    exit 1
-  fi
-
-  local app_identifier_prefix
-  app_identifier_prefix="$(/usr/libexec/PlistBuddy -c 'Print :ApplicationIdentifierPrefix:0' "$profile_plist" 2>/dev/null || true)"
-  if [[ -z "$app_identifier_prefix" ]]; then
-    echo "The sync provisioning profile has no ApplicationIdentifierPrefix." >&2
-    exit 1
-  fi
-  if [[ "$app_identifier_prefix" != *. ]]; then
-    app_identifier_prefix="${app_identifier_prefix}."
-  fi
-
-  local profile_container
-  profile_container="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.developer.icloud-container-identifiers:0' "$profile_plist" 2>/dev/null || true)"
-  if [[ "$profile_container" != "iCloud.com.jingsan0801.mytokenremain" ]]; then
-    echo "The sync provisioning profile does not authorize iCloud.com.jingsan0801.mytokenremain." >&2
-    exit 1
-  fi
-
-  local profile_cloudkit_service
-  profile_cloudkit_service="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.developer.icloud-services:0' "$profile_plist" 2>/dev/null || true)"
-  if [[ -z "$profile_cloudkit_service" ]]; then
-    profile_cloudkit_service="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.developer.icloud-services' "$profile_plist" 2>/dev/null || true)"
-  fi
-  # Apple may encode this permission as the concrete service or as a wildcard
-  # string in a development profile. The signed app still requests only CloudKit.
-  if [[ "$profile_cloudkit_service" != "CloudKit" && "$profile_cloudkit_service" != "*" ]]; then
-    echo "The sync provisioning profile does not authorize the CloudKit service." >&2
-    exit 1
-  fi
-
-  local has_development_environment=false
-  local has_production_environment=false
-  local scalar_environment
-  scalar_environment="$(/usr/libexec/PlistBuddy \
-    -c 'Print :Entitlements:com.apple.developer.icloud-container-environment' \
-    "$profile_plist" 2>/dev/null || true)"
-  [[ "$scalar_environment" == "Development" ]] && has_development_environment=true
-  [[ "$scalar_environment" == "Production" ]] && has_production_environment=true
-
-  # Development profiles may encode the allowed environments as an array,
-  # while Developer ID profiles commonly encode the sole Production value as
-  # a scalar string. Accept both Apple-issued representations without
-  # weakening the requested-environment check below.
-  local environment_index=0
-  while true; do
-    local profile_environment
-    profile_environment="$(/usr/libexec/PlistBuddy \
-      -c "Print :Entitlements:com.apple.developer.icloud-container-environment:$environment_index" \
-      "$profile_plist" 2>/dev/null || true)"
-    [[ -n "$profile_environment" ]] || break
-    [[ "$profile_environment" == "Development" ]] && has_development_environment=true
-    [[ "$profile_environment" == "Production" ]] && has_production_environment=true
-    environment_index=$((environment_index + 1))
-  done
-
-  SYNC_EXPECTED_ICLOUD_ENVIRONMENT="$SYNC_REQUESTED_ICLOUD_ENVIRONMENT"
-  if [[ -z "$SYNC_EXPECTED_ICLOUD_ENVIRONMENT" ]]; then
-    local first_provisioned_device provisions_all_devices
-    first_provisioned_device="$(/usr/libexec/PlistBuddy -c 'Print :ProvisionedDevices:0' "$profile_plist" 2>/dev/null || true)"
-    provisions_all_devices="$(/usr/libexec/PlistBuddy -c 'Print :ProvisionsAllDevices' "$profile_plist" 2>/dev/null || true)"
-    if [[ -n "$first_provisioned_device" ]]; then
-      SYNC_EXPECTED_ICLOUD_ENVIRONMENT="Development"
-    elif [[ "$provisions_all_devices" == "true" ]]; then
-      SYNC_EXPECTED_ICLOUD_ENVIRONMENT="Production"
-    else
-      echo "Could not infer the CloudKit environment; set USAGEDOCK_SYNC_ICLOUD_ENVIRONMENT explicitly." >&2
-      exit 1
-    fi
-  fi
-  if [[ "$SYNC_EXPECTED_ICLOUD_ENVIRONMENT" == "Development" \
-    && "$has_development_environment" != "true" ]]; then
-    echo "The sync provisioning profile does not authorize CloudKit Development." >&2
-    exit 1
-  fi
-  if [[ "$SYNC_EXPECTED_ICLOUD_ENVIRONMENT" == "Production" \
-    && "$has_production_environment" != "true" ]]; then
-    echo "The sync provisioning profile does not authorize CloudKit Production." >&2
-    exit 1
-  fi
-  SYNC_EXPECTED_APNS_ENVIRONMENT="$(
-    printf '%s' "$SYNC_EXPECTED_ICLOUD_ENVIRONMENT" | /usr/bin/tr '[:upper:]' '[:lower:]'
-  )"
-  local profile_apns_environment
-  profile_apns_environment="$(/usr/libexec/PlistBuddy \
-    -c 'Print :Entitlements:com.apple.developer.aps-environment' \
-    "$profile_plist" 2>/dev/null || true)"
-  if [[ "$profile_apns_environment" != "$SYNC_EXPECTED_APNS_ENVIRONMENT" ]]; then
-    echo "The sync provisioning profile does not authorize the required APNs environment." >&2
-    exit 1
-  fi
-
-  SYNC_EXPECTED_GET_TASK_ALLOW="false"
-  if [[ "$SYNC_EXPECTED_ICLOUD_ENVIRONMENT" == "Development" ]]; then
-    SYNC_EXPECTED_GET_TASK_ALLOW="true"
-    if [[ "$SIGNING_COMMON_NAME" != "Apple Development:"* ]]; then
-      echo "CloudKit Development builds require an Apple Development identity." >&2
-      exit 1
-    fi
-  fi
-  if [[ "$SYNC_EXPECTED_ICLOUD_ENVIRONMENT" == "Production" \
-    && "$SIGNING_COMMON_NAME" != "Developer ID Application:"*"(84397AQ22Y)" ]]; then
-    echo "Production website distribution requires a Developer ID Application identity." >&2
-    exit 1
-  fi
-
-  SYNC_RESOLVED_ENTITLEMENTS="$SYNC_WORK_DIR/UsageDockSync.resolved.entitlements"
-  SYNC_EXPECTED_KEYCHAIN_GROUP="${app_identifier_prefix}com.jingsan0801.mytokenremain.sync"
-  SYNC_EXPECTED_APPLICATION_IDENTIFIER="${app_identifier_prefix}${BUNDLE_ID}"
-  SYNC_EXPECTED_TEAM_IDENTIFIER="${app_identifier_prefix%.}"
-  cp "$SYNC_ENTITLEMENTS_TEMPLATE" "$SYNC_RESOLVED_ENTITLEMENTS"
-  /usr/libexec/PlistBuddy -c "Set :keychain-access-groups:0 $SYNC_EXPECTED_KEYCHAIN_GROUP" "$SYNC_RESOLVED_ENTITLEMENTS"
-  /usr/libexec/PlistBuddy -c "Set :com.apple.application-identifier $SYNC_EXPECTED_APPLICATION_IDENTIFIER" "$SYNC_RESOLVED_ENTITLEMENTS"
-  /usr/libexec/PlistBuddy -c "Set :com.apple.developer.team-identifier $SYNC_EXPECTED_TEAM_IDENTIFIER" "$SYNC_RESOLVED_ENTITLEMENTS"
-  /usr/libexec/PlistBuddy -c "Set :com.apple.developer.icloud-container-environment $SYNC_EXPECTED_ICLOUD_ENVIRONMENT" "$SYNC_RESOLVED_ENTITLEMENTS"
-  /usr/libexec/PlistBuddy -c "Set :com.apple.developer.aps-environment $SYNC_EXPECTED_APNS_ENVIRONMENT" "$SYNC_RESOLVED_ENTITLEMENTS"
-  if [[ "$SYNC_EXPECTED_GET_TASK_ALLOW" == "true" ]]; then
-    /usr/libexec/PlistBuddy -c 'Set :com.apple.security.get-task-allow true' "$SYNC_RESOLVED_ENTITLEMENTS"
-  else
-    /usr/libexec/PlistBuddy -c 'Delete :com.apple.security.get-task-allow' "$SYNC_RESOLVED_ENTITLEMENTS" 2>/dev/null || true
-  fi
-}
-
-verify_sync_signature() {
-  local signed_app="$1"
-  local final_entitlements="$SYNC_WORK_DIR/final-entitlements.plist"
-  /usr/bin/codesign --verify --deep --strict "$signed_app"
-  /usr/bin/codesign -d --entitlements :- "$signed_app/Contents/MacOS/$EXECUTABLE_NAME" > "$final_entitlements" 2>/dev/null
-
-  local container environment apns_environment service keychain_group application_identifier team_identifier get_task_allow
-  container="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.icloud-container-identifiers:0' "$final_entitlements" 2>/dev/null || true)"
-  environment="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.icloud-container-environment' "$final_entitlements" 2>/dev/null || true)"
-  apns_environment="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.aps-environment' "$final_entitlements" 2>/dev/null || true)"
-  service="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.icloud-services:0' "$final_entitlements" 2>/dev/null || true)"
-  keychain_group="$(/usr/libexec/PlistBuddy -c 'Print :keychain-access-groups:0' "$final_entitlements" 2>/dev/null || true)"
-  application_identifier="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.application-identifier' "$final_entitlements" 2>/dev/null || true)"
-  team_identifier="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.team-identifier' "$final_entitlements" 2>/dev/null || true)"
-  get_task_allow="$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.get-task-allow' "$final_entitlements" 2>/dev/null || true)"
-  if [[ "$container" != "iCloud.com.jingsan0801.mytokenremain" \
-    || "$environment" != "$SYNC_EXPECTED_ICLOUD_ENVIRONMENT" \
-    || "$apns_environment" != "$SYNC_EXPECTED_APNS_ENVIRONMENT" \
-    || "$service" != "CloudKit" \
-    || "$keychain_group" != "$SYNC_EXPECTED_KEYCHAIN_GROUP" \
-    || "$application_identifier" != "$SYNC_EXPECTED_APPLICATION_IDENTIFIER" \
-    || "$team_identifier" != "$SYNC_EXPECTED_TEAM_IDENTIFIER" ]]; then
-    echo "Final sync signature is missing a required CloudKit or shared-keychain entitlement." >&2
-    exit 1
-  fi
-  if [[ "$SYNC_EXPECTED_GET_TASK_ALLOW" == "true" && "$get_task_allow" != "true" ]]; then
-    echo "Development sync signature is missing get-task-allow from its profile." >&2
-    exit 1
-  fi
-  if [[ "$SYNC_EXPECTED_GET_TASK_ALLOW" == "false" && "$get_task_allow" == "true" ]]; then
-    echo "Production sync signature unexpectedly grants get-task-allow." >&2
-    exit 1
-  fi
-  if /usr/libexec/PlistBuddy -c 'Print :com.apple.security.app-sandbox' "$final_entitlements" >/dev/null 2>&1 \
-    || /usr/libexec/PlistBuddy -c 'Print :com.apple.security.application-groups' "$final_entitlements" >/dev/null 2>&1; then
-    echo "Final sync signature unexpectedly grants App Sandbox or an App Group." >&2
-    exit 1
-  fi
-  if [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$signed_app/Contents/Info.plist")" != "$BUNDLE_ID" \
-    || "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$signed_app/Contents/Info.plist")" != "$EXECUTABLE_NAME" ]]; then
-    echo "Final sync bundle has the wrong identifier or executable." >&2
-    exit 1
-  fi
-  if ! /usr/bin/grep -aFq 'iCloud.com.jingsan0801.mytokenremain' "$signed_app/Contents/MacOS/$EXECUTABLE_NAME" \
-    || ! /usr/bin/grep -aFq 'Private sync source upload succeeded' "$signed_app/Contents/MacOS/$EXECUTABLE_NAME"; then
-    echo "Final sync binary was built without the private CloudKit transport." >&2
-    exit 1
-  fi
-}
-
-verify_development_isolation() {
+verify_bundle_identity() {
   local signed_app="$1"
   local entitlements
-  # Fork note: with the Dev variant removed, plain builds intentionally target
-  # the single stable install path; upstream's "development build cannot
-  # target the stable sync app" refusal is dropped together with the variant.
+  # Fork note: with the Dev variant and CloudKit sync removed, every build
+  # targets the single stable install path and must carry no iCloud or shared
+  # sync-keychain entitlements.
   /usr/bin/codesign --verify --deep --strict "$signed_app"
   if [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$signed_app/Contents/Info.plist")" != "$BUNDLE_ID" \
     || "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$signed_app/Contents/Info.plist")" != "$EXECUTABLE_NAME" ]]; then
@@ -346,8 +88,8 @@ verify_development_isolation() {
   fi
   entitlements="$(/usr/bin/codesign -d --entitlements :- "$signed_app" 2>/dev/null || true)"
   if [[ "$entitlements" == *"com.apple.developer.icloud-container-identifiers"* \
-    || "$entitlements" == *"84397AQ22Y.com.jingsan0801.mytokenremain.sync"* ]]; then
-    echo "Development-only bundle unexpectedly carries production sync entitlements." >&2
+    || "$entitlements" == *"com.apple.developer.icloud-services"* ]]; then
+    echo "Bundle unexpectedly carries CloudKit entitlements." >&2
     exit 1
   fi
 }
@@ -392,7 +134,7 @@ verify_bundle_payload() {
     echo "Bundle ships SVG regeneration sources that nothing loads: $stray_svg" >&2
     exit 1
   }
-  if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
+  if [[ "$ARCHIVE_MODE" == "1" ]]; then
     # `strip -S` removes the debug stabs; their presence means the strip was
     # skipped and the executable carries ~7 MB of DWARF per architecture.
     local stabs
@@ -412,16 +154,12 @@ verify_bundle_for_mode() {
     exit 1
   }
   verify_bundle_payload "$signed_app"
-  if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
-    verify_sync_signature "$signed_app"
-  else
-    verify_development_isolation "$signed_app"
-  fi
+  verify_bundle_identity "$signed_app"
 }
 
 if [[ "$MODE" == "--print-install-contract" || "$MODE" == "print-install-contract" ]]; then
-  printf 'sync_release=%s\napp_name=%s\nexecutable=%s\nbundle_id=%s\ninstalled_app=%s\nstable_sync_app=%s\n' \
-    "$SYNC_RELEASE_MODE" "$APP_NAME" "$EXECUTABLE_NAME" "$BUNDLE_ID" "$INSTALLED_APP" "$STABLE_SYNC_APP"
+  printf 'archive=%s\napp_name=%s\nexecutable=%s\nbundle_id=%s\ninstalled_app=%s\n' \
+    "$ARCHIVE_MODE" "$APP_NAME" "$EXECUTABLE_NAME" "$BUNDLE_ID" "$INSTALLED_APP"
   exit 0
 fi
 
@@ -430,9 +168,8 @@ if [[ "$MODE" != "--archive" && "$MODE" != "archive" ]]; then
 fi
 cd "$ROOT_DIR"
 SWIFT_BUILD_ARGS=(--product "$PRODUCT_NAME" --arch arm64 --arch x86_64)
-if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
+if [[ "$ARCHIVE_MODE" == "1" ]]; then
   SWIFT_BUILD_ARGS+=(--configuration release)
-  SWIFT_BUILD_ARGS+=(-Xswiftc -DTOKENREMAIN_CLOUD_SYNC)
 fi
 swift build "${SWIFT_BUILD_ARGS[@]}"
 BUILD_DIR="$(swift build "${SWIFT_BUILD_ARGS[@]}" --show-bin-path)"
@@ -445,7 +182,7 @@ cp "$BUILD_BINARY" "$APP_BINARY"
 # larger than its own __TEXT. Archive the DWARF first, verify it describes the
 # binary we are about to ship, then strip. Development builds keep their
 # symbols so lldb still works against a locally built app.
-if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
+if [[ "$ARCHIVE_MODE" == "1" ]]; then
   [[ -d "$BUILD_DIR/$PRODUCT_NAME.dSYM" ]] || {
     echo "Release build produced no $PRODUCT_NAME.dSYM; refusing to ship an unsymbolicatable binary." >&2
     exit 1
@@ -493,7 +230,7 @@ mkdir -p "$APP_RESOURCES/ProviderIcons"
   "$ROOT_DIR/Sources/UsageDock/Resources/ProviderIcons/" "$APP_RESOURCES/ProviderIcons/"
 cp "$ROOT_DIR/Sources/UsageDock/Resources/MyTokenRemain.icns" "$APP_RESOURCES/MyTokenRemain.icns"
 # macOS 26+ draws the Icon Composer icon; a release must never ship without it.
-if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
+if [[ "$ARCHIVE_MODE" == "1" ]]; then
   "$ROOT_DIR/script/compile_app_icon.sh" "$APP_RESOURCES" --required
 else
   "$ROOT_DIR/script/compile_app_icon.sh" "$APP_RESOURCES"
@@ -505,34 +242,29 @@ for localization in "$ROOT_DIR/Sources/UsageDock/Localization/"*.lproj; do
 done
 chmod +x "$APP_BINARY"
 
-if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
-  prepare_sync_signing
-  SIGNING_IDENTITY="$SYNC_SIGNING_IDENTITY"
-else
-  if [[ -z "$SIGNING_IDENTITY" ]]; then
-    SIGNING_IDENTITY="$(security find-identity -v -p codesigning 2>/dev/null \
-      | sed -n 's/.*"\(Apple Development:.*\)"/\1/p' \
-      | head -n 1)"
-  fi
-  if [[ -z "$SIGNING_IDENTITY" ]]; then
-    if [[ "${USAGEDOCK_ALLOW_ADHOC_SIGNING:-0}" == "1" ]]; then
-      # Machines without an Apple Development certificate (CI, a secondary
-      # Mac used only for verification) can opt into an ad-hoc signature.
-      # Keychain items created by this build trust the ad-hoc CDHash, so they
-      # survive relaunches but not rebuilds; production installs should still
-      # use a stable Apple Development identity.
-      SIGNING_IDENTITY="-"
-      SIGNING_COMMON_NAME="Ad Hoc"
-    else
-      echo "TokenRemain needs an Apple Development signing identity to preserve Keychain approval." >&2
-      exit 1
-    fi
+if [[ -z "$SIGNING_IDENTITY" ]]; then
+  SIGNING_IDENTITY="$(security find-identity -v -p codesigning 2>/dev/null \
+    | sed -n 's/.*"\(Apple Development:.*\)"/\1/p' \
+    | head -n 1)"
+fi
+if [[ -z "$SIGNING_IDENTITY" ]]; then
+  if [[ "${USAGEDOCK_ALLOW_ADHOC_SIGNING:-0}" == "1" ]]; then
+    # Machines without an Apple Development certificate (CI, a secondary
+    # Mac used only for verification) can opt into an ad-hoc signature.
+    # Keychain items created by this build trust the ad-hoc CDHash, so they
+    # survive relaunches but not rebuilds; production installs should still
+    # use a stable Apple Development identity.
+    SIGNING_IDENTITY="-"
+    SIGNING_COMMON_NAME="Ad Hoc"
   else
-    SIGNING_COMMON_NAME="$(resolve_signing_common_name "$SIGNING_IDENTITY")"
-    if [[ -z "$SIGNING_COMMON_NAME" ]]; then
-      echo "Could not resolve the requested signing identity." >&2
-      exit 1
-    fi
+    echo "TokenRemain needs an Apple Development signing identity to preserve Keychain approval." >&2
+    exit 1
+  fi
+else
+  SIGNING_COMMON_NAME="$(resolve_signing_common_name "$SIGNING_IDENTITY")"
+  if [[ -z "$SIGNING_COMMON_NAME" ]]; then
+    echo "Could not resolve the requested signing identity." >&2
+    exit 1
   fi
 fi
 # Finder/File Provider metadata can be copied onto a local bundle and invalidate
@@ -540,16 +272,7 @@ fi
 for attribute in com.apple.FinderInfo com.apple.fileprovider.fpfs#P com.apple.macl com.apple.provenance com.apple.quarantine; do
   /usr/bin/xattr -dr "$attribute" "$APP_BUNDLE" 2>/dev/null || true
 done
-if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
-  cp "$SYNC_PROVISIONING_PROFILE" "$APP_CONTENTS/embedded.provisionprofile"
-  # Browser-downloaded profiles carry quarantine metadata. If it is copied into
-  # the locally built bundle, Gatekeeper treats this development app as an
-  # internet-distributed, unnotarized app and kills it before main() runs.
-  /usr/bin/xattr -c "$APP_CONTENTS/embedded.provisionprofile" 2>/dev/null || true
-  sign_outer_bundle "$SYNC_RESOLVED_ENTITLEMENTS"
-else
-  sign_outer_bundle
-fi
+sign_outer_bundle
 # On File Provider-backed workspaces, codesign itself can cause provenance
 # metadata to be re-applied to newly written signature files. Removing it after
 # signing does not change the code signature and prevents dyld launch stalls.
@@ -563,7 +286,7 @@ if [[ "$MODE" == "--archive" || "$MODE" == "archive" ]]; then
   rm -rf "$ARCHIVED_APP"
   /usr/bin/ditto "$APP_BUNDLE" "$ARCHIVED_APP"
   /usr/bin/codesign --verify --deep --strict "$ARCHIVED_APP"
-  verify_sync_signature "$ARCHIVED_APP"
+  verify_bundle_identity "$ARCHIVED_APP"
   # Keep the DWARF with the release it describes. Crash reports arrive months
   # later and the build tree is long gone by then.
   if [[ -d "$APP_DSYM" ]]; then
@@ -604,8 +327,8 @@ done
 
 open_app() {
   # LaunchServices may have already restored the login item after the pre-build
-  # stop. Reuse that instance so a verified rebuild never creates two competing
-  # CloudKit publishers.
+  # stop. Reuse that instance so a verified rebuild never leaves two copies
+  # competing for the same status item.
   /usr/bin/open "$INSTALLED_APP"
 }
 

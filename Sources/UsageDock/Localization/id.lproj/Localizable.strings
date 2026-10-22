@@ -4,17 +4,12 @@
 "nav.group.system" = "SISTEM";
 "nav.overview" = "Ringkasan";
 "nav.limits" = "Batas";
-"nav.devices" = "Perangkat";
 "nav.data_sources" = "Sumber data";
 "nav.settings" = "Pengaturan";
 "section.overview.subtitle" = "Risiko kuota dan kuota resmi langsung";
 "section.limits.subtitle" = "Jendela kuota resmi semua alat coding AI Anda";
-"section.devices.subtitle" = "Mac ini dan pemantauan lintas perangkat mendatang";
 "section.data_sources.subtitle" = "Status sumber data dan privasi";
 "section.settings.subtitle" = "Mulai, segarkan, dan kontrol aplikasi";
-"sync.partial_error" = "Beberapa sumber perlu diperiksa";
-"sync.loading" = "Memuat data…";
-"sync.healthy" = "Semua sumber sehat";
 "risk.badge.low" = "RENDAH";
 "risk.badge.medium" = "SEDANG";
 "risk.badge.high" = "TINGGI";

@@ -4,17 +4,12 @@
 "nav.group.system" = "SYSTÈME";
 "nav.overview" = "Vue d’ensemble";
 "nav.limits" = "Limites";
-"nav.devices" = "Appareils";
 "nav.data_sources" = "Sources de données";
 "nav.settings" = "Réglages";
 "section.overview.subtitle" = "Risque de quota et quotas officiels en direct";
 "section.limits.subtitle" = "Fenêtres de quota officielles de vos outils de codage IA";
-"section.devices.subtitle" = "Ce Mac et futur suivi multiappareil";
 "section.data_sources.subtitle" = "État des sources et confidentialité";
 "section.settings.subtitle" = "Démarrage, actualisation et commandes";
-"sync.partial_error" = "Certaines sources nécessitent votre attention";
-"sync.loading" = "Chargement des données…";
-"sync.healthy" = "Toutes les sources sont opérationnelles";
 "risk.badge.low" = "FAIBLE";
 "risk.badge.medium" = "MOYEN";
 "risk.badge.high" = "ÉLEVÉ";

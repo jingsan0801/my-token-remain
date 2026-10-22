@@ -31,7 +31,6 @@ description: 为 TokenRemain 改动按模块与实际副作用选择静态检查
 | 文档、规则、技能 | `verify_agent_docs.sh` 检查 frontmatter、相对链接、锚点、技能链接和 R 编号；另查命令副作用和 diff；不为此构建应用 | 修改了验证配方时，只在可安全运行的范围内实跑，其他路径保留草稿状态 |
 | Provider/PTY | 发现对应 `Tests/UsageDockTests/` suite；重放已脱敏 `Fixtures/`；凭证路径加 Keychain 契约脚本 | 共享采集/缓存/账号路径变化扩大到相关消费者；真实 provider 状态需另做 D 验证 |
 | 刷新/共享 Store | 定向策略、缓存、通知测试；共享核心变化再跑完整 macOS suite | 比较用户设置、活跃/空闲/退避/过期状态；性能结论需要同条件实测 |
-| 同步 | SyncKit suite；桌面 Redactor/Fingerprint/DirectSync 相关测试；变更编译条件时检查对应构建 | 协议变更补旧 payload、新 payload、过期/重放/脱敏；跨端验收需要实际消费者证据 |
 | macOS UI/启动 | 相关布局/启动契约；卡片与滚动按 [DB-002](../../../docs/design-boundaries.md#db-002) 检查，不新增只断言尺寸常量的测试 | D 级验证最窄宽度、较长文案、常见内容完整呈现、整页滚动及真实溢出；隐藏启动与 macOS 26 路径分别取证 |
 | 登录/授权/异步等待 | 按 [DB-001](../../../docs/design-boundaries.md#db-001) 定向覆盖不返回、取消、超时、迟到结果、重试和部分完成 | 共享等待工具扩大相关 suite；交互变化补 D 级“等待 → 退出 → 恢复 → 重试”，模拟与真实账号证据分开 |
 | 官网/broadcast | 在各自目录运行 `npm run check`，先检查脚本 | 浏览器/API 行为按任务补充；check 中的 Wrangler dry-run 不是生产部署 |
@@ -46,7 +45,6 @@ description: 为 TokenRemain 改动按模块与实际副作用选择静态检查
 bash script/verify_keychain_read_contract.sh
 bash script/verify_launch_surface_isolation.sh
 bash script/verify_version_consistency.sh
-bash script/verify_automatic_update_contract.sh
 bash script/verify_website_release_contract.sh
 bash script/verify_agent_docs.sh
 bash script/verify_agent_lane_guard.sh
@@ -75,12 +73,11 @@ bash script/verify_agent_lane_guard.sh
 
 ```bash
 swift test --no-parallel
-swift test --package-path Packages/TokenRemainSyncKit --no-parallel
 npm --prefix site run check
 npm --prefix broadcast run check
 ```
 
-上面不是要求每个任务全部执行。现有 SwiftPM 环境确因 package sandbox 阻断必要操作，且宿主允许时才增加 `--disable-sandbox`；不把它当作绕过宿主权限的方法。修改 `TOKENREMAIN_CLOUD_SYNC` 条件路径时，在同样隔离条件下补 `swift test --no-parallel -Xswiftc -DTOKENREMAIN_CLOUD_SYNC`；这不能证明 CloudKit 生产连接或发布签名有效。
+上面不是要求每个任务全部执行。现有 SwiftPM 环境确因 package sandbox 阻断必要操作，且宿主允许时才增加 `--disable-sandbox`；不把它当作绕过宿主权限的方法。
 
 `npm run check` 会写构建输出，Wrangler dry-run 可能使用本地缓存或网络；先确认当前 package scripts。依赖安装仅用对应锁文件，不顺便更新 lockfile/版本。不能在 macOS 上把 Windows renderer build 通过称为 Windows 原生验收。
 
@@ -102,7 +99,7 @@ npm --prefix broadcast run check
 bash script/build_and_run.sh --verify
 ```
 
-记录被测源码指纹（包括未提交改动）、产物路径、版本、bundle ID、进程 PID 与可执行路径。进程仍在只是启动证据。不要启动第二个生产 CloudKit publisher，也不为方便 UI 自动登录或刷新凭证。
+记录被测源码指纹（包括未提交改动）、产物路径、版本、bundle ID、进程 PID 与可执行路径。进程仍在只是启动证据。不为方便 UI 自动登录或刷新凭证。
 
 ### Drive：按真实用户路径选择功能
 

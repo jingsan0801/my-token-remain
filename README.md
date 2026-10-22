@@ -26,7 +26,7 @@
 <p align="center"><sub>Claude Code、Codex、Cursor、Grok、GLM 等 21+ 家工具的剩余额度与重置倒计时，一屏看完。</sub></p>
 
 > [!NOTE]
-> 这是个人自用 fork(MyTokenRemain):移除了自动更新(Sparkle)、作者服务器链路、Token 用量/成本统计与趋势页,只保留额度监控;另新增了可选的 WebDAV 配置同步。差异明细见[更新记录](CHANGELOG.md)。
+> 这是个人自用 fork(MyTokenRemain):移除了自动更新(Sparkle)、作者服务器链路、Token 用量/成本统计、趋势页以及 iPhone/Apple Watch 跨设备同步,只保留 macOS 额度监控;另新增了可选的 WebDAV 配置同步。差异明细见[更新记录](CHANGELOG.md)。
 
 ## 功能
 
@@ -39,7 +39,6 @@
 ### 🔐 隐私：凭证从不离开你的 Mac
 
 - **只读本机已有凭证**：无需注册账号，无遥测，不刷新第三方 token，不上传凭证。
-- **可选加密同步**：默认关闭；开启后只把白名单字段组成的快照加密写入你自己的 iCloud，供 iPhone、Apple Watch 与桌面小组件显示。
 - **可选 WebDAV 配置同步**(fork 自有):把账号配置与密钥以明文 JSON 写到你自己的 WebDAV 服务器(如坚果云),方便多 Mac 复制配置;默认关闭。
 - **低能耗**：后台 CPU 比 v1.2.2 降低 95%（[测试方法](docs/performance-v1.2.3.md)）；界面支持简体中文、繁體中文、English、日本語、한국어 等多种语言。
 
@@ -50,22 +49,7 @@
 </p>
 <p align="center"><sub><b>额度</b> · 每个窗口的剩余、重置时间与更新时间。</sub></p>
 
-<details>
-<summary><b>更多截图</b>：iPhone、Apple Watch 与小组件</summary>
-<br/>
 
-<p align="center">
-  <img src="site/assets/phone-overview-zh.jpg" width="24%" alt="iPhone 概览页，聚合最多 16 台 Mac" />
-  <img src="site/assets/watch-overview-zh.png" width="16%" alt="Apple Watch 概览" />
-</p>
-<p align="center">
-  <img src="site/assets/widget-s-zh.png" width="30%" alt="iPhone 小号桌面小组件" />
-  <img src="site/assets/widget-m-zh.png" width="60%" alt="iPhone 中号桌面小组件" />
-</p>
-
-iPhone 版目前为 [TestFlight 公开测试](https://testflight.apple.com/join/DU3DrnhG)；数据由 Mac 单向加密发布，移动客户端源码不在本仓库开源范围内。
-
-</details>
 
 ## 快速上手
 
@@ -122,10 +106,9 @@ iPhone 版目前为 [TestFlight 公开测试](https://testflight.apple.com/join/
 
 - **只读凭证，绝不刷新**：只读各工具自己维护的 token，从不写回、不争用 refresh token；后台读取关闭钥匙串交互，不会弹出授权窗。 <sub>🔍 [契约脚本](script/verify_keychain_read_contract.sh) · [测试](Tests/UsageDockTests/KeychainReadTests.swift#L45) · [源码](Sources/UsageDock/Services/ClaudeOAuthUsageService.swift#L9)</sub>
 - **手动密钥只进本机钥匙串**：粘贴的 API Key 存入 macOS 钥匙串，且禁止同步到 iCloud 钥匙串。 <sub>🔍 [源码](Sources/UsageDock/Services/KeychainSecretStore.swift#L176) · [测试](Tests/UsageDockTests/AppOwnedKeychainTests.swift#L15)</sub>
-- **无账号、无遥测、无凭证中转**：额度查询直连各服务商官方 API；依赖只有本仓库的同步包，没有任何分析 SDK。 <sub>🔍 [依赖清单](Package.swift)</sub>
-- **同步默认关闭，端到端加密**：开启后，只有白名单字段组成的展示快照在本机 AES-GCM 加密，再写入你自己的 iCloud 私有库。 <sub>🔍 [默认关闭测试](Tests/UsageDockTests/CrossDeviceSyncDefaultsTests.swift#L8) · [字段白名单](Sources/UsageDock/Sync/MobileSnapshotRedactor.swift#L7) · [加密实现](Packages/TokenRemainSyncKit/Sources/TokenRemainSyncKit/EncryptedSyncEnvelope.swift#L66)</sub>
+- **无账号、无遥测、无凭证中转**：额度查询直连各服务商官方 API；依赖只有 Sparkle 之外的标准库与本仓库代码，没有任何分析 SDK。 <sub>🔍 [依赖清单](Package.swift)</sub>
 
-**其他联网行为**（均不携带凭证）：服务状态读取 `status.openai.com`、`status.claude.com` 的公开接口；开启 WebDAV 同步时只连接你自己配置的服务器；局域网直连同步监听 TCP 47831，只接受已配对设备。
+**其他联网行为**（均不携带凭证）：服务状态读取 `status.openai.com`、`status.claude.com` 的公开接口；开启 WebDAV 同步时只连接你自己配置的服务器。
 
 细节见[隐私政策](https://tokenremain.com/privacy)。
 
@@ -187,7 +170,7 @@ defaults delete com.jamesli.usagedock
 rm -rf ~/Library/Caches/com.jamesli.usagedock ~/Library/Application\ Support/com.jamesli.usagedock
 ```
 
-手动粘贴的密钥可在「钥匙串访问」中搜索 `com.jamesli.usagedock` 删除。开启过同步的话，如需清除 iCloud 中的数据，请[联系支持](https://tokenremain.com/support)。
+手动粘贴的密钥可在「钥匙串访问」中搜索 `com.jamesli.usagedock` 删除。
 
 </details>
 

@@ -26,7 +26,7 @@ separate, ignored app bundles without replacing `/Users/jamesli/Applications/Tok
   read-only files, and app-scoped bookmarks.
 
 The candidate intentionally has no temporary home/absolute-path exception.
-The machine has no macOS provisioning profile, so CloudKit, App Group, shared
+The machine has no macOS provisioning profile, so App Group, shared
 Keychain, Mac App Distribution signing, and App Store receipt behavior are **not**
 claimed by this audit. Those remain release gates.
 

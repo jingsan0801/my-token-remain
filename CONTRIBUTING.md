@@ -30,7 +30,6 @@ Note that every mode stops the running Dev app, rebuilds and reinstalls it.
 | Area | Command |
 | :-- | :-- |
 | macOS app | `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test` |
-| Sync protocol | `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path Packages/TokenRemainSyncKit` |
 | Broadcast worker | `cd broadcast && npm ci && npm run typecheck && npm test` |
 
 Contract scripts in `script/verify_*.sh` enforce product guarantees (for example, `verify_keychain_read_contract.sh` fails if code reads the Keychain outside the controlled entry point). Read a script before running it: release scripts touch signing and packaging.
@@ -41,25 +40,23 @@ Contract scripts in `script/verify_*.sh` enforce product guarantees (for example
 | :-- | :-- |
 | `Sources/UsageDock/`, `Package.swift` | SwiftPM menu bar app (SwiftUI + AppKit) |
 | `Tests/UsageDockTests/` | macOS app tests |
-| `Packages/TokenRemainSyncKit/` | Encrypted cross-device sync protocol |
 | `broadcast/` | Cloudflare Workers backend for AI Feed and download counts ([README](broadcast/README.md)) |
 | `site/` | Website, privacy policy and support pages |
 | `script/` | Build, packaging and contract-verification scripts |
 | `docs/` | Versioning, privacy, feed contract and performance notes |
 | `design/` | Brand, palette and UI sources |
 
-The iPhone and Apple Watch clients are maintained separately and are not in this repository.
 
 ## Ground rules for changes
 
 These protect users' credentials and data; PRs that break them won't be merged. Maintainers and coding agents follow the fuller version in [AGENTS.md](AGENTS.md).
 
 1. **Third-party credentials are read-only.** Never refresh, rewrite, migrate or delete another tool's tokens, and never trigger a sign-in automatically. Keychain reads go through `Sources/UsageDock/Support/KeychainRead.swift`; background reads must stay non-interactive.
-2. **Sync stays private and compatible.** Only allowlisted, redacted fields cross `MobileSnapshotRedactor`. Changing a wire format, cache or preference format needs a migration plan for already-shipped clients.
+2. **Persistence stays compatible.** Changing a cache, preference or imported-config format needs a migration plan for data written by earlier builds.
 3. **Behavior contracts don't change silently.** Quota percentages and units, pools, account ownership, error categories, cache freshness and refresh intervals are product semantics — a refactor or performance change must keep them identical unless changing them is the stated goal.
 4. **No telemetry, no analytics SDKs, no new network destinations** without a matching update to the README's privacy section and the privacy policy.
 5. **Keep the diff focused.** No repo-wide reformatting, dependency upgrades or drive-by cleanups. Don't delete regression tests or loosen assertions to make a change pass.
-6. **Localize every user-facing string** in all `Sources/UsageDock/Localization/*.lproj` files. Windows locales are generated from the macOS `.strings` files — regenerate them instead of editing the output.
+6. **Localize every user-facing string** in all `Sources/UsageDock/Localization/*.lproj` files.
 
 ## Pull requests
 

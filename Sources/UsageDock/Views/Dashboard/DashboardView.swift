@@ -12,9 +12,9 @@ final class DashboardNavigator: ObservableObject {
 }
 
 /// The standalone Dashboard: a native macOS sidebar/detail split over the same
-/// live `UsageStore`. Real data drives Overview / Limits / Data Sources /
-/// Settings; Devices renders an honest empty state.
-/// Fork note: 趋势页与 token 用量/成本展示已在自用版中移除。
+/// live `UsageStore`. Real data drives Overview / Limits / Accounts / Data
+/// Sources / Settings.
+/// Fork note: 趋势页、token 用量/成本与跨设备同步已在自用版中移除。
 struct DashboardView: View {
     @ObservedObject var store: UsageStore
     @ObservedObject var feedStore: AIFeedStore
@@ -25,9 +25,6 @@ struct DashboardView: View {
     @ObservedObject var preferences: PreferencesStore = .shared
     @ObservedObject private var appUpdater = AppUpdateController.shared
     @State private var limitsReorderInteraction = DirectReorderInteraction<ProviderQuota.Provider>()
-#if TOKENREMAIN_CLOUD_SYNC
-    @ObservedObject private var cloudSync = CrossDeviceSyncController.shared
-#endif
 
     private var insights: UsageInsights {
         UsageInsights(
@@ -38,7 +35,7 @@ struct DashboardView: View {
     }
 
     var body: some View {
-        dashboardWithSyncGuidance
+        dashboardContent
             // The one place the Dashboard's background-lightness preference
             // enters the view tree. Everything below resolves `DashboardSurface`
             // tokens against it, so the whole window — chrome, cards, sheets and
@@ -72,28 +69,6 @@ struct DashboardView: View {
             }
     }
 
-    @ViewBuilder
-    private var dashboardWithSyncGuidance: some View {
-#if TOKENREMAIN_CLOUD_SYNC
-        dashboardContent
-            .alert(item: syncGuidanceBinding) { guidance in
-                Alert(
-                    title: Text(syncGuidanceTitle(guidance)),
-                    message: Text(syncGuidanceMessage(guidance)),
-                    primaryButton: .default(Text(L10n.text("sync.guidance.review"))) {
-                        navigator.selection = .devices
-                        cloudSync.dismissGuidance()
-                    },
-                    secondaryButton: .cancel(Text(L10n.text("sync.guidance.later"))) {
-                        cloudSync.dismissGuidance()
-                    }
-                )
-            }
-#else
-        dashboardContent
-#endif
-    }
-
     private var detectedProviderBinding: Binding<TrackedProvidersStore.Detection?> {
         Binding(
             get: { tracked.pendingDetectionSuggestions.first },
@@ -118,32 +93,6 @@ struct DashboardView: View {
         }
     }
 
-#if TOKENREMAIN_CLOUD_SYNC
-    private var syncGuidanceBinding: Binding<CrossDeviceSyncController.Guidance?> {
-        Binding(
-            get: { cloudSync.guidance },
-            set: { value in
-                if value == nil {
-                    cloudSync.dismissGuidance()
-                }
-            }
-        )
-    }
-
-    private func syncGuidanceTitle(_ guidance: CrossDeviceSyncController.Guidance) -> String {
-        switch guidance {
-        case .checkICloud: L10n.text("sync.guidance.icloud_title")
-        case .checkKeychain: L10n.text("sync.guidance.keychain_title")
-        }
-    }
-
-    private func syncGuidanceMessage(_ guidance: CrossDeviceSyncController.Guidance) -> String {
-        switch guidance {
-        case .checkICloud: L10n.text("sync.guidance.icloud_message")
-        case .checkKeychain: L10n.text("sync.guidance.keychain_message")
-        }
-    }
-#endif
 
     private var dashboardBody: some View {
         NavigationSplitView {
@@ -357,8 +306,6 @@ struct DashboardView: View {
                 store: store,
                 reorderInteraction: limitsReorderInteraction
             )
-        case .devices:
-            DevicesSection(insights: insights)
         case .accounts:
             AccountsSection(store: store, tracked: tracked) {
                 navigator.selection = .dataSources

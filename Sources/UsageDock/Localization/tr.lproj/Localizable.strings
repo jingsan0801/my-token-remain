@@ -4,17 +4,12 @@
 "nav.group.system" = "SİSTEM";
 "nav.overview" = "Genel bakış";
 "nav.limits" = "Limitler";
-"nav.devices" = "Aygıtlar";
 "nav.data_sources" = "Veri kaynakları";
 "nav.settings" = "Ayarlar";
 "section.overview.subtitle" = "Kota riski ve canlı resmi kotalar";
 "section.limits.subtitle" = "Yapay zekâ kodlama araçlarının resmî kota pencereleri";
-"section.devices.subtitle" = "Bu Mac ve gelecekte aygıtlar arası izleme";
 "section.data_sources.subtitle" = "Veri kaynağı durumu ve gizlilik";
 "section.settings.subtitle" = "Başlangıç, yenileme ve uygulama denetimleri";
-"sync.partial_error" = "Bazı kaynaklar ilgi gerektiriyor";
-"sync.loading" = "Veriler yükleniyor…";
-"sync.healthy" = "Tüm kaynaklar sağlıklı";
 "risk.badge.low" = "DÜŞÜK";
 "risk.badge.medium" = "ORTA";
 "risk.badge.high" = "YÜKSEK";

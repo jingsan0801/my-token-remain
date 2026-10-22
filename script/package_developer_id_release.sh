@@ -17,8 +17,7 @@ ZIP="$OUTPUT_DIR/TokenRemain-$VERSION-$BUILD-macOS.zip"
 APPCAST="$OUTPUT_DIR/appcast.xml"
 DMG="$OUTPUT_DIR/TokenRemain.dmg"
 VERSIONED_DMG="$OUTPUT_DIR/TokenRemain-$VERSION-$BUILD.dmg"
-PROFILE="${USAGEDOCK_SYNC_PROVISIONING_PROFILE:-}"
-IDENTITY="${USAGEDOCK_SYNC_SIGNING_IDENTITY:-}"
+IDENTITY="${USAGEDOCK_SIGNING_IDENTITY:-}"
 NOTARY_PROFILE="${TOKENREMAIN_NOTARYTOOL_PROFILE:-}"
 BROADCAST_BASE_URL="${TOKENREMAIN_BROADCAST_BASE_URL:-https://api.tokenremain.com}"
 IDENTITY_COMMON_NAME=""
@@ -79,12 +78,8 @@ require_signing_inputs() {
     echo "TOKENREMAIN_BROADCAST_BASE_URL must be the deployed HTTPS Worker origin." >&2
     exit 1
   fi
-  if [[ ! -r "$PROFILE" ]]; then
-    echo "USAGEDOCK_SYNC_PROVISIONING_PROFILE must point to the Apple-issued Developer ID provisioning profile." >&2
-    exit 1
-  fi
   if [[ -z "$IDENTITY" ]]; then
-    echo "USAGEDOCK_SYNC_SIGNING_IDENTITY must be a certificate SHA-1 or unambiguous common name." >&2
+    echo "USAGEDOCK_SIGNING_IDENTITY must be a certificate SHA-1 or unambiguous common name." >&2
     exit 1
   fi
   IDENTITY_COMMON_NAME="$(resolve_signing_common_name "$IDENTITY")"
@@ -114,10 +109,6 @@ verify_app() {
   /usr/bin/lipo "$app/Contents/Frameworks/Sparkle.framework/Versions/B/Sparkle" -verify_arch arm64 x86_64
   /usr/bin/codesign --verify --strict "$app/Contents/Frameworks/Sparkle.framework"
   /usr/bin/codesign -d --entitlements :- "$app/Contents/MacOS/UsageDock" > "$entitlements" 2>/dev/null
-  [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.icloud-container-environment' "$entitlements")" == "Production" ]]
-  [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.icloud-container-identifiers:0' "$entitlements")" == "iCloud.com.jingsan0801.mytokenremain" ]]
-  [[ "$(/usr/libexec/PlistBuddy -c 'Print :keychain-access-groups:0' "$entitlements")" == "84397AQ22Y.com.jingsan0801.mytokenremain.sync" ]]
-  [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.aps-environment' "$entitlements")" == "production" ]]
   if /usr/libexec/PlistBuddy -c 'Print :com.apple.security.get-task-allow' "$entitlements" >/dev/null 2>&1; then
     echo "Release app must not contain get-task-allow." >&2
     exit 1
@@ -229,10 +220,7 @@ build_notarized_dmg() {
 build_app() {
   require_signing_inputs
   mkdir -p "$OUTPUT_DIR"
-  USAGEDOCK_SYNC_RELEASE=1 \
-  USAGEDOCK_SYNC_ICLOUD_ENVIRONMENT=Production \
-  USAGEDOCK_SYNC_PROVISIONING_PROFILE="$PROFILE" \
-  USAGEDOCK_SYNC_SIGNING_IDENTITY="$IDENTITY" \
+  USAGEDOCK_SIGNING_IDENTITY="$IDENTITY" \
   USAGEDOCK_ARCHIVE_DIR="$OUTPUT_DIR" \
   TOKENREMAIN_BROADCAST_BASE_URL="$BROADCAST_BASE_URL" \
     "$ROOT_DIR/script/build_and_run.sh" --archive

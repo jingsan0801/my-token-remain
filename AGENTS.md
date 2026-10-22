@@ -9,13 +9,12 @@
 | 范围 | 事实入口与边界 |
 | --- | --- |
 | macOS | `Package.swift`、`Sources/UsageDock/`、`Tests/UsageDockTests/`；SwiftPM、SwiftUI 与 AppKit |
-| 共享同步 | `Packages/TokenRemainSyncKit/`、`Sources/UsageDock/Sync/`；有跨版本、跨设备消费者 |
 | 官网 | `site/package.json`；构建检查与 Cloudflare 部署是不同操作 |
 | Broadcast | `broadcast/package.json`、`broadcast/README.md`、`docs/curated-feed-contract.md`；本地测试不授权生产数据或消息操作 |
 | 发布 | `docs/versioning.md`、`docs/download-baseline.md`、`script/`；版本以当前文件和 Git 状态为准，不照抄文档中的历史分支名 |
 | 代理配置 | 本文件、`CLAUDE.md`、`.cursor/`、`.claude/`、`.agents/`、`.codex/hooks.json`、`docs/agents/`、`script/*agent*`；改动走 R15，宿主能力以 [knowledge](docs/agents/knowledge.md#host-capabilities) 的实测记录为准 |
 
-移动客户端源码独立维护。即使另一个仓库可访问，也不自动属于本任务范围。`marketing/`、`design/`、历史 `reports/`、版本文件、签名配置和发布产物只在任务相关时修改。
+fork 不包含移动客户端与跨设备同步。`marketing/`、`design/`、历史 `reports/`、版本文件、签名配置和发布产物只在任务相关时修改。
 
 ## 必须遵守的限制条件
 
@@ -29,7 +28,7 @@
 ### R2. Git、发布和对外动作有明确授权边界
 
 - 默认交付本地 diff 和验证结果；没有任务授权，不自动 commit、push、创建或更新 PR、merge、rebase 已有历史、打 tag。
-- 不自动部署 Worker/网站、发布 Release/appcast、上传 App Store/TestFlight 或公证产物、修改生产 CloudKit schema/数据，也不向他人发消息或发布内容。
+- 不自动部署 Worker/网站、发布 Release/appcast、上传 App Store/TestFlight 或公证产物，也不向他人发消息或发布内容。
 - 授权在当前任务内持续有效，执行前检查已有授权，不能反复要求确认。缺少必要授权时，先完成可独立进行的准备与验证，再呈现具体结果和待执行动作。
 - “无人值守”“不要停”表示继续在现有范围内工作，不授予上述额外权限。发布标签不移动、不复用；真实发布按现有发布流程验证精确 commit 和产物。
 
@@ -40,12 +39,11 @@
 - 用户手动保存的 API Key、应用自己的同步密钥按现有专用路径处理；不要把“第三方凭证只读”误写成禁止应用自身所有 Keychain 写入。
 - token、Cookie、认证文件、未脱敏响应和敏感日志不得进入源码、fixture、截图、审查上下文、会话历史摘要或外部服务。只提取定位所需的脱敏证据。
 
-### R4. 保持同步隐私与跨版本兼容
+### R4. 保持持久化与跨版本兼容
 
-- `MobileSnapshotRedactor` 是桌面 provider 模型进入同步 DTO 的明确边界；不直接序列化整个 Store、provider 模型或原始响应。
-- 保留字段白名单、脱敏、加密认证、来源身份、序列号、过期及重放校验。`SyncContentFingerprint` 必须与可上传内容保持一致。
-- 修改 wire schema、缓存、偏好或持久化格式前，识别已发布客户端和已有数据的消费者，提供旧数据与新数据验证及必要迁移设计。
+- 修改缓存、偏好或持久化格式前，识别已有数据的消费者（旧版本缓存、账号配置、导入的配置载荷），提供旧数据与新数据验证及必要迁移设计。
 - “迁移所有调用者后删除旧 API”仅适用于可以协调更新的内部 API。仓库中没有调用者不构成删除旧快照兼容路径的证据。
+- fork 已移除跨设备同步；该方向的历史约束不再适用，但缓存与账号数据的兼容要求仍然有效。
 
 ### R5. 行为合同不能被重构或性能优化偷偷改变
 
@@ -61,7 +59,7 @@
 
 按宿主权限和任务需要使用子代理，小改动可单人完成。默认最多两个同时活动的执行子代理，不递归扩大数量；复杂设计或高风险变更才增加独立审查。每次委派传递本文件、允许修改范围、禁止操作、基线和验收条件，父代理复核实际 diff 与证据。
 
-共享文件只有一个实现负责人。worktree 隔离不等于应用隔离：构建缓存、安装路径、进程名、端口、用户配置、Keychain、账号和 CloudKit 状态都可能共享。原生应用验证必须单一操作者；不得为自己的检查关闭别人的实例。
+共享文件只有一个实现负责人。worktree 隔离不等于应用隔离：构建缓存、安装路径、进程名、端口、用户配置、Keychain 和账号状态都可能共享。原生应用验证必须单一操作者；不得为自己的检查关闭别人的实例。
 
 ### R8. 按副作用选择验证，保护真实安装
 
@@ -70,7 +68,7 @@
 - 不默认运行 `script/verify_release_configuration.sh`；它属于发布范围检查，只在校验发布配置时运行。
 - `script/build_and_run.sh --verify` 会停止对应进程、构建、安装并启动应用；普通 Dev 构建也需要实例归属检查。
 - `--print-install-contract` 在当前脚本中也安装了 EXIT 清理，可能删除 `dist/` 下对应暂存 bundle；`verify_installation_isolation.sh` 调用它，不能当作无副作用入口。
-- 普通开发保持非 sync 的 Dev 身份；不继承发布环境变量去覆盖生产 `TokenRemain.app`，不更改生产签名、权限或安装状态来让测试通过。
+- 普通开发构建与 `--archive` 使用同一应用身份；不更改生产签名、权限或安装状态来让测试通过。
 
 ### R9. 测试与报告不能降低证据标准
 

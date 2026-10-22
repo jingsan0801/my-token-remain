@@ -1,7 +1,6 @@
 import Combine
 import Foundation
 import OSLog
-import TokenRemainSyncKit
 
 @MainActor
 final class UsageStore: ObservableObject {
@@ -11,13 +10,9 @@ final class UsageStore: ObservableObject {
         let windowMinutes: Int
     }
 
-    /// 各 provider 当前展示快照的合并视图。逐 provider 的具名访问器保留在下方,
-    /// 视图无需感知本机与 Direct Sync 快照的分层。
+    /// 各 provider 当前展示快照。
     @Published private(set) var quotas: [ProviderQuota.Provider: ProviderQuota] = [:]
-    /// Device-local readings remain separate from direct-sync readings so a
-    /// Windows snapshot is never cached or echoed back as if this Mac produced it.
     private var localQuotas: [ProviderQuota.Provider: ProviderQuota] = [:]
-    private var directSyncSnapshots: [UUID: MobileUsageSnapshot] = [:]
 
     var claude: ProviderQuota? { quotas[.claude] }
     var codex: ProviderQuota? { quotas[.codex] }
@@ -101,7 +96,6 @@ final class UsageStore: ObservableObject {
     private var auxProviderRetryAfter: [ProviderQuota.Provider: Date] = [:]
     private var claudeRetryAfter: Date?
     private var claudeConsecutiveFailures = 0
-    private var lowLatencySyncEnabled = false
     /// 由状态栏控制器注入:主界面(弹窗/仪表板/浮窗)可见时返回 true,
     /// 后台额度刷新据此维持分钟级节奏。
     var localUsageUIVisibilityProvider: (() -> Bool)?
@@ -585,8 +579,7 @@ final class UsageStore: ObservableObject {
                 let primarySurfaceVisible = localUsageUIVisibilityProvider?() ?? false
                 let auxiliaryInterval = Self.auxProviders.contains(where: tracked.isEnabled)
                     ? AdaptiveRefreshPolicy.auxiliaryQuotaInterval(
-                        preferred: PreferencesStore.shared.refreshInterval,
-                        lowLatencySyncEnabled: lowLatencySyncEnabled
+                        preferred: PreferencesStore.shared.refreshInterval
                     )
                     : nil
                 let scheduledInterval = AdaptiveRefreshPolicy.schedulerInterval(
@@ -615,15 +608,6 @@ final class UsageStore: ObservableObject {
         }
     }
 
-    /// Cross-device sync owns this override. It never changes the user's saved
-    /// menu-bar preference; disabling sync immediately returns to that choice.
-    func setLowLatencySyncEnabled(_ enabled: Bool) {
-        guard enabled != lowLatencySyncEnabled else { return }
-        lowLatencySyncEnabled = enabled
-        guard enabled else { return }
-        Task { await refresh(force: true) }
-    }
-
     func refresh(force: Bool = false) async {
         guard !isRefreshing else { return }
         isRefreshing = true
@@ -633,17 +617,15 @@ final class UsageStore: ObservableObject {
         let localSessionActive = sessionActivityMonitor.hasRecentSessionActivity(at: now)
         let primarySurfaceVisible = localUsageUIVisibilityProvider?() ?? false
         // Codex/Claude 在本地 session 或界面活跃时保持分钟级；两者都空闲
-        // 时至少退到 5 分钟。Apple 设备仍能收到 Mac 的周期快照，但不再
-        // 让静止的 Mac 永久承担一分钟一次的账户请求和会话目录扫描。
+        // 时至少退到 5 分钟，避免让静止的 Mac 永久承担一分钟一次的账户
+        // 请求和会话目录扫描。
         let localAIInterval = AdaptiveRefreshPolicy.localAIQuotaInterval(
             preferred: PreferencesStore.shared.refreshInterval,
-            lowLatencySyncEnabled: lowLatencySyncEnabled,
             localSessionActive: localSessionActive,
             primarySurfaceVisible: primarySurfaceVisible
         )
         let auxiliaryInterval = AdaptiveRefreshPolicy.auxiliaryQuotaInterval(
-            preferred: PreferencesStore.shared.refreshInterval,
-            lowLatencySyncEnabled: lowLatencySyncEnabled
+            preferred: PreferencesStore.shared.refreshInterval
         )
         func autoDue(since date: Date?, interval: TimeInterval?) -> Bool {
             guard let interval else { return false }
@@ -1623,33 +1605,8 @@ final class UsageStore: ObservableObject {
         .init(byProvider: localQuotas)
     }
 
-    /// Applies an already authenticated and replay-checked direct-sync value.
-    /// The freshest reading wins independently per provider; local cache and
-    /// outbound Mac snapshots continue to contain only Mac-produced readings.
-    func applyDirectSyncSnapshot(_ snapshot: MobileUsageSnapshot) {
-        directSyncSnapshots[snapshot.sourceInstanceID] = snapshot
-        for provider in DirectSyncSnapshotAdapter.quotas(from: snapshot).keys {
-            tracked.markConnected(provider)
-        }
-        recomputeEffectiveQuotas()
-    }
-
-    var localQuotasForDirectSync: [ProviderQuota.Provider: ProviderQuota] {
-        localQuotas
-    }
-
-    private func recomputeEffectiveQuotas(now: Date = Date()) {
-        directSyncSnapshots = directSyncSnapshots.filter { $0.value.expiresAt >= now }
-        var merged = localQuotas.filter { tracked.isEnabled($0.key) }
-        for snapshot in directSyncSnapshots.values {
-            for (provider, quota) in DirectSyncSnapshotAdapter.quotas(from: snapshot)
-            where tracked.isEnabled(provider) {
-                if merged[provider].map({ quota.capturedAt > $0.capturedAt }) ?? true {
-                    merged[provider] = quota
-                }
-            }
-        }
-        quotas = merged
+    private func recomputeEffectiveQuotas() {
+        quotas = localQuotas.filter { tracked.isEnabled($0.key) }
     }
 
     private func currentProviderAccountQuotas() -> [ProviderAccountID: ProviderQuota] {

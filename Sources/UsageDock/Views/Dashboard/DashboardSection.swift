@@ -5,7 +5,6 @@ import SwiftUI
 enum DashboardSection: String, CaseIterable, Identifiable, Hashable {
     case overview
     case limits
-    case devices
     case accounts
     case dataSources
     case settings
@@ -27,7 +26,7 @@ enum DashboardSection: String, CaseIterable, Identifiable, Hashable {
 
     var group: Group {
         switch self {
-        case .overview, .limits, .devices: return .monitor
+        case .overview, .limits: return .monitor
         case .accounts, .dataSources, .settings: return .system
         }
     }
@@ -37,7 +36,6 @@ enum DashboardSection: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .overview: return L10n.text("nav.overview")
         case .limits: return L10n.text("nav.limits")
-        case .devices: return L10n.text("nav.devices")
         case .accounts: return L10n.text("nav.accounts")
         case .dataSources: return L10n.text("nav.data_sources")
         case .settings: return L10n.text("nav.settings")
@@ -49,7 +47,6 @@ enum DashboardSection: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .overview: return L10n.text("section.overview.subtitle")
         case .limits: return L10n.text("section.limits.subtitle")
-        case .devices: return L10n.text("section.devices.subtitle")
         case .accounts: return L10n.text("section.accounts.subtitle")
         case .dataSources: return L10n.text("section.data_sources.subtitle")
         case .settings: return L10n.text("section.settings.subtitle")
@@ -60,7 +57,6 @@ enum DashboardSection: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .overview: return "square.grid.2x2"
         case .limits: return "gauge.with.dots.needle.50percent"
-        case .devices: return "laptopcomputer.and.iphone"
         case .accounts: return "person.2.badge.gearshape"
         case .dataSources: return "cylinder.split.1x2"
         case .settings: return "gearshape"

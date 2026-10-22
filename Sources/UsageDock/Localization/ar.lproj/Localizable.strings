@@ -4,17 +4,12 @@
 "nav.group.system" = "النظام";
 "nav.overview" = "نظرة عامة";
 "nav.limits" = "الحدود";
-"nav.devices" = "الأجهزة";
 "nav.data_sources" = "مصادر البيانات";
 "nav.settings" = "الإعدادات";
 "section.overview.subtitle" = "مخاطر الحصة والحصص الرسمية المباشرة";
 "section.limits.subtitle" = "نوافذ الحصة الرسمية لأدوات الترميز بالذكاء الاصطناعي";
-"section.devices.subtitle" = "هذا الـ Mac والمراقبة المستقبلية بين الأجهزة";
 "section.data_sources.subtitle" = "حالة المصادر والخصوصية";
 "section.settings.subtitle" = "بدء التشغيل والتحديث وعناصر التحكم";
-"sync.partial_error" = "بعض المصادر تحتاج إلى الانتباه";
-"sync.loading" = "جارٍ تحميل البيانات…";
-"sync.healthy" = "جميع المصادر سليمة";
 "risk.badge.low" = "منخفض";
 "risk.badge.medium" = "متوسط";
 "risk.badge.high" = "مرتفع";

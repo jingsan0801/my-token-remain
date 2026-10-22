@@ -4,17 +4,12 @@
 "nav.group.system" = "SISTEMA";
 "nav.overview" = "Visão geral";
 "nav.limits" = "Limites";
-"nav.devices" = "Dispositivos";
 "nav.data_sources" = "Fontes de dados";
 "nav.settings" = "Ajustes";
 "section.overview.subtitle" = "Risco de cota e cotas oficiais ao vivo";
 "section.limits.subtitle" = "Janelas de cota oficiais das suas ferramentas de codificação com IA";
-"section.devices.subtitle" = "Este Mac e futuro monitoramento entre dispositivos";
 "section.data_sources.subtitle" = "Status das fontes e privacidade";
 "section.settings.subtitle" = "Inicialização, atualização e controles do app";
-"sync.partial_error" = "Algumas fontes precisam de atenção";
-"sync.loading" = "Carregando dados…";
-"sync.healthy" = "Todas as fontes estão normais";
 "risk.badge.low" = "BAIXO";
 "risk.badge.medium" = "MÉDIO";
 "risk.badge.high" = "ALTO";

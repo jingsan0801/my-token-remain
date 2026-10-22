@@ -4,17 +4,12 @@
 "nav.group.system" = "HỆ THỐNG";
 "nav.overview" = "Tổng quan";
 "nav.limits" = "Hạn mức";
-"nav.devices" = "Thiết bị";
 "nav.data_sources" = "Nguồn dữ liệu";
 "nav.settings" = "Cài đặt";
 "section.overview.subtitle" = "Rủi ro hạn mức và hạn mức chính thức trực tiếp";
 "section.limits.subtitle" = "Cửa sổ hạn mức chính thức của các công cụ lập trình AI";
-"section.devices.subtitle" = "Máy Mac này và giám sát đa thiết bị trong tương lai";
 "section.data_sources.subtitle" = "Trạng thái nguồn dữ liệu và quyền riêng tư";
 "section.settings.subtitle" = "Khởi động, làm mới và điều khiển ứng dụng";
-"sync.partial_error" = "Một số nguồn cần được kiểm tra";
-"sync.loading" = "Đang tải dữ liệu…";
-"sync.healthy" = "Tất cả nguồn đều ổn định";
 "risk.badge.low" = "THẤP";
 "risk.badge.medium" = "VỪA";
 "risk.badge.high" = "CAO";

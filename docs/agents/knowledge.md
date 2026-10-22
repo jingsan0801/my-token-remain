@@ -50,7 +50,7 @@ Lane B 比较这些基线与上游当前状态。基线变更需要人审阅后�
 | DeepSeek、Kimi、MiniMax、MiMo、Qoder、Kiro、Volcengine、Ollama 八家集中在一个文件，口径移植自 token-monitor（MIT），凭据只读（环境变量或用户粘贴的钥匙串条目） | `Services/ExtendedProviderServices.swift` 文件头注释；README 致谢 | 2026-09-28 |
 | 诊断直查还是降级：看 `~/Library/Caches/<bundle id>/quota-cache.json` 中 Claude 条目有没有 `planName`，直查会写出套餐名，没有则说明每轮都在走 PTY 降级 | `Services/QuotaCache.swift`；2026-08-14 实测口径 | 2026-09-28 |
 
-**多额度池。** 上游每个独立额度维度都要解析，不混合也不丢弃。同一账期拆池时，最忙的池做 primary 并设 `QuotaWindow.poolName`，兄弟池和第三个以上维度放 `ScopedQuotaWindow`；不要把两个相同 `windowMinutes` 的窗口放进 primary 与 secondary，同步协议会以 `duplicateWindow` 拒收整份快照。可选的附加池注册进 `Models/ScopedPoolToggleCatalog.swift`，可见性走 `PreferencesStore.resolvedScopedPoolVisibility(...)`，存储键统一为 `tokenRemain.scopedPoolVisibility.v1`，不要再造独立布尔键。来源：`Models/UsageModels.swift`、`Stores/PreferencesStore.swift`、`Packages/TokenRemainSyncKit/Tests/.../SyncProtocolTests.swift`；核实 2026-09-28。
+**多额度池。** 每个独立额度维度都要解析，不混合也不丢弃。同一账期拆池时，最忙的池做 primary 并设 `QuotaWindow.poolName`，兄弟池和第三个以上维度放 `ScopedQuotaWindow`；不要把两个相同 `windowMinutes` 的窗口放进 primary 与 secondary，摘要逻辑会把它们当成重复窗口。可选的附加池注册进 `Models/ScopedPoolToggleCatalog.swift`，可见性走 `PreferencesStore.resolvedScopedPoolVisibility(...)`，存储键统一为 `tokenRemain.scopedPoolVisibility.v1`，不要再造独立布尔键。来源：`Models/UsageModels.swift`、`Stores/PreferencesStore.swift`；核实 2026-10-22。
 
 ## Keychain
 
@@ -75,7 +75,7 @@ Lane B 比较这些基线与上游当前状态。基线变更需要人审阅后�
 | --- | --- | --- |
 | 普通开发构建是 `TokenRemain Dev` / `UsageDockDev` / `com.jamesli.usagedock.dev`，不覆盖生产 `TokenRemain.app`（`com.jamesli.usagedock`） | `script/build_and_run.sh`、`script/verify_installation_isolation.sh` | 2026-09-28 |
 | 两者是独立的 UserDefaults 域，Dev 域残留的外观偏好（`tokenRemain.popoverGlassStyle.v1`、`tokenRemain.popoverBackgroundOpacity.v1`）会让 Dev 看起来像“玻璃回归”；对比前先分别 `defaults read`。默认值是 frosted 与 0.62 | `Stores/PreferencesStore.swift`（`popoverGlassStyleKey`、`defaultPopoverBackgroundOpacity`）；2026-08-21 排查记录 | 2026-09-28 |
-| Fork 已彻底移除 Sparkle 依赖；CloudKit 同步只在 `TOKENREMAIN_CLOUD_SYNC` 生产构建中存在 | `App/UsageDockApp.swift`（`#if TOKENREMAIN_CLOUD_SYNC`）；`script/build_and_run.sh` 仅在 `USAGEDOCK_SYNC_RELEASE=1` 时加 `-DTOKENREMAIN_CLOUD_SYNC` | 2026-10-22 |
+| Fork 已彻底移除 Sparkle 依赖与跨设备同步（CloudKit/DirectSync/SyncKit）；`--archive` 只改变 release 配置与签名产物，不再切换应用身份 | `Package.swift`、`script/build_and_run.sh`、`App/UsageDockApp.swift` | 2026-10-22 |
 
 ## 网站与素材
 
@@ -112,7 +112,6 @@ Lane B 比较这些基线与上游当前状态。基线变更需要人审阅后�
 
 | 条目 | 建议的契约 | 现状 |
 | --- | --- | --- |
-| 多池不得在 primary 与 secondary 放相同 `windowMinutes` | 桌面侧测试：把各 provider fixture 经 `MobileSnapshotRedactor` 生成快照后走同步校验，断言不出现 `duplicateWindow` | 协议层已有 `SyncProtocolTests`，桌面侧缺端到端断言 |
 | 官网每张截图都有中英两套 | 在 `verify_website_release_contract.sh` 中检查每个 `data-shot-en` 都有对应的 `data-shot-zh` 且文件存在 | 未实现 |
 | 对外内容不出现 UsageDock | 在官网契约脚本中 grep `site/` | 当前为 0 处，未设检查 |
 | 状态色与徽章文字对比度 | 已有 `ThemeContrastTests`（状态色 3:1）；可补“填充徽章上的墨色文字” | 部分已是契约 |

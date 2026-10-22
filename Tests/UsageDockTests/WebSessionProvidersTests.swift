@@ -399,13 +399,6 @@ struct WebCookieGuideSpecTests {
         #expect(stored?.region == .international)
         #expect(stored?.edition == .personal)
     }
-
-    @Test("New web-session providers stay desktop-only in sync")
-    func desktopOnly() {
-        for provider in [ProviderQuota.Provider.muse, .museCode, .amp, .factory, .augment] {
-            #expect(!MobileSnapshotRedactor.publishedProviders.contains(provider))
-        }
-    }
 }
 
 private actor RequestRecorder {

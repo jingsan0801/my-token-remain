@@ -4,17 +4,12 @@
 "nav.group.system" = "सिस्टम";
 "nav.overview" = "अवलोकन";
 "nav.limits" = "सीमाएँ";
-"nav.devices" = "डिवाइस";
 "nav.data_sources" = "डेटा स्रोत";
 "nav.settings" = "सेटिंग्स";
 "section.overview.subtitle" = "कोटा जोखिम और लाइव आधिकारिक कोटा";
 "section.limits.subtitle" = "आपके AI कोडिंग टूल की आधिकारिक कोटा विंडो";
-"section.devices.subtitle" = "यह Mac और भावी क्रॉस-डिवाइस निगरानी";
 "section.data_sources.subtitle" = "डेटा स्रोत स्थिति और गोपनीयता";
 "section.settings.subtitle" = "स्टार्टअप, रीफ़्रेश और ऐप नियंत्रण";
-"sync.partial_error" = "कुछ स्रोतों पर ध्यान देना आवश्यक है";
-"sync.loading" = "डेटा लोड हो रहा है…";
-"sync.healthy" = "सभी स्रोत ठीक हैं";
 "risk.badge.low" = "कम";
 "risk.badge.medium" = "मध्यम";
 "risk.badge.high" = "उच्च";

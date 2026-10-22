@@ -1,6 +1,5 @@
 import Foundation
 import Testing
-import TokenRemainSyncKit
 @testable import UsageDock
 
 @Suite("Grok Bot usage parser")
@@ -204,7 +203,7 @@ struct GrokBotProviderWiringTests {
         #expect(installed() == true)
     }
 
-    @Test("Grok Bot is its own provider next to Grok and stays desktop-only in sync")
+    @Test("Grok Bot is its own provider next to Grok")
     func providerIdentity() {
         let order = ProviderQuota.Provider.displayOrder
         #expect(order.firstIndex(of: .grokBot) == order.firstIndex(of: .grok).map { $0 + 1 })
@@ -212,9 +211,6 @@ struct GrokBotProviderWiringTests {
         #expect(PopoverWidget.grokBot.provider == .grokBot)
         #expect(PopoverLayoutStore.defaultHidden.contains(.grokBot))
         #expect(UsageStore.auxProviders.contains(.grokBot))
-        #expect(MobileSnapshotRedactor.stableID(for: .grokBot) == "grok-bot")
-        #expect(!MobileSnapshotRedactor.publishedProviders.contains(.grokBot))
-        #expect(!SyncedProviderID.supportedOnCurrentMobile.contains("grok-bot"))
     }
 }
 

@@ -26,7 +26,7 @@ Credentials never leave your machine: read-only, never refreshed, never uploaded
 <p align="center"><sub>Remaining quota and reset countdowns for Claude Code, Codex, Cursor, Grok, GLM and 21+ tools — on one screen.</sub></p>
 
 > [!NOTE]
-> This is a personal fork (MyTokenRemain): automatic updates (Sparkle), the author's server pipeline, token-usage/cost statistics and the Trends page are removed — quota monitoring only — with an optional self-hosted WebDAV config sync added. See the [changelog](CHANGELOG.md) for the delta.
+> This is a personal fork (MyTokenRemain): automatic updates (Sparkle), the author's server pipeline, token-usage/cost statistics, the Trends page and iPhone/Apple Watch cross-device sync are removed — macOS quota monitoring only — with an optional self-hosted WebDAV config sync added. See the [changelog](CHANGELOG.md) for the delta.
 
 ## Features
 
@@ -39,7 +39,6 @@ Credentials never leave your machine: read-only, never refreshed, never uploaded
 ### 🔐 Privacy — credentials never leave your Mac
 
 - **Reads what's already there**: no account to create, no telemetry, never refreshes third-party tokens, never uploads credentials.
-- **Optional encrypted sync**: off by default; when on, only an allowlisted snapshot is encrypted into your own iCloud for iPhone, Apple Watch and Home Screen widgets.
 - **Optional WebDAV config sync** (fork-only): writes account configuration and keys as plaintext JSON to your own WebDAV server to copy settings between Macs; off by default.
 - **Light on energy**: background CPU down 95% vs v1.2.2 ([method](docs/performance-v1.2.3.md)); interface in English, 简体中文, 繁體中文, 日本語, 한국어 and more.
 
@@ -50,22 +49,7 @@ Credentials never leave your machine: read-only, never refreshed, never uploaded
 </p>
 <p align="center"><sub><b>Limits</b> · remaining quota, reset time and freshness for every window.</sub></p>
 
-<details>
-<summary><b>More screenshots</b>: iPhone, Apple Watch and widgets</summary>
-<br/>
 
-<p align="center">
-  <img src="site/assets/phone-overview.jpg" width="24%" alt="iPhone overview page, aggregating up to 16 Macs" />
-  <img src="site/assets/watch-overview.png" width="16%" alt="Apple Watch overview" />
-</p>
-<p align="center">
-  <img src="site/assets/widget-s.png" width="30%" alt="Small iPhone Home Screen widget" />
-  <img src="site/assets/widget-m.png" width="60%" alt="Medium iPhone Home Screen widget" />
-</p>
-
-The iPhone app is in [public TestFlight beta](https://testflight.apple.com/join/DU3DrnhG). Data is published one-way and encrypted by the Mac; the mobile client source is outside this repository's open-source scope.
-
-</details>
 
 ## Quick start
 
@@ -122,10 +106,9 @@ Every claim links to the code or test that backs it:
 
 - **Read-only credentials, never refreshed** — Reads the tokens your tools already maintain, never writes back, never competes for refresh tokens; background reads disable Keychain UI, so no system prompt appears. <sub>🔍 [contract script](script/verify_keychain_read_contract.sh) · [tests](Tests/UsageDockTests/KeychainReadTests.swift#L45) · [source](Sources/UsageDock/Services/ClaudeOAuthUsageService.swift#L9)</sub>
 - **Pasted keys stay in the local Keychain** — API keys go into the macOS Keychain and are barred from syncing to iCloud Keychain. <sub>🔍 [source](Sources/UsageDock/Services/KeychainSecretStore.swift#L176) · [tests](Tests/UsageDockTests/AppOwnedKeychainTests.swift#L15)</sub>
-- **No account, no telemetry, no credential relay** — Quota queries go straight to each provider's official API; the only dependency is this repo's sync package, with no analytics SDK. <sub>🔍 [dependencies](Package.swift)</sub>
-- **Sync is off by default and end-to-end encrypted** — When enabled, only an allowlisted display snapshot is AES-GCM encrypted on your Mac, then written to your own private iCloud database. <sub>🔍 [off-by-default test](Tests/UsageDockTests/CrossDeviceSyncDefaultsTests.swift#L8) · [field allowlist](Sources/UsageDock/Sync/MobileSnapshotRedactor.swift#L7) · [encryption](Packages/TokenRemainSyncKit/Sources/TokenRemainSyncKit/EncryptedSyncEnvelope.swift#L66)</sub>
+- **No account, no telemetry, no credential relay** — Quota queries go straight to each provider's official API; the package has no third-party dependencies and no analytics SDK. <sub>🔍 [dependencies](Package.swift)</sub>
 
-**Other network activity** (never carries credentials): service status reads the public endpoints of `status.openai.com` and `status.claude.com`; WebDAV sync, when enabled, contacts only the server you configure; direct LAN sync listens on TCP 47831 and accepts only paired devices.
+**Other network activity** (never carries credentials): service status reads the public endpoints of `status.openai.com` and `status.claude.com`; WebDAV sync, when enabled, contacts only the server you configure.
 
 Details in the [privacy policy](https://tokenremain.com/privacy).
 
@@ -187,7 +170,7 @@ defaults delete com.jamesli.usagedock
 rm -rf ~/Library/Caches/com.jamesli.usagedock ~/Library/Application\ Support/com.jamesli.usagedock
 ```
 
-Pasted keys can be removed in Keychain Access by searching for `com.jamesli.usagedock`. If you enabled sync and want the iCloud data cleared, [contact support](https://tokenremain.com/support).
+Pasted keys can be removed in Keychain Access by searching for `com.jamesli.usagedock`.
 
 </details>
 

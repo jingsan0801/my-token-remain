@@ -14,7 +14,6 @@ struct LocalizationTests {
         "widget.ai_feed",
         "nav.overview",
         "nav.limits",
-        "nav.devices",
         "nav.data_sources",
         "nav.settings",
         "section.overview.subtitle",

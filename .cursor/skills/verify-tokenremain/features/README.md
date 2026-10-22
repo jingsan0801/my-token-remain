@@ -25,4 +25,3 @@
 - [额度与刷新](quota-refresh.md) 覆盖弹窗与 Dashboard 中的额度展示和用户触发的刷新。
 - [登录/凭证等待](login-wait.md) 覆盖等待、取消、超时、控件恢复、重试和迟到结果。
 - [窗口与外观](window-appearance.md) 覆盖 Dashboard、菜单栏弹窗的打开关闭和外观/尺寸切换。
-- [同步](sync.md) 覆盖源端展示 DTO 与消费端显示的比较。

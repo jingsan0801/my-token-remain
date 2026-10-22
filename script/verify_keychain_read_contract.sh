@@ -20,21 +20,17 @@ fail() {
 
 # 1. 允许直接调用 SecItemCopyMatching 的文件白名单。
 #    - KeychainRead.swift:统一的只读入口
-#    - SynchronizableSyncKeyStore.swift:走 data-protection keychain + app 自己的
-#      access group(kSecAttrSynchronizable),查询形态与 legacy 条目不同,不能
-#      套用 KeychainRead;它自己处理 interactionNotAllowed。
+# fork note: 跨设备同步包已移除;扫描范围只剩 app target。
 ALLOWED=(
   "Sources/UsageDock/Support/KeychainRead.swift"
-  "Packages/TokenRemainSyncKit/Sources/TokenRemainSyncKit/SynchronizableSyncKeyStore.swift"
 )
-# 扫描范围包含桌面同步包：同一个进程里的裸读取不会因为换了 target 就安全。
 while IFS= read -r offender; do
   [[ -z "$offender" ]] && continue
   for allowed in "${ALLOWED[@]}"; do
     [[ "$offender" == "$allowed" ]] && continue 2
   done
   fail "$offender calls SecItemCopyMatching directly; route it through KeychainRead instead"
-done < <(/usr/bin/grep -rl --include='*.swift' 'SecItemCopyMatching' Sources Packages || true)
+done < <(/usr/bin/grep -rl --include='*.swift' 'SecItemCopyMatching' Sources || true)
 
 # 2. 禁止交互必须用 SecKeychainSetUserInteractionAllowed。
 #    kSecUseAuthenticationContext / kSecUseAuthenticationUIFail 对 legacy
@@ -65,7 +61,7 @@ done
 # 5. `.allowed` 只允许在数据源页的明确用户授权入口中构造。
 #    该方法只由 Button 动作调用;后台刷新、凭据发现和变量转发仍不能
 #    生成交互读取。注释里的 `.allowed` 先用 awk 剔除,避免误报。
-ALLOWED_LITERALS="$(/usr/bin/grep -rn --include='*.swift' '\.allowed\b' Sources Packages \
+ALLOWED_LITERALS="$(/usr/bin/grep -rn --include='*.swift' '\.allowed\b' Sources \
   | /usr/bin/grep -v 'Support/KeychainRead.swift' \
   | /usr/bin/awk -F'//' '$1 ~ /\.allowed/ { print }' || true)"
 INTERACTIVE_ENTRY="Sources/UsageDock/Stores/UsageStore.swift"

@@ -324,26 +324,3 @@ struct ZAIBalanceAccountTests {
     }
 }
 
-#if TOKENREMAIN_CLOUD_SYNC
-import TokenRemainSyncKit
-
-@Suite("BigModel balance sync compatibility")
-struct ZAIBalanceSyncTests {
-    @Test("The existing redactor carries CNY without adding wire fields or leaking report totals")
-    func syncRoundTrip() throws {
-        let quota = try ZAIBalanceParser.parse(balanceFixture, now: balanceNow)
-        let snapshot = MobileSnapshotRedactor.makeSnapshot(from: [.zai: quota], sourceInstanceID: UUID(), sequence: 1, generatedAt: balanceNow)
-        #expect(snapshot.providers.first?.providerID == "zai")
-        #expect(snapshot.providers.first?.windows.count == 1)
-        #expect(snapshot.providers.first?.windows.first?.remainingBalance == SyncedQuotaBalance(amount: 123.45, currencyCode: "CNY"))
-        let text = String(decoding: try snapshot.encodedPayload(), as: UTF8.self)
-        #expect(!text.contains("rechargeAmount"))
-        #expect(!text.contains("totalSpendAmount"))
-        #expect(!text.contains("frozenBalance"))
-        let restored = DirectSyncSnapshotAdapter.quotas(from: snapshot)
-        #expect(restored[.zai]?.primary.remainingBalance == quota.primary.remainingBalance)
-        #expect(restored[.zai]?.generalQuotaSummary.remainingBalance?.amount == 123.45)
-        #expect(restored[.zai]?.capturedAt == balanceNow)
-    }
-}
-#endif

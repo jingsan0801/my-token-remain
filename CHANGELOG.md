@@ -13,6 +13,11 @@ Versioning for public releases.
   TokenRemain is quota-monitoring only; the sync wire schema is unchanged.
 - Fork-only: the in-development Electron Windows adapter (`windows/`) and its
   CI workflow are removed; this fork is macOS-only.
+- Fork-only: cross-device sync is removed entirely — the CloudKit publisher and
+  its settings/Devices surfaces, LAN Direct Sync pairing, `TokenRemainSyncKit`,
+  `MobileSnapshotRedactor`/`SourceIdentityStore`/`SyncContentFingerprint`, the
+  iCloud entitlements and sync-release signing mode. The app no longer ships a
+  provisioning profile, listens on a LAN port, or writes to iCloud.
 
 ### Added
 

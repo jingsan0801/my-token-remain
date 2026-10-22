@@ -4,17 +4,12 @@
 "nav.group.system" = "SISTEMA";
 "nav.overview" = "Panoramica";
 "nav.limits" = "Limiti";
-"nav.devices" = "Dispositivi";
 "nav.data_sources" = "Origini dati";
 "nav.settings" = "Impostazioni";
 "section.overview.subtitle" = "Rischio quota e quote ufficiali in tempo reale";
 "section.limits.subtitle" = "Finestre quota ufficiali dei tuoi strumenti di coding AI";
-"section.devices.subtitle" = "Questo Mac e futuro monitoraggio tra dispositivi";
 "section.data_sources.subtitle" = "Stato delle origini e privacy";
 "section.settings.subtitle" = "Avvio, aggiornamento e controlli app";
-"sync.partial_error" = "Alcune origini richiedono attenzione";
-"sync.loading" = "Caricamento dati…";
-"sync.healthy" = "Tutte le origini sono operative";
 "risk.badge.low" = "BASSO";
 "risk.badge.medium" = "MEDIO";
 "risk.badge.high" = "ALTO";

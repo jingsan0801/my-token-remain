@@ -38,9 +38,6 @@ jobs:
       - name: Build
         run: swift build
 
-      - name: Test TokenRemainSyncKit
-        run: swift test --package-path Packages/TokenRemainSyncKit --no-parallel
-
       - name: Test app
         run: |
           # Suites that need a real login keychain and interactive authorization
@@ -67,9 +64,6 @@ jobs:
       - name: Version consistency
         run: bash script/verify_version_consistency.sh
 
-      - name: Automatic update contract
-        run: bash script/verify_automatic_update_contract.sh
-
       - name: Website release contract
         run: bash script/verify_website_release_contract.sh
 
@@ -78,9 +72,6 @@ jobs:
 
       - name: Agent lane guard
         run: bash script/verify_agent_lane_guard.sh
-
-      - name: Offline ccusage license fallback tests
-        run: python3 script/test_ccusage_license.py
 
   broadcast:
     name: Broadcast typecheck and tests

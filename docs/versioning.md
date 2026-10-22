@@ -35,8 +35,8 @@ Before creating a release tag:
 1. Move the matching Changelog section from `Unreleased` to its release date.
 2. Run `script/verify_release_configuration.sh` and the full test suite.
 3. Build and inspect the distribution-signed macOS artifact.
-4. Complete external production prerequisites, including the reviewed CloudKit
-   schema deployment when the release depends on cross-device sync.
+4. Complete external production prerequisites for the services the release
+   depends on.
 5. Merge the reviewed release commit to `main`.
 6. Create and push an annotated `vMAJOR.MINOR.PATCH` tag at that exact commit.
 
