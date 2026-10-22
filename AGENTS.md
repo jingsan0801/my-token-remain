@@ -10,7 +10,6 @@
 | --- | --- |
 | macOS | `Package.swift`、`Sources/UsageDock/`、`Tests/UsageDockTests/`；SwiftPM、SwiftUI 与 AppKit |
 | 共享同步 | `Packages/TokenRemainSyncKit/`、`Sources/UsageDock/Sync/`；有跨版本、跨设备消费者 |
-| Windows | `windows/package.json`、`windows/README.md`、`.github/workflows/windows-validation.yml`；Electron 与原生 Windows 行为分开验证 |
 | 官网 | `site/package.json`；构建检查与 Cloudflare 部署是不同操作 |
 | Broadcast | `broadcast/package.json`、`broadcast/README.md`、`docs/curated-feed-contract.md`；本地测试不授权生产数据或消息操作 |
 | 发布 | `docs/versioning.md`、`docs/download-baseline.md`、`script/`；版本以当前文件和 Git 状态为准，不照抄文档中的历史分支名 |
@@ -56,7 +55,7 @@
 
 不在局部任务中全仓格式化、顺带统一架构、升级依赖或清理资产。许可证、安全与隐私约束、系统限制、协议兼容和历史故障原因注释应保留；确认信息过时或已由等价可执行约束覆盖后才可删除。不能因 `/no-comments`、`deslop` 或“更简洁”而删除约束或未经验证的兼容代码。
 
-本地化和生成文件从当前权威来源维护，不硬编码语言数量。Windows 的 `src/locales.generated.js` 从 macOS `.strings` 生成，图标也有生成入口；先核对生成脚本和既有 diff，再生成必要产物，不手工修补生成结果或混入用户其他改动。
+本地化和生成文件从当前权威来源维护，不硬编码语言数量。
 
 ### R7. 并行必须隔离文件与运行状态
 

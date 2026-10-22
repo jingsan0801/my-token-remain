@@ -77,15 +77,6 @@ Lane B 比较这些基线与上游当前状态。基线变更需要人审阅后�
 | 两者是独立的 UserDefaults 域，Dev 域残留的外观偏好（`tokenRemain.popoverGlassStyle.v1`、`tokenRemain.popoverBackgroundOpacity.v1`）会让 Dev 看起来像“玻璃回归”；对比前先分别 `defaults read`。默认值是 frosted 与 0.62 | `Stores/PreferencesStore.swift`（`popoverGlassStyleKey`、`defaultPopoverBackgroundOpacity`）；2026-08-21 排查记录 | 2026-09-28 |
 | Fork 已彻底移除 Sparkle 依赖；CloudKit 同步只在 `TOKENREMAIN_CLOUD_SYNC` 生产构建中存在 | `App/UsageDockApp.swift`（`#if TOKENREMAIN_CLOUD_SYNC`）；`script/build_and_run.sh` 仅在 `USAGEDOCK_SYNC_RELEASE=1` 时加 `-DTOKENREMAIN_CLOUD_SYNC` | 2026-10-22 |
 
-## Windows
-
-| 事实 | 来源 | 核实日期 |
-| --- | --- | --- |
-| Windows 版在 `windows/`，与 macOS 同在 `main` 干线开发；CI 重新生成 locales 与图标必须零 diff | `.github/workflows/windows-validation.yml`；PR #41 | 2026-09-28 |
-| 字体栈（含 `--mono`）必须显式带 `"Microsoft YaHei UI", "Microsoft YaHei"`，否则 Chromium 在 Windows 上把等宽栈的中文回退成宋体 | `windows/src/theme.css` | 2026-09-28 |
-| 玻璃窗口配方：`transparent: false` + `backgroundColor: "#00000000"` + `backgroundMaterial: "acrylic"`，圆角与去边框用 koffi 调 DWM（`DWMWA_WINDOW_CORNER_PREFERENCE = 33`）；`backgroundMaterial` 建窗即锁定；透明窗（悬浮窗）里任何 `backdrop-filter` 都会渲染成黑块 | `windows/electron/main.js`、`windows/electron/windows-chrome.js`、`windows/src/floating.css` 注释 | 2026-09-28 |
-| 渲染层有三个 HTML 入口：`index.html`（Dashboard）、`popover.html`（托盘弹窗，布局语义在 `src/popover-layout.js`，镜像 macOS `PopoverLayoutStore`）、`floating.html`（悬浮窗）；`index.html` 与 `popover.html` 的 CSP 为 `connect-src 'none'`，会拦 vite HMR websocket | `windows/*.html`、`windows/src/` | 2026-09-28 |
-
 ## 网站与素材
 
 | 事实 | 来源 | 核实日期 |
@@ -122,8 +113,6 @@ Lane B 比较这些基线与上游当前状态。基线变更需要人审阅后�
 | 条目 | 建议的契约 | 现状 |
 | --- | --- | --- |
 | 多池不得在 primary 与 secondary 放相同 `windowMinutes` | 桌面侧测试：把各 provider fixture 经 `MobileSnapshotRedactor` 生成快照后走同步校验，断言不出现 `duplicateWindow` | 协议层已有 `SyncProtocolTests`，桌面侧缺端到端断言 |
-| Windows 字体栈必须带微软雅黑 | `windows/tests` 中检查所有 `font-family` 与 `--mono` 声明都含 `Microsoft YaHei` | 未实现 |
-| 透明 Electron 窗不得使用 `backdrop-filter` | 对 `floating.css` 的静态检查 | 只有注释 |
 | 官网每张截图都有中英两套 | 在 `verify_website_release_contract.sh` 中检查每个 `data-shot-en` 都有对应的 `data-shot-zh` 且文件存在 | 未实现 |
 | 对外内容不出现 UsageDock | 在官网契约脚本中 grep `site/` | 当前为 0 处，未设检查 |
 | 状态色与徽章文字对比度 | 已有 `ThemeContrastTests`（状态色 3:1）；可补“填充徽章上的墨色文字” | 部分已是契约 |

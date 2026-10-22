@@ -32,7 +32,6 @@ Note that every mode stops the running Dev app, rebuilds and reinstalls it.
 | macOS app | `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test` |
 | Sync protocol | `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test --package-path Packages/TokenRemainSyncKit` |
 | Broadcast worker | `cd broadcast && npm ci && npm run typecheck && npm test` |
-| Windows adapter | `cd windows && npm ci && npm test` |
 
 Contract scripts in `script/verify_*.sh` enforce product guarantees (for example, `verify_keychain_read_contract.sh` fails if code reads the Keychain outside the controlled entry point). Read a script before running it: release scripts touch signing and packaging.
 
@@ -44,7 +43,6 @@ Contract scripts in `script/verify_*.sh` enforce product guarantees (for example
 | `Tests/UsageDockTests/` | macOS app tests |
 | `Packages/TokenRemainSyncKit/` | Encrypted cross-device sync protocol |
 | `broadcast/` | Cloudflare Workers backend for AI Feed and download counts ([README](broadcast/README.md)) |
-| `windows/` | Electron-based Windows adapter, in development ([README](windows/README.md)) |
 | `site/` | Website, privacy policy and support pages |
 | `script/` | Build, packaging and contract-verification scripts |
 | `docs/` | Versioning, privacy, feed contract and performance notes |
@@ -66,7 +64,7 @@ These protect users' credentials and data; PRs that break them won't be merged. 
 ## Pull requests
 
 - Branch from `main` and open the PR against `main`.
-- Use [Conventional Commits](https://www.conventionalcommits.org/) with a scope, as in the existing history: `fix(claude): …`, `feat(windows): …`, `docs(readme): …`.
+- Use [Conventional Commits](https://www.conventionalcommits.org/) with a scope, as in the existing history: `fix(claude): …`, `feat(sync): …`, `docs(readme): …`.
 - Describe what changed, why, and how you verified it (the tests you ran and, for UI changes, before/after screenshots with personal data removed).
 - Add user-visible changes to [CHANGELOG.md](CHANGELOG.md) under an `Unreleased` heading at the top (create it if it isn't there).
 

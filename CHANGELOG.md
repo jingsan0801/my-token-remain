@@ -11,6 +11,8 @@ Versioning for public releases.
   are gone, together with the bundled ccusage helper, the pricing/exchange-rate
   services, local usage history caches and the model throughput scanner.
   TokenRemain is quota-monitoring only; the sync wire schema is unchanged.
+- Fork-only: the in-development Electron Windows adapter (`windows/`) and its
+  CI workflow are removed; this fork is macOS-only.
 
 ### Added
 

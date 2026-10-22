@@ -34,11 +34,9 @@ description: 为 TokenRemain 改动按模块与实际副作用选择静态检查
 | 同步 | SyncKit suite；桌面 Redactor/Fingerprint/DirectSync 相关测试；变更编译条件时检查对应构建 | 协议变更补旧 payload、新 payload、过期/重放/脱敏；跨端验收需要实际消费者证据 |
 | macOS UI/启动 | 相关布局/启动契约；卡片与滚动按 [DB-002](../../../docs/design-boundaries.md#db-002) 检查，不新增只断言尺寸常量的测试 | D 级验证最窄宽度、较长文案、常见内容完整呈现、整页滚动及真实溢出；隐藏启动与 macOS 26 路径分别取证 |
 | 登录/授权/异步等待 | 按 [DB-001](../../../docs/design-boundaries.md#db-001) 定向覆盖不返回、取消、超时、迟到结果、重试和部分完成 | 共享等待工具扩大相关 suite；交互变化补 D 级“等待 → 退出 → 恢复 → 重试”，模拟与真实账号证据分开 |
-| Windows | 在 `windows/` 运行 `npm run check` | 原生 Keychain 替代机制、托盘、窗口和安装行为需要 Windows runner/设备；检查 CI 实际 commit |
 | 官网/broadcast | 在各自目录运行 `npm run check`，先检查脚本 | 浏览器/API 行为按任务补充；check 中的 Wrangler dry-run 不是生产部署 |
 | 发布相关 | 版本、更新、bundled helper 等独立契约按需选择 | 完整 suite、分发签名产物和授权的公开发布证据；不能跳过现有发布门禁 |
 
-本地化影响 Windows 时先检查 `windows/scripts/generate-locales.mjs`，在拥有对应输出改动的条件下运行 `npm --prefix windows run locales:generate`。图标同理使用 `icon:generate`。二者会写生成文件，不能列作 S 级只读检查。不要把用户尚未提交的其他本地化/资产改动顺带生成进本任务。
 
 ## 3. S 级入口
 
@@ -78,7 +76,6 @@ bash script/verify_agent_lane_guard.sh
 ```bash
 swift test --no-parallel
 swift test --package-path Packages/TokenRemainSyncKit --no-parallel
-npm --prefix windows run check
 npm --prefix site run check
 npm --prefix broadcast run check
 ```
