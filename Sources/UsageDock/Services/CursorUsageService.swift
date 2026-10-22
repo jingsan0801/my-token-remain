@@ -363,6 +363,7 @@ struct CursorAuthReader {
     }
 
     static let stateDBPath = "~/Library/Application Support/Cursor/User/globalStorage/state.vscdb"
+    private static let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "CursorAuth")
 
     var stateDBURL: URL = URL(
         fileURLWithPath: (stateDBPath as NSString).expandingTildeInPath
@@ -376,20 +377,49 @@ struct CursorAuthReader {
             let membership = await stateValue(key: "cursorAuth/stripeMembershipType")
             return Auth(accessToken: token, membershipType: membership)
         }
-        guard let token = Self.normalized(keychainPayload()) else { return nil }
+        guard let token = Self.normalized(keychainPayload()) else {
+            // Card notices only say "not logged in"; this line records which
+            // of the two read paths failed, without ever logging the token.
+            Self.logger.notice("Cursor auth unavailable: state.vscdb and keychain both empty")
+            return nil
+        }
+        Self.logger.notice("Cursor auth loaded from keychain fallback")
         return Auth(accessToken: token, membershipType: nil)
     }
 
     private func stateValue(key: String) async -> String? {
-        guard FileManager.default.fileExists(atPath: stateDBURL.path) else { return nil }
-        let sql = "SELECT value FROM ItemTable WHERE key = '\(key)' LIMIT 1;"
-        guard let data = try? await ProcessRunner.run(
-            "/usr/bin/sqlite3",
-            arguments: ["-readonly", stateDBURL.path, sql]
-        ) else {
+        guard FileManager.default.fileExists(atPath: stateDBURL.path) else {
+            Self.logger.notice("Cursor auth: state.vscdb missing")
             return nil
         }
-        return Self.normalized(String(data: data, encoding: .utf8))
+        let sql = "SELECT value FROM ItemTable WHERE key = '\(key)' LIMIT 1;"
+        // Cursor keeps this DB in WAL mode; two providers refreshing together
+        // (Cursor + Grok Bot) each open their own sqlite3 process. Without a
+        // busy timeout the loser of that race fails instantly with
+        // "database is locked (5)", which used to surface as "not logged in".
+        for attempt in 0..<2 {
+            do {
+                let data = try await ProcessRunner.run(
+                    "/usr/bin/sqlite3",
+                    arguments: ["-readonly", "-cmd", ".timeout 3000", stateDBURL.path, sql]
+                )
+                let value = Self.normalized(String(data: data, encoding: .utf8))
+                if value == nil {
+                    Self.logger.notice("Cursor auth: \(key, privacy: .public) empty")
+                }
+                return value
+            } catch {
+                // sqlite3 stderr carries the SQLite error code and never the value.
+                if attempt == 0 {
+                    Self.logger.notice("Cursor auth: state.vscdb busy, retrying: \(error.localizedDescription, privacy: .public)")
+                    try? await Task.sleep(for: .milliseconds(150))
+                    continue
+                }
+                Self.logger.error("Cursor auth: state.vscdb read failed: \(error.localizedDescription, privacy: .public)")
+                return nil
+            }
+        }
+        return nil
     }
 
     /// state.vscdb 的 value 可能是裸字符串或 JSON 引号包裹的字符串,统一剥掉。
