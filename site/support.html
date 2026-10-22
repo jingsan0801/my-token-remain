@@ -3,133 +3,120 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TokenRemain Support</title>
-  <meta name="description" content="Support and troubleshooting for TokenRemain on Mac, iPhone, Apple Watch, widgets, and Live Activity.">
+  <title>MyTokenRemain Support</title>
+  <meta name="description" content="Troubleshooting and support for the macOS-only MyTokenRemain fork.">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#070B12">
-  <link rel="canonical" href="https://tokenremain.com/support">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="TokenRemain">
-  <meta property="og:title" content="TokenRemain Support">
-  <meta property="og:description" content="Support and troubleshooting for TokenRemain on Mac, iPhone, Apple Watch, widgets, and Live Activity.">
-  <meta property="og:url" content="https://tokenremain.com/support">
-  <meta property="og:image" content="https://tokenremain.com/assets/dashboard.jpg">
-  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:site_name" content="MyTokenRemain">
+  <meta property="og:title" content="MyTokenRemain Support">
+  <meta property="og:description" content="Troubleshooting and support for the macOS-only MyTokenRemain fork.">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="legal.css">
 </head>
 <body data-page="support">
   <main class="shell">
     <nav>
-      <a class="wordmark" href="index.html">Token<em>Remain</em></a>
+      <a class="wordmark" href="index.html">My<em>TokenRemain</em></a>
       <span class="navlinks">
-        <a href="/privacy">Privacy</a>
+        <a href="privacy.html">Privacy</a>
         <a href="index.html">Product</a>
         <button class="lang" id="langBtn" type="button">中文</button>
       </span>
     </nav>
 
     <div data-lang-panel="en">
-      <p class="eyebrow">Human support</p>
+      <p class="eyebrow">Support</p>
       <h1>How can we help?</h1>
-      <p class="intro">TokenRemain has no account system. Support is handled directly by email and public issue reports. Never send passwords, access tokens, API keys, cookies, or private prompts.</p>
-      <a class="contact" href="mailto:jamescarstin520@gmail.com?subject=TokenRemain%20Support">Email TokenRemain Support</a>
+      <p class="intro">MyTokenRemain has no account system. Support is handled through public issue reports. Never send passwords, access tokens, API keys or cookies.</p>
+      <a class="contact" href="https://github.com/jingsan0801/my-token-remain/issues" rel="noopener">Open an issue</a>
       <article style="margin-top:42px">
         <section>
           <h2>Include these details</h2>
           <ul>
-            <li>Mac, iPhone, or Watch model and OS version.</li>
-            <li>TokenRemain version and the affected surface or Provider.</li>
-            <li>The exact visible error message and steps to reproduce it.</li>
-            <li>A screenshot with personal information and credentials removed.</li>
+            <li>macOS version and Mac model.</li>
+            <li>MyTokenRemain version (Settings › About).</li>
+            <li>The affected provider and the exact visible message.</li>
+            <li>Steps to reproduce, with secrets redacted.</li>
           </ul>
         </section>
         <section>
-          <h2>Mac companion and provider data</h2>
-          <p>The Mac app is the source of real Provider data. The Universal DMG supports Apple Silicon and Intel Macs running macOS 14 or later. Provider credentials remain on the Mac.</p>
-          <p><a href="https://api.tokenremain.com/v1/downloads/macos">Download TokenRemain for Mac</a></p>
+          <h2>A card says "Login not detected"</h2>
+          <p>MyTokenRemain never refreshes tokens; it only reads the sign-in state each tool saves. Sign in again in that tool and use it once. Some tools, such as Antigravity, must be opened and used once before their credentials are written to disk.</p>
         </section>
         <section>
-          <h2>Apple-device sync</h2>
-          <p>The Mac and iPhone must use the same iCloud account with iCloud Drive and iCloud Keychain available. Sync can be enabled without granting notification permission.</p>
-          <p>When the iPhone app is active, it combines CloudKit change notifications with foreground reconciliation. A locked, suspended, force-quit, offline, or low-power device—and WidgetKit background refresh—cannot be promised a fixed delivery time.</p>
+          <h2>Claude quota without the Claude Code CLI</h2>
+          <p>Paste your own claude.ai <code>sessionKey</code> or Cookie into the Claude row on the Data Sources page. Once verified it is stored only in your Mac's Keychain. Removing the cookie returns the card to the local Claude Code login.</p>
         </section>
         <section>
-          <h2>No data yet</h2>
-          <ul>
-            <li>Confirm that TokenRemain on Mac shows current Provider data first.</li>
-            <li>Confirm the Mac and iPhone are signed in to the same iCloud account.</li>
-            <li>Open TokenRemain on iPhone and check the displayed provider capture time, not only the iCloud receipt time.</li>
-            <li>If real data is unavailable, Demo Mode remains clearly labeled and never represents a live Provider value.</li>
-          </ul>
+          <h2>A card is labeled "third-party API"</h2>
+          <p>When Claude Code uses a custom <code>ANTHROPIC_BASE_URL</code>, or Codex uses a custom <code>base_url</code>, the quota comes from the API actually serving you and the card names it. If you use an official login and still see this label, open an issue with the redacted configuration.</p>
         </section>
         <section>
-          <h2>Availability and purchases</h2>
-          <p>The public iPhone TestFlight beta is available now. Install TestFlight, then <a href="https://testflight.apple.com/join/DU3DrnhG" rel="noopener">join the TokenRemain beta</a>. This is a beta, not a production App Store release; final App Store availability will be announced separately.</p>
+          <h2>WebDAV config sync</h2>
+          <p>Sync is off by default. When enabled it uploads a plaintext JSON payload over HTTPS to the server you configure; the password is stored in the Keychain. If the upload fails, check the URL, credentials and certificate; the app keeps local data unchanged.</p>
         </section>
         <section>
-          <h2>Privacy or deletion help</h2>
-          <p>See the <a href="/privacy">Privacy Policy</a> for the exact local and CloudKit data boundary. Email support if you need help disconnecting sync or removing TokenRemain-managed data.</p>
+          <h2>Where are token counts, cost estimates or Trends?</h2>
+          <p>They are removed in this fork, together with the iPhone, Apple Watch and widget clients. Only official quota windows and reset countdowns are shown. If you need those features, use the upstream TokenRemain release.</p>
         </section>
         <section>
-          <h2>Contact</h2>
-          <p>Publisher and support contact: Dongheng Li</p>
-          <a class="contact" href="mailto:jamescarstin520@gmail.com?subject=TokenRemain%20Support">jamescarstin520@gmail.com</a>
+          <h2>Uninstall</h2>
+          <pre>defaults delete com.jingsan0801.mytokenremain
+rm -rf ~/Library/Application\ Support/com.jingsan0801.mytokenremain</pre>
+          <p>Pasted keys can be removed in Keychain Access by searching for <code>com.jingsan0801.mytokenremain</code>.</p>
         </section>
       </article>
     </div>
 
     <div data-lang-panel="zh" hidden>
-      <p class="eyebrow">人工支持</p>
-      <h1>需要什么帮助？</h1>
-      <p class="intro">TokenRemain 不建立账号。支持通过邮箱与公开 Issue 提供。请勿发送密码、access token、API key、cookie 或私密提示词。</p>
-      <a class="contact" href="mailto:jamescarstin520@gmail.com?subject=TokenRemain%20Support">发送邮件给 TokenRemain 支持</a>
+      <p class="eyebrow">支持</p>
+      <h1>我们能帮你什么？</h1>
+      <p class="intro">MyTokenRemain 没有账号系统，问题通过公开 issue 处理。请勿发送密码、访问令牌、API Key 或 Cookie。</p>
+      <a class="contact" href="https://github.com/jingsan0801/my-token-remain/issues" rel="noopener">提交 issue</a>
       <article style="margin-top:42px">
         <section>
-          <h2>请提供这些信息</h2>
+          <h2>请附上这些信息</h2>
           <ul>
-            <li>Mac、iPhone 或 Watch 型号与系统版本。</li>
-            <li>TokenRemain 版本，以及受影响的页面或 Provider。</li>
-            <li>完整的可见错误信息与复现步骤。</li>
-            <li>已经移除个人信息与凭证的截图。</li>
+            <li>macOS 版本与 Mac 机型。</li>
+            <li>MyTokenRemain 版本（设置 › 关于）。</li>
+            <li>出问题的服务与界面上完整的提示文字。</li>
+            <li>复现步骤（请先脱敏）。</li>
           </ul>
         </section>
         <section>
-          <h2>Mac 伴侣 App 与 Provider 数据</h2>
-          <p>Mac App 是真实 Provider 数据的唯一来源。Universal DMG 支持运行 macOS 14 或更高版本的 Apple Silicon 与 Intel Mac。Provider 凭证始终留在 Mac。</p>
-          <p><a href="https://api.tokenremain.com/v1/downloads/macos">下载 TokenRemain Mac 版</a></p>
+          <h2>卡片提示「未检测到登录」</h2>
+          <p>MyTokenRemain 从不刷新 token，只读取工具自己保存的登录状态。到对应工具里重新登录并正常使用一次即可；Antigravity 等工具需要先打开使用一次，凭证才会写到本机。</p>
         </section>
         <section>
-          <h2>Apple 设备同步</h2>
-          <p>Mac 与 iPhone 需要登录同一 iCloud 账号，并确保 iCloud Drive 与 iCloud Keychain 可用。启用同步不需要先授权通知。</p>
-          <p>iPhone App 活跃时，会结合 CloudKit 变更提示与前台兜底拉取。锁屏、挂起、强退、离线、低电量，以及 WidgetKit 后台刷新均无法承诺固定到达时间。</p>
+          <h2>没有 Claude Code CLI 时查看 Claude 额度</h2>
+          <p>在「数据来源」页的 Claude 行粘贴你自己的 claude.ai <code>sessionKey</code> 或 Cookie，验证成功后只保存在本机钥匙串。移除 Cookie 即恢复读取本地 Claude Code 登录。</p>
         </section>
         <section>
-          <h2>还没有数据</h2>
-          <ul>
-            <li>先确认 Mac 版 TokenRemain 已经显示最新 Provider 数据。</li>
-            <li>确认 Mac 与 iPhone 登录同一 iCloud 账号。</li>
-            <li>打开 iPhone App，并查看页面显示的 Provider 采集时间，而不只是 iCloud 接收时间。</li>
-            <li>真实数据不可用时，演示模式会始终明确标记，不会伪装成实时 Provider 数据。</li>
-          </ul>
+          <h2>卡片标注「第三方 API」</h2>
+          <p>当 Claude Code 设置了 <code>ANTHROPIC_BASE_URL</code>，或 Codex 配置了自定义 <code>base_url</code> 时，额度来自实际提供服务的 API，卡片会注明来源。如果使用官方登录却被这样标注，请附脱敏后的配置提交 issue。</p>
         </section>
         <section>
-          <h2>开放时间与购买</h2>
-          <p>iPhone 公开 TestFlight 测试现已开放。安装 TestFlight 后，<a href="https://testflight.apple.com/join/DU3DrnhG" rel="noopener">加入 TokenRemain 测试</a>。这是测试版，不是 App Store 正式版；正式上架时间会另行公布。</p>
+          <h2>WebDAV 配置同步</h2>
+          <p>同步默认关闭。开启后通过 HTTPS 向你配置的服务器上传一份明文 JSON；密码保存在钥匙串。若上传失败，请检查地址、凭证与证书；应用不会改动本地数据。</p>
         </section>
         <section>
-          <h2>隐私或删除协助</h2>
-          <p>请查看<a href="/privacy">隐私政策</a>了解本地与 CloudKit 的准确数据边界。如需协助断开同步或移除 TokenRemain 管理的数据，请发送邮件。</p>
+          <h2>Token 统计、成本估算与趋势页去哪了？</h2>
+          <p>这些功能与 iPhone、Apple Watch 和小组件客户端已在本 fork 中移除，只保留官方额度窗口与重置倒计时。如需这些功能，请使用上游 TokenRemain 发布版。</p>
         </section>
         <section>
-          <h2>联系</h2>
-          <p>发布者与支持联系人：Dongheng Li</p>
-          <a class="contact" href="mailto:jamescarstin520@gmail.com?subject=TokenRemain%20Support">jamescarstin520@gmail.com</a>
+          <h2>卸载</h2>
+          <pre>defaults delete com.jingsan0801.mytokenremain
+rm -rf ~/Library/Application\ Support/com.jingsan0801.mytokenremain</pre>
+          <p>粘贴的密钥可在「钥匙串访问」中搜索 <code>com.jingsan0801.mytokenremain</code> 删除。</p>
         </section>
       </article>
     </div>
 
-    <footer><span>© 2026 Dongheng Li</span><span><a href="/privacy">Privacy Policy</a> · <a href="/">TokenRemain</a></span></footer>
+    <footer>
+      <span>© 2026 MyTokenRemain · Apache-2.0</span>
+      <span><a href="index.html">Product</a> · <a href="privacy.html">Privacy</a></span>
+    </footer>
   </main>
   <script src="legal.js"></script>
 </body>

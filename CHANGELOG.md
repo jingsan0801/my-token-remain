@@ -18,6 +18,9 @@ Versioning for public releases.
   `MobileSnapshotRedactor`/`SourceIdentityStore`/`SyncContentFingerprint`, the
   iCloud entitlements and sync-release signing mode. The app no longer ships a
   provisioning profile, listens on a LAN port, or writes to iCloud.
+- Fork-only: `site/` is rewritten as a static, bilingual macOS-only page with
+  no download button, iPhone/Apple Watch/widget screenshots, token/cost/trends
+  sections, deploy configuration or release-lookup script.
 
 ### Added
 

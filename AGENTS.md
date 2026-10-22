@@ -9,7 +9,7 @@
 | 范围 | 事实入口与边界 |
 | --- | --- |
 | macOS | `Package.swift`、`Sources/UsageDock/`、`Tests/UsageDockTests/`；SwiftPM、SwiftUI 与 AppKit |
-| 官网 | `site/package.json`；构建检查与 Cloudflare 部署是不同操作 |
+| 官网 | `site/` 仅保留静态说明页（无构建脚本、无部署配置） |
 | Broadcast | `broadcast/package.json`、`broadcast/README.md`、`docs/curated-feed-contract.md`；本地测试不授权生产数据或消息操作 |
 | 发布 | `docs/versioning.md`、`docs/download-baseline.md`、`script/`；版本以当前文件和 Git 状态为准，不照抄文档中的历史分支名 |
 | 代理配置 | 本文件、`CLAUDE.md`、`.cursor/`、`.claude/`、`.agents/`、`.codex/hooks.json`、`docs/agents/`、`script/*agent*`；改动走 R15，宿主能力以 [knowledge](docs/agents/knowledge.md#host-capabilities) 的实测记录为准 |

@@ -81,8 +81,8 @@ Lane B 比较这些基线与上游当前状态。基线变更需要人审阅后�
 
 | 事实 | 来源 | 核实日期 |
 | --- | --- | --- |
-| 对外产品名一律是 TokenRemain，UsageDock 只是内部工程代号；仓库名 `token-remain`，下载文件 `TokenRemain.dmg`，官网经 `api.tokenremain.com/v1/downloads/macos` 跳转到 GitHub 最新发布 | `script/verify_website_release_contract.sh`；`site/*.html` 中无 “UsageDock” | 2026-09-28 |
-| 官网截图按语言分两套：默认文件名是英文，中文加 `-zh` 后缀；`<img>` 用 `data-shot-en` / `data-shot-zh` 声明，`applyShots()` 按语言切换；新截图必须带 `data-shot-en` 才会被扫描 | `site/index.html`、`site/assets/` | 2026-09-28 |
+| 对外产品名在本 fork 是 MyTokenRemain，UsageDock 只是内部工程代号；仓库为个人 fork，不发布 DMG，`site/` 仅保留静态说明页（无下载入口、无 iPhone/Apple Watch 内容） | `site/*.html`；`README.md` | 2026-10-22 |
+| `site/` 已收敛为无构建、无部署的静态说明页；双语通过 `data-i18n` + JS 字典切换，不再引用截图资源 | `site/index.html`、`site/legal.js` | 2026-10-22 |
 | 重拍桌面截图可用启动参数直达表面：`--open-dashboard`、`--open-popover`、`--open-section <rawValue>`，配合 `-AppleLanguages "(en)"` 切语言（应用没有内置语言开关）；启动和驱动应用是 D 级操作，需任务授权 | `App/UsageDockApp.swift` | 2026-09-28 |
 
 ## 产品定位与设计约定
@@ -112,7 +112,5 @@ Lane B 比较这些基线与上游当前状态。基线变更需要人审阅后�
 
 | 条目 | 建议的契约 | 现状 |
 | --- | --- | --- |
-| 官网每张截图都有中英两套 | 在 `verify_website_release_contract.sh` 中检查每个 `data-shot-en` 都有对应的 `data-shot-zh` 且文件存在 | 未实现 |
-| 对外内容不出现 UsageDock | 在官网契约脚本中 grep `site/` | 当前为 0 处，未设检查 |
 | 状态色与徽章文字对比度 | 已有 `ThemeContrastTests`（状态色 3:1）；可补“填充徽章上的墨色文字” | 部分已是契约 |
 | 新 `settings.pool_*` 键七语齐全 | 已由 `LocalizationTests.fullyLocalizedLocales` 保证 | 已是契约 |

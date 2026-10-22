@@ -64,9 +64,6 @@ jobs:
       - name: Version consistency
         run: bash script/verify_version_consistency.sh
 
-      - name: Website release contract
-        run: bash script/verify_website_release_contract.sh
-
       - name: Agent docs
         run: bash script/verify_agent_docs.sh
 

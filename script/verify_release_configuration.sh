@@ -7,7 +7,6 @@ cd "$ROOT_DIR"
 ./script/verify_version_consistency.sh
 ./script/verify_installation_isolation.sh
 ./script/verify_keychain_read_contract.sh
-./script/verify_website_release_contract.sh
 
 [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' Resources/Info.plist)" == "com.jingsan0801.mytokenremain" ]]
 
@@ -33,6 +32,5 @@ cd "$ROOT_DIR"
 /bin/bash -n script/verify_installation_isolation.sh
 /bin/bash -n script/verify_keychain_read_contract.sh
 /bin/bash -n script/verify_version_consistency.sh
-/bin/bash -n script/verify_website_release_contract.sh
 
 echo "desktop release configuration verified: version, updater, packaging, privacy, and website contracts"

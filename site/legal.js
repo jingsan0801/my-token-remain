@@ -3,12 +3,12 @@
   var panels = document.querySelectorAll("[data-lang-panel]");
   var titles = {
     privacy: {
-      en: "TokenRemain Privacy Policy",
-      zh: "TokenRemain 隐私政策"
+      en: "MyTokenRemain Privacy Policy",
+      zh: "MyTokenRemain 隐私政策"
     },
     support: {
-      en: "TokenRemain Support",
-      zh: "TokenRemain 支持"
+      en: "MyTokenRemain Support",
+      zh: "MyTokenRemain 支持"
     }
   };
   var page = document.body.dataset.page || "privacy";

@@ -33,7 +33,7 @@ description: 为 TokenRemain 改动按模块与实际副作用选择静态检查
 | 刷新/共享 Store | 定向策略、缓存、通知测试；共享核心变化再跑完整 macOS suite | 比较用户设置、活跃/空闲/退避/过期状态；性能结论需要同条件实测 |
 | macOS UI/启动 | 相关布局/启动契约；卡片与滚动按 [DB-002](../../../docs/design-boundaries.md#db-002) 检查，不新增只断言尺寸常量的测试 | D 级验证最窄宽度、较长文案、常见内容完整呈现、整页滚动及真实溢出；隐藏启动与 macOS 26 路径分别取证 |
 | 登录/授权/异步等待 | 按 [DB-001](../../../docs/design-boundaries.md#db-001) 定向覆盖不返回、取消、超时、迟到结果、重试和部分完成 | 共享等待工具扩大相关 suite；交互变化补 D 级“等待 → 退出 → 恢复 → 重试”，模拟与真实账号证据分开 |
-| 官网/broadcast | 在各自目录运行 `npm run check`，先检查脚本 | 浏览器/API 行为按任务补充；check 中的 Wrangler dry-run 不是生产部署 |
+| broadcast | 在 `broadcast/` 运行 `npm run check`，先检查脚本 | API 行为按任务补充；check 中的 Wrangler dry-run 不是生产部署 |
 | 发布相关 | 版本、更新、bundled helper 等独立契约按需选择 | 完整 suite、分发签名产物和授权的公开发布证据；不能跳过现有发布门禁 |
 
 
@@ -45,12 +45,11 @@ description: 为 TokenRemain 改动按模块与实际副作用选择静态检查
 bash script/verify_keychain_read_contract.sh
 bash script/verify_launch_surface_isolation.sh
 bash script/verify_version_consistency.sh
-bash script/verify_website_release_contract.sh
 bash script/verify_agent_docs.sh
 bash script/verify_agent_lane_guard.sh
 ```
 
-`verify_website_release_contract.sh` 不带参数时只读本地文件；`--public` 会联网访问官网与 GitHub，不属于 S 级。`verify_agent_lane_guard.sh` 只在自己的临时目录里建 git 仓库并用 `gh` 替身。这些脚本也是 `.github/workflows/macos-validation.yml` 的 contracts job。
+`verify_agent_lane_guard.sh` 只在自己的临时目录里建 git 仓库并用 `gh` 替身。这些脚本也是 `.github/workflows/macos-validation.yml` 的 contracts job。
 
 变更 shell 脚本可用 `bash -n` 检查其语法；该检查不执行脚本，也不证明行为。
 
