@@ -675,6 +675,7 @@
 "accounts.row_accessibility" = "%1$@ アカウント %2$@";
 "accounts.row_help" = "クリックするとこのアカウントだけを表示します";
 "accounts.all_disabled" = "すべてのアカウントがオフです。アカウントメニューから有効にできます。";
+"accounts.missing_credential" = "このアカウントには保存済みの認証情報がありません。アカウントメニューの「認証情報を更新」から入力してください。";
 "accounts.management_notice" = "アカウント操作に失敗しました: %1$@";
 
 /* アカウント追加時の資格情報入力（キーチェーン方式のプロバイダー） */

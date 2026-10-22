@@ -270,6 +270,10 @@ struct QuotaCard: View {
                 .font(.system(size: 10))
                 .foregroundStyle(isStale ? DashboardTheme.warning : DashboardTheme.mutedText)
             }
+            if let notice {
+                Divider().overlay(DashboardSurface.border)
+                QuotaNoticeBanner(message: notice)
+            }
         } else if let credentialConfiguration {
             VStack(alignment: .leading, spacing: 8) {
                 Text(
@@ -329,10 +333,6 @@ struct QuotaCard: View {
             // menu and the add button never start a card drag.
             accountControls
 
-            if let notice, credentialConfiguration == nil {
-                QuotaConnectionNotice(message: notice)
-                    .layoutPriority(1)
-            }
             if let serviceStatus, serviceStatus.isAbnormal {
                 ServiceStatusBadge(status: serviceStatus)
                     .padding(.top, 2)
@@ -991,28 +991,26 @@ struct CodexResetCreditsCard: View {
     }
 }
 
-/// Prominent recovery guidance pinned beside the provider name. Keeping it in
-/// the fixed header makes login/install failures visible even when the quota
-/// rows below need to scroll. The text is the failure's own localized message:
-/// a fixed "sign in again" line would mislabel missing keys, network errors
-/// and third-party logins as an expired session.
-private struct QuotaConnectionNotice: View {
+/// 卡片内容区的完整故障/恢复提示。放在额度行之后、多行铺开,不再把
+/// 长文案截断成「请在 Cu…」。文案仍是失败自带的本地化消息:固定的
+/// 「重新登录」会误标缺 Key、网络错误和第三方登录等不同情况。
+private struct QuotaNoticeBanner: View {
     let message: String
 
     var body: some View {
-        Label {
-            Text(message)
-                .lineLimit(1)
-                .minimumScaleFactor(0.72)
-                .truncationMode(.tail)
-        } icon: {
+        HStack(alignment: .top, spacing: 6) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 9, weight: .bold))
+                .foregroundStyle(DashboardTheme.warning)
+                .padding(.top, 1)
+            Text(message)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(DashboardTheme.warning)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .font(.system(size: 10, weight: .semibold))
-        .foregroundStyle(DashboardTheme.warning)
-        .padding(.horizontal, 7)
-        .padding(.vertical, 4)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
         .background {
             RoundedRectangle(cornerRadius: 7, style: .continuous)
                 .fill(DashboardTheme.warning.opacity(0.11))

@@ -675,6 +675,7 @@
 "accounts.row_accessibility" = "%1$@-Konto %2$@";
 "accounts.row_help" = "Klicken, um nur dieses Konto anzuzeigen";
 "accounts.all_disabled" = "Alle Konten sind deaktiviert. Aktivieren Sie eines im Kontomenü.";
+"accounts.missing_credential" = "Für dieses Konto ist keine Anmeldeinformation gespeichert. Wählen Sie im Kontomenü „Anmeldeinformation aktualisieren“.";
 "accounts.management_notice" = "Kontoaktion fehlgeschlagen: %1$@";
 
 /* Zugangsdaten-Eingabe beim Hinzufügen (Anbieter mit Schlüsselbund) */

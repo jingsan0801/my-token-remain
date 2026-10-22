@@ -675,6 +675,7 @@
 "accounts.row_accessibility" = "Cuenta de %1$@: %2$@";
 "accounts.row_help" = "Haz clic para mostrar solo esta cuenta";
 "accounts.all_disabled" = "Todas las cuentas están desactivadas. Activa una desde el menú de cuentas.";
+"accounts.missing_credential" = "Esta cuenta no tiene credenciales guardadas. Elige «Actualizar credencial» en el menú de la cuenta.";
 "accounts.management_notice" = "La acción de la cuenta ha fallado: %1$@";
 
 /* Entrada de credencial al añadir cuenta (proveedores con llavero) */

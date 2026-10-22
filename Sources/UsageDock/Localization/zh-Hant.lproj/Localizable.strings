@@ -686,6 +686,7 @@
 "accounts.row_accessibility" = "%1$@ 帳戶 %2$@";
 "accounts.row_help" = "點按可只檢視此帳戶";
 "accounts.all_disabled" = "所有帳戶皆已停用，可在帳戶選單中重新啟用。";
+"accounts.missing_credential" = "此帳戶沒有儲存憑證；請在帳戶選單中選「更新憑證」重新輸入。";
 "accounts.management_notice" = "帳戶操作失敗：%1$@";
 
 /* 新增帳戶的憑證輸入（鑰匙圈型服務商） */

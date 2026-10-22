@@ -686,6 +686,7 @@
 "accounts.row_accessibility" = "%1$@ 账户 %2$@";
 "accounts.row_help" = "点按可只查看此账户";
 "accounts.all_disabled" = "所有账户均已停用，可在账户菜单中重新启用。";
+"accounts.missing_credential" = "此账户没有保存凭据；请在账户菜单中选「更新凭据」重新录入。";
 "accounts.management_notice" = "账户操作失败：%1$@";
 
 /* 添加账户的凭据输入（钥匙串型服务商） */

@@ -57,7 +57,7 @@ struct ProviderAccountFetchService: Sendable {
             case .missingProfileDirectory:
                 "The isolated account profile is missing. Remove it and sign in again."
             case .missingCredential:
-                "This account has no saved credential."
+                L10n.text("accounts.missing_credential")
             }
         }
     }

@@ -686,6 +686,7 @@
 "accounts.row_accessibility" = "%1$@ account %2$@";
 "accounts.row_help" = "Click to show only this account";
 "accounts.all_disabled" = "Every account is turned off. Enable one from the account menu.";
+"accounts.missing_credential" = "This account has no saved credential. Choose “Update credential” from the account menu.";
 "accounts.management_notice" = "Account action failed: %1$@";
 
 /* Add-account credential entry (Keychain-backed providers) */

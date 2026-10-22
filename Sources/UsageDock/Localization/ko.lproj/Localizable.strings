@@ -675,6 +675,7 @@
 "accounts.row_accessibility" = "%1$@ 계정 %2$@";
 "accounts.row_help" = "클릭하여 이 계정만 보기";
 "accounts.all_disabled" = "모든 계정이 꺼져 있습니다. 계정 메뉴에서 하나를 활성화하세요.";
+"accounts.missing_credential" = "이 계정에는 저장된 자격 증명이 없습니다. 계정 메뉴에서 '자격 증명 업데이트'를 선택해 입력하세요.";
 "accounts.management_notice" = "계정 작업 실패: %1$@";
 
 /* 계정 추가 시 자격 증명 입력(키체인 방식 공급자) */

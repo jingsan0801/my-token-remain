@@ -68,6 +68,7 @@ enum L10n {
         "webdav.error.http_status": "请求失败(HTTP %d)。",
         "webdav.error.bad_format": "远端文件不是 MyTokenRemain 的配置同步格式。",
         "webdav.error.newer_version": "远端配置由更新版本的 App 导出(格式 v%d),请先升级本机 App。",
+        "accounts.missing_credential": "此账户没有保存凭据；请在账户菜单中选「更新凭据」重新录入。",
         "accounts.credential.hint.zai": "普通 Key 默认查询 Coding Plan；国内 API 余额请用 JSON，指定 region: china、queryMode: balance。",
         "service.zai.balance_query_failed": "智谱 API 余额查询失败。请重试或检查 API Key 的权限。",
         "service.zai.balance_requires_china": "API 余额查询仅支持中国区域。",
