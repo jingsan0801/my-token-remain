@@ -36,7 +36,6 @@ Lane B 比较这些基线与上游当前状态。基线变更需要人审阅后�
 | --- | --- | --- | --- |
 | pstack（`cursor/plugins` 的 `pstack/`） | 见 [pstack-upstream.json](pstack-upstream.json)；处置表在 `.cursor/rules/tokenremain-pstack.mdc` | 本仓库审阅记录 | 2026-09-28 |
 | token-monitor（`Javis603/token-monitor`，MIT） | 移植时的上游提交未记录，状态为“未知”。已知移植落地于本仓库 `697e550`（2026-07-23，首次移植）与 `b4fc28d`（2026-08-04，扩展兼容）；Lane B 首次运行列出 2026-07-23 以来 `src/shared/*Limits.js` 的提交，由人确认基线后写回本表 | `Sources/UsageDock/Services/ExtendedProviderServices.swift` 文件头注释；`git log --follow` | 2026-09-28 |
-| ccusage（npm `@ccusage/ccusage-darwin-*`） | `Resources/Info.plist` 的 `TokenRemainBundledCCUsageVersion`；`script/verify_ccusage_freshness.sh --check` 只读比较 npm 最新版（写 `/tmp` 临时目录，陈旧时退出 1），`--update` 会改 `Vendor/`，属于发布任务 | 脚本源码 | 2026-09-28 |
 
 ## Provider 接口与凭证
 
@@ -76,7 +75,7 @@ Lane B 比较这些基线与上游当前状态。基线变更需要人审阅后�
 | --- | --- | --- |
 | 普通开发构建是 `TokenRemain Dev` / `UsageDockDev` / `com.jamesli.usagedock.dev`，不覆盖生产 `TokenRemain.app`（`com.jamesli.usagedock`） | `script/build_and_run.sh`、`script/verify_installation_isolation.sh` | 2026-09-28 |
 | 两者是独立的 UserDefaults 域，Dev 域残留的外观偏好（`tokenRemain.popoverGlassStyle.v1`、`tokenRemain.popoverBackgroundOpacity.v1`）会让 Dev 看起来像“玻璃回归”；对比前先分别 `defaults read`。默认值是 frosted 与 0.62 | `Stores/PreferencesStore.swift`（`popoverGlassStyleKey`、`defaultPopoverBackgroundOpacity`）；2026-08-21 排查记录 | 2026-09-28 |
-| Dev 构建不启动 Sparkle 更新器，也不挂 CloudKit 同步，二者只在 `TOKENREMAIN_CLOUD_SYNC` 生产构建中存在 | `App/UsageDockApp.swift`（`#if TOKENREMAIN_CLOUD_SYNC`）；`script/build_and_run.sh` 仅在 `USAGEDOCK_SYNC_RELEASE=1` 时加 `-DTOKENREMAIN_CLOUD_SYNC` | 2026-09-28 |
+| Fork 已彻底移除 Sparkle 依赖；CloudKit 同步只在 `TOKENREMAIN_CLOUD_SYNC` 生产构建中存在 | `App/UsageDockApp.swift`（`#if TOKENREMAIN_CLOUD_SYNC`）；`script/build_and_run.sh` 仅在 `USAGEDOCK_SYNC_RELEASE=1` 时加 `-DTOKENREMAIN_CLOUD_SYNC` | 2026-10-22 |
 
 ## Windows
 

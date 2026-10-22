@@ -60,11 +60,10 @@ bash script/verify_agent_lane_guard.sh
 
 **不得直接归为 S 的现有入口：**
 
-- `verify_release_configuration.sh` 调用 `verify_ccusage_freshness.sh --update`，可联网并改 `Vendor/`、版本相关配置。仅在授权范围包含该更新时运行；无授权时运行适用的独立门禁并明确完整发布门禁未完成。
+- `verify_release_configuration.sh` 串起全部发布门禁；仅在授权范围包含发布验证时运行，无授权时运行适用的独立门禁并明确完整发布门禁未完成。
 - `build_and_run.sh --verify` 会停止进程、签名、安装、启动；结尾只检查进程存在，不能证明目标功能正确。
 - `build_and_run.sh --print-install-contract` 的 EXIT trap 会清理对应 `dist/` bundle。`verify_installation_isolation.sh` 会调用 Dev 和 sync 两种 contract；只在确认对应暂存产物可清理的受控范围内使用，否则直接读代码检查。
 - `verify_launch_stability.sh` 会构建/安装、按名字停进程、改玻璃偏好。`--skip-build` 仍会改变运行状态；默认结束删除偏好值，并不恢复用户原值。
-- `verify_ccusage_freshness.sh --local` 还会执行本地 helper，`--check` 会联网；先检查当前实现，不凭参数名归为静态检查。
 
 ## 4. T 级入口
 

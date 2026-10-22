@@ -34,7 +34,7 @@ Note that every mode stops the running Dev app, rebuilds and reinstalls it.
 | Broadcast worker | `cd broadcast && npm ci && npm run typecheck && npm test` |
 | Windows adapter | `cd windows && npm ci && npm test` |
 
-Contract scripts in `script/verify_*.sh` enforce product guarantees (for example, `verify_keychain_read_contract.sh` fails if code reads the Keychain outside the controlled entry point). Read a script before running it: `verify_release_configuration.sh` updates the bundled ccusage, and release scripts touch signing and packaging.
+Contract scripts in `script/verify_*.sh` enforce product guarantees (for example, `verify_keychain_read_contract.sh` fails if code reads the Keychain outside the controlled entry point). Read a script before running it: release scripts touch signing and packaging.
 
 ## Repository layout
 

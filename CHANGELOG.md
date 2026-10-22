@@ -5,6 +5,13 @@ Versioning for public releases.
 
 ## Unreleased
 
+### Removed
+
+- Fork-only: token usage, cost estimates, pace projections and the Trends page
+  are gone, together with the bundled ccusage helper, the pricing/exchange-rate
+  services, local usage history caches and the model throughput scanner.
+  TokenRemain is quota-monitoring only; the sync wire schema is unchanged.
+
 ### Added
 
 - Fork-only: optional WebDAV config sync. Tracked providers, account metadata

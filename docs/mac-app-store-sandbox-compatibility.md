@@ -79,14 +79,14 @@ or user-verified yet.
 | Kiro | Finds and launches `kiro-cli` | CLI not installed | Same unavailable result | **Sandbox-unavailable until separately proven**; likely requires a redesigned API path | **High**: arbitrary external CLI execution and inherited Sandbox limits |
 | Volcengine | `ProviderSecretStore` own Keychain; signed remote API request | AK/SK not configured | Same unavailable result | **Needs API key pair** | **Low-medium** |
 | Ollama | `ProviderSecretStore` own Keychain; authenticated settings request | Cookie not configured | Same unavailable result | **Needs Cookie** | **Medium**: session Cookie handling needs explicit privacy disclosure |
-| Local history/trends (`ccusage`) | `CCUsageService`: bundled native ccusage helper in offline mode | Success in the website edition | Historical Sandbox helper process failed; not re-audited after native vendoring | **Sandbox-unavailable until re-audited with explicit log access** | **High**: a child helper still needs access to other apps' local logs |
-| Trae Agent trajectories | `TraeAgentUsageService`: user-selected local JSON folders; allowlisted model/time/token decoding only | Parser and folder-store fixtures pass; Trae Agent is not installed on the development Mac | Not audited | **Explicit folder selection is already part of the UI, but a security-scoped bookmark would be required for a Sandbox build** | **Medium-high**: current website build persists paths, not Sandbox bookmarks; no Sandbox runtime claim |
+| ~~Local history/trends (`ccusage`)~~ | Removed from the app (fork, 2026-10): no bundled helper remains | — | — | **N/A — feature deleted** | — |
+| ~~Trae Agent trajectories~~ | Removed from the app (fork, 2026-10) together with the local-usage pipeline | — | — | **N/A — feature deleted** | — |
 
 ## Decision-gate conclusion
 
 The current full automatic experience cannot be shipped unchanged through the
-Mac App Store. The runtime comparison proves regressions for Codex, Cursor,
-OpenCode, and local history/trends. Antigravity's preferred process/loopback path
+Mac App Store. The runtime comparison proves regressions for Codex, Cursor and
+OpenCode (local history/trends no longer exist in this fork). Antigravity's preferred process/loopback path
 also remains unproven because Antigravity was installed but not running during
 the audit. Claude and Copilot worked only on an already-authorized development
 Mac; that is not fresh-install or App Review proof.
@@ -106,7 +106,7 @@ directions were:
 **Selected direction: B.** The shipping Mac app is the unsandboxed,
 Developer ID-signed and notarized website edition. The Sandbox candidate remains
 an isolated compatibility artifact and is not a release target. Consequently,
-Codex, Cursor, OpenCode, local history/trends, and the other local integrations
+Codex, Cursor, OpenCode, and the other local integrations
 keep their existing automatic paths in the website build; they are not being
 redesigned around Sandbox folder grants for version 1.
 

@@ -8,19 +8,11 @@
 凭证只留在本机：只读、不刷新、不上传。
 
 <p>
-  <a href="https://github.com/Carstin520/token-remain/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/Carstin520/token-remain?label=latest&color=22D3EE" /></a>
   <img alt="macOS 14+ · Universal" src="https://img.shields.io/badge/macOS_14%2B-Universal-000?logo=apple&logoColor=white" />
-  <img alt="已通过 Apple 公证" src="https://img.shields.io/badge/Apple-Notarized-34C759?logo=apple&logoColor=white" />
   <a href="LICENSE"><img alt="Apache-2.0 许可" src="https://img.shields.io/badge/license-Apache--2.0-8A94A6" /></a>
 </p>
 
-<h3><a href="https://api.tokenremain.com/v1/downloads/macos">⬇️ 下载 TokenRemain.dmg</a></h3>
-
-<a href="https://tokenremain.com">官网</a> ·
-<a href="https://testflight.apple.com/join/DU3DrnhG">iPhone 测试版</a> ·
 <a href="CHANGELOG.md">更新记录</a> ·
-<a href="https://tokenremain.com/privacy">隐私政策</a> ·
-<a href="https://github.com/Carstin520/token-remain/issues">问题反馈</a> ·
 <a href="README.en.md">English</a>
 
 </div>
@@ -28,61 +20,42 @@
 <br/>
 
 <p align="center">
-  <img src="site/assets/dash-overview-zh.webp" width="77%" alt="Dashboard 概览：最低剩余额度、今日 Token 与估算成本、官方额度进度与风险提示" />
-  <img src="site/assets/popover-zh.webp" width="19%" alt="菜单栏弹窗：按应用列出剩余额度、今日本地统计与 AI 动态" />
+  <img src="site/assets/dash-overview-zh.webp" width="77%" alt="Dashboard 概览：最低剩余额度、官方额度进度与风险提示" />
+  <img src="site/assets/popover-zh.webp" width="19%" alt="菜单栏弹窗：按应用列出剩余额度" />
 </p>
-<p align="center"><sub>Claude Code、Codex、Cursor、Grok、GLM 等 21+ 家工具的剩余额度、重置倒计时与今日成本，一屏看完。（真实使用数据截图）</sub></p>
+<p align="center"><sub>Claude Code、Codex、Cursor、Grok、GLM 等 21+ 家工具的剩余额度与重置倒计时，一屏看完。</sub></p>
 
-> [!TIP]
-> **1.4 新功能**：Dashboard 新增「账号管理」，多账号可单独启停与重命名；趋势页拆分输入 / 输出 / 缓存写入 / 缓存读取，并在本机估算各模型输出速度（tok/s）；成本估算支持 13 种显示币种；Claude Desktop / Cowork 会话计入本地统计。完整内容见[更新记录](CHANGELOG.md)。
+> [!NOTE]
+> 这是个人自用 fork(MyTokenRemain):移除了自动更新(Sparkle)、作者服务器链路、Token 用量/成本统计与趋势页,只保留额度监控;另新增了可选的 WebDAV 配置同步。差异明细见[更新记录](CHANGELOG.md)。
 
 ## 功能
 
 ### 🧭 额度：撑不撑得到重置，一眼就知道
 
 - **21+ 家工具并排展示**：每个官方额度窗口都带进度条、重置倒计时和更新时间。
-- **节奏预测**：按真实窗口进度判断当前节奏能否撑到重置，撑不到时给出预计可用时长。
 - **多账号**：同一工具的多个账号分行显示；「账号管理」页可按应用开关监控、启停账号、重命名、更新凭证，同套餐账号可选合并查看。
 - **随处可见**：菜单栏胶囊、跨空间浮窗、Dock 图标双仪表（两款应用自选），macOS 26 上使用 Liquid Glass。
-
-### 📊 用量：Token 花在哪、跑得多快
-
-- **今日成本**：内置 ccusage 离线统计 15+ 种本地编码 Agent（含 Claude Desktop / Cowork），按官方 API 标价估算。
-- **Token 构成**：输入、输出、缓存写入、缓存读取分开统计；点击趋势图任意一天即可展开按模型的明细。
-- **输出速度**：从本机 Claude Code 与 Codex 会话日志估算各模型的端到端 tok/s，只读取时间戳与 Token 计数。
-- **显示币种**：USD、CNY、EUR、JPY 等 13 种；只换算 API 标价估算，官方账单与余额保持原币种。
 
 ### 🔐 隐私：凭证从不离开你的 Mac
 
 - **只读本机已有凭证**：无需注册账号，无遥测，不刷新第三方 token，不上传凭证。
 - **可选加密同步**：默认关闭；开启后只把白名单字段组成的快照加密写入你自己的 iCloud，供 iPhone、Apple Watch 与桌面小组件显示。
-- **AI 动态**：精选 Anthropic、OpenAI 等官方账号，额度重置与重大更新可推送本机通知。
+- **可选 WebDAV 配置同步**(fork 自有):把账号配置与密钥以明文 JSON 写到你自己的 WebDAV 服务器(如坚果云),方便多 Mac 复制配置;默认关闭。
 - **低能耗**：后台 CPU 比 v1.2.2 降低 95%（[测试方法](docs/performance-v1.2.3.md)）；界面支持简体中文、繁體中文、English、日本語、한국어 等多种语言。
 
 ## 界面一览
 
-<table>
-  <tr>
-    <td width="50%"><img src="site/assets/dash-limits-zh.webp" alt="额度页：各服务商的官方窗口、重置倒计时与节奏余量" /></td>
-    <td width="50%"><img src="site/assets/dash-models-zh.webp" alt="趋势页模型明细：当日 Token 构成与各模型 tok/s" /></td>
-  </tr>
-  <tr>
-    <td><b>额度</b> · 每个窗口的剩余、重置时间与节奏余量，超前时标红并给出预计用尽时间。</td>
-    <td><b>模型明细</b> · 点击任意一天：Token 构成、各模型用量占比与本机估算的输出速度。</td>
-  </tr>
-</table>
+<p align="center">
+  <img src="site/assets/dash-limits-zh.webp" width="80%" alt="额度页：各服务商的官方窗口与重置倒计时" />
+</p>
+<p align="center"><sub><b>额度</b> · 每个窗口的剩余、重置时间与更新时间。</sub></p>
 
 <details>
-<summary><b>更多截图</b>：趋势页、iPhone、Apple Watch 与小组件</summary>
+<summary><b>更多截图</b>：iPhone、Apple Watch 与小组件</summary>
 <br/>
 
 <p align="center">
-  <img src="site/assets/dash-trends-zh.webp" width="80%" alt="趋势页：按服务商堆叠的每日 Token 柱状图、Token 构成与额度消耗曲线" />
-</p>
-<p align="center">
   <img src="site/assets/phone-overview-zh.jpg" width="24%" alt="iPhone 概览页，聚合最多 16 台 Mac" />
-  <img src="site/assets/phone-trends-zh.jpg" width="24%" alt="iPhone 趋势页" />
-  <img src="site/assets/phone-aifeed-zh.jpg" width="24%" alt="iPhone AI Feed 页" />
   <img src="site/assets/watch-overview-zh.png" width="16%" alt="Apple Watch 概览" />
 </p>
 <p align="center">
@@ -96,13 +69,13 @@ iPhone 版目前为 [TestFlight 公开测试](https://testflight.apple.com/join/
 
 ## 快速上手
 
-1. **安装**：[下载 DMG](https://api.tokenremain.com/v1/downloads/macos)，把 TokenRemain 拖进「应用程序」后打开。
+1. **安装**：本 fork 不发布 DMG，从源码构建（见 [CONTRIBUTING.md](CONTRIBUTING.md)）：`USAGEDOCK_INSTALL_DIR="$HOME/Applications" bash ./script/build_and_run.sh`。
 2. **选择工具**：欢迎页会扫描本机已安装的 AI 工具，勾选要追踪的即可。凭证沿用各工具自己的登录，无需在 TokenRemain 里再登录；Codex 可沿用官方桌面 App 的登录。
 3. **补充密钥**：Z.ai、OpenRouter 等需要 API Key 的服务，直接在对应额度卡里粘贴，或在「数据来源」页的「API Key 设置」中填写。密钥只存本机钥匙串。
-4. **按需调整**：在「设置 › 刷新与同步」调整额度刷新频率（1–30 分钟或仅手动）；在「设置 › 通用」选择 Dock 图标显示的两款应用和显示币种；在「账号管理」页管理多账号。
+4. **按需调整**：在「设置 › 刷新与同步」调整额度刷新频率（1–30 分钟或仅手动）；在「设置 › 通用」选择 Dock 图标显示的两款应用；在「账号管理」页管理多账号。
 
 > [!NOTE]
-> Claude Code / Cowork 的本地 Token 统计无需额外安装 CLI。Claude 额度需要可读取的 Claude Code 登录，或在「数据来源」中手动配置 claude.ai 会话（见[常见问题](#常见问题)）；仅登录 Claude 桌面 App 不保证能续期 Code 凭证。
+> Claude 额度需要可读取的 Claude Code 登录，或在「数据来源」中手动配置 claude.ai 会话（见[常见问题](#常见问题)）；仅登录 Claude 桌面 App 不保证能续期 Code 凭证。
 
 ## 支持接入的应用
 
@@ -123,7 +96,7 @@ iPhone 版目前为 [TestFlight 公开测试](https://testflight.apple.com/join/
 | <img src="site/assets/providers/openrouter.svg" width="16" alt="" /> **OpenRouter** | 🔑 | Key 限额、Credits 与账户余额 |
 
 <details>
-<summary><b>另外 11 家扩展 Provider</b>与本地成本来源</summary>
+<summary><b>另外 11 家扩展 Provider</b></summary>
 <br/>
 
 | 应用 | 接入方式 | | 应用 | 接入方式 |
@@ -137,8 +110,6 @@ iPhone 版目前为 [TestFlight 公开测试](https://testflight.apple.com/join/
 
 **Cookie 型服务怎么接入**：在浏览器登录对应网站后，从开发者工具复制请求里的 Cookie，粘贴到该服务的额度卡即可（也可用 `QODER_COOKIE`、`MIMO_COOKIE`、`OLLAMA_COOKIE` 环境变量提供）。Cookie 与 API Key 一样只存本机钥匙串；TokenRemain 从不读取浏览器自身的 Cookie 存储。Cookie 等同于登录凭证，请勿分享；退出网站登录后它会失效，需要重新粘贴。
 
-**本地成本来源**：内置 ccusage 动态发现 Claude Code、Codex、Gemini、Goose 等 15+ 种本地 Agent，并合并 `~/.claude`、`~/.config/claude`、`CLAUDE_CONFIG_DIR` 与 Claude Cowork 的会话目录（自动去重，可在「数据来源」页添加自定义目录）；Trae 只读取所选目录中的时间、模型与 Token 计数。托管模型按官方标价估算，Ollama 等本地模型记零成本；价格未知时仍保留 Token 数。
-
 </details>
 
 ## 隐私
@@ -151,11 +122,10 @@ iPhone 版目前为 [TestFlight 公开测试](https://testflight.apple.com/join/
 
 - **只读凭证，绝不刷新**：只读各工具自己维护的 token，从不写回、不争用 refresh token；后台读取关闭钥匙串交互，不会弹出授权窗。 <sub>🔍 [契约脚本](script/verify_keychain_read_contract.sh) · [测试](Tests/UsageDockTests/KeychainReadTests.swift#L45) · [源码](Sources/UsageDock/Services/ClaudeOAuthUsageService.swift#L9)</sub>
 - **手动密钥只进本机钥匙串**：粘贴的 API Key 存入 macOS 钥匙串，且禁止同步到 iCloud 钥匙串。 <sub>🔍 [源码](Sources/UsageDock/Services/KeychainSecretStore.swift#L176) · [测试](Tests/UsageDockTests/AppOwnedKeychainTests.swift#L15)</sub>
-- **无账号、无遥测、无凭证中转**：额度查询直连各服务商官方 API；依赖只有 Sparkle 与本仓库的同步包，没有任何分析 SDK。 <sub>🔍 [依赖清单](Package.swift)</sub>
-- **价格与汇率更新不带任何本机数据**：价格表每天至多一次无 body、无参数、无认证头的 GET；只有选择 USD 以外的币种时，才向公开汇率接口发出同样固定的请求。 <sub>🔍 [价格测试](Tests/UsageDockTests/CCUsagePricingServiceTests.swift#L19) · [契约脚本](script/verify_bundled_ccusage_contract.sh#L42) · [汇率源码](Sources/UsageDock/Services/ExchangeRateService.swift)</sub>
+- **无账号、无遥测、无凭证中转**：额度查询直连各服务商官方 API；依赖只有本仓库的同步包，没有任何分析 SDK。 <sub>🔍 [依赖清单](Package.swift)</sub>
 - **同步默认关闭，端到端加密**：开启后，只有白名单字段组成的展示快照在本机 AES-GCM 加密，再写入你自己的 iCloud 私有库。 <sub>🔍 [默认关闭测试](Tests/UsageDockTests/CrossDeviceSyncDefaultsTests.swift#L8) · [字段白名单](Sources/UsageDock/Sync/MobileSnapshotRedactor.swift#L7) · [加密实现](Packages/TokenRemainSyncKit/Sources/TokenRemainSyncKit/EncryptedSyncEnvelope.swift#L66)</sub>
 
-**其他联网行为**（均不携带凭证或用量）：AI 动态从 `api.tokenremain.com` 拉取公开内容，通知默认关闭，开启后才用随机安装 ID 注册推送；服务状态读取 `status.openai.com`、`status.claude.com` 的公开接口；非 USD 显示币种读取 `open.er-api.com` 的公开参考汇率；更新检查读取 GitHub 上签名的 appcast；局域网直连同步监听 TCP 47831，只接受已配对设备。
+**其他联网行为**（均不携带凭证）：服务状态读取 `status.openai.com`、`status.claude.com` 的公开接口；开启 WebDAV 同步时只连接你自己配置的服务器；局域网直连同步监听 TCP 47831，只接受已配对设备。
 
 细节见[隐私政策](https://tokenremain.com/privacy)。
 
@@ -187,13 +157,6 @@ TokenRemain 从不刷新 token，只读取工具自己保存的登录状态。�
 
 </details>
 
-<details>
-<summary><b>Claude 桌面 App / Cowork 的用量会被统计吗？</b></summary>
-<br/>
-
-会。本地统计自动合并 `~/.claude`、`~/.config/claude`、继承的 `CLAUDE_CONFIG_DIR` 和 Claude Cowork 的 `.claude/projects` 目录，由内置 ccusage 离线读取并去重；「数据来源」页可以查看发现的目录，也能添加包含 `projects` 的自定义配置目录。普通聊天、网页和手机会话不产生本地 Token 日志，因此不会计入。
-
-</details>
 
 <details>
 <summary><b>顶部预警和卡片上的百分比不一致</b></summary>
@@ -203,21 +166,7 @@ TokenRemain 从不刷新 token，只读取工具自己保存的登录状态。�
 
 </details>
 
-<details>
-<summary><b>今日成本和我的账单对不上</b></summary>
-<br/>
 
-成本按官方 API 标价估算本地 Token 用量，用于衡量用量规模，不等于订阅账单。切换显示币种只换算这部分估算值，官方账单金额与账户余额始终保持原币种。
-
-</details>
-
-<details>
-<summary><b>tok/s 是怎么算的？</b></summary>
-<br/>
-
-TokenRemain 在每次本地统计刷新后，增量读取 Claude Code 与 Codex 会话日志新追加的部分，只提取时间戳、模型名与 Token 计数，估算各模型的端到端输出速度（包含首 Token 延迟）。扫描在低优先级下进行，有时间和数据量上限，结果只保存在本机。
-
-</details>
 
 <details>
 <summary><b>卡片标注了「第三方 API」</b></summary>
@@ -248,28 +197,10 @@ rm -rf ~/Library/Caches/com.jamesli.usagedock ~/Library/Application\ Support/com
 
 欢迎提交 issue 与 PR。构建、测试、目录结构与代码约定见 [CONTRIBUTING.md](CONTRIBUTING.md)；安全问题请按 [SECURITY.md](SECURITY.md) 私下报告，不要公开提交 issue。
 
-## 下载趋势
-
-<div align="center">
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://api.tokenremain.com/v1/downloads/chart.svg?theme=dark&amp;lang=zh" />
-  <source media="(prefers-color-scheme: light)" srcset="https://api.tokenremain.com/v1/downloads/chart.svg?theme=light&amp;lang=zh" />
-  <img src="https://api.tokenremain.com/v1/downloads/chart.svg?theme=dark&amp;lang=zh" width="920" alt="官网累计下载趋势图，数据来自匿名聚合计数器的每日快照" />
-</picture>
-
-<sub>基线为截至 2026-08-07 的 163 次历史下载（[明细](docs/download-baseline.md)），此后由匿名下载入口即时累计，并每小时与 GitHub 上的 DMG 下载总数对账，不含任何个人数据。</sub>
-
-</div>
-
 ## 致谢
 
 - [token-monitor](https://github.com/Javis603/token-monitor)（MIT）：扩展 Provider 的额度读取逻辑移植自此项目，桌面浮窗与偏好设计也受其启发。
-- [ccusage](https://github.com/ryoppippi/ccusage)（MIT）：随 App 内置，用于统计本地 Agent 的 Token 用量。
 - [OpenUsage](https://github.com/robinebers/openusage)（MIT）：Claude 限额 API 直查的 provider 设计参考。
-- [LiteLLM](https://github.com/BerriAI/litellm)：公开的模型价格表。
-- [ExchangeRate-API](https://www.exchangerate-api.com)：显示币种使用的公开参考汇率。
-- [Sparkle](https://github.com/sparkle-project/Sparkle)（MIT）：签名自动更新。
 
 第三方版权与许可声明见 [NOTICE](NOTICE)。
 

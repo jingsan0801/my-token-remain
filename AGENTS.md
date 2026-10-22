@@ -16,7 +16,7 @@
 | 发布 | `docs/versioning.md`、`docs/download-baseline.md`、`script/`；版本以当前文件和 Git 状态为准，不照抄文档中的历史分支名 |
 | 代理配置 | 本文件、`CLAUDE.md`、`.cursor/`、`.claude/`、`.agents/`、`.codex/hooks.json`、`docs/agents/`、`script/*agent*`；改动走 R15，宿主能力以 [knowledge](docs/agents/knowledge.md#host-capabilities) 的实测记录为准 |
 
-移动客户端源码独立维护。即使另一个仓库可访问，也不自动属于本任务范围。`marketing/`、`design/`、历史 `reports/`、`Vendor/`、版本文件、签名配置和发布产物只在任务相关时修改。
+移动客户端源码独立维护。即使另一个仓库可访问，也不自动属于本任务范围。`marketing/`、`design/`、历史 `reports/`、版本文件、签名配置和发布产物只在任务相关时修改。
 
 ## 必须遵守的限制条件
 

@@ -8,19 +8,11 @@
 Credentials never leave your machine: read-only, never refreshed, never uploaded.
 
 <p>
-  <a href="https://github.com/Carstin520/token-remain/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Carstin520/token-remain?label=latest&color=22D3EE" /></a>
   <img alt="macOS 14+ · Universal" src="https://img.shields.io/badge/macOS_14%2B-Universal-000?logo=apple&logoColor=white" />
-  <img alt="Notarized by Apple" src="https://img.shields.io/badge/Apple-Notarized-34C759?logo=apple&logoColor=white" />
   <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-8A94A6" /></a>
 </p>
 
-<h3><a href="https://api.tokenremain.com/v1/downloads/macos">⬇️ Download TokenRemain.dmg</a></h3>
-
-<a href="https://tokenremain.com">Website</a> ·
-<a href="https://testflight.apple.com/join/DU3DrnhG">iPhone beta</a> ·
 <a href="CHANGELOG.md">Changelog</a> ·
-<a href="https://tokenremain.com/privacy">Privacy</a> ·
-<a href="https://github.com/Carstin520/token-remain/issues">Issues</a> ·
 <a href="README.md">简体中文</a>
 
 </div>
@@ -28,61 +20,42 @@ Credentials never leave your machine: read-only, never refreshed, never uploaded
 <br/>
 
 <p align="center">
-  <img src="site/assets/dash-overview.webp" width="77%" alt="Dashboard overview: lowest remaining quota, today's tokens and estimated cost, official quota progress and risk notes" />
-  <img src="site/assets/popover.webp" width="19%" alt="Menu bar popover listing remaining quota per app, today's local usage and the AI Feed" />
+  <img src="site/assets/dash-overview.webp" width="77%" alt="Dashboard overview: lowest remaining quota, official quota progress and risk notes" />
+  <img src="site/assets/popover.webp" width="19%" alt="Menu bar popover listing remaining quota per app" />
 </p>
-<p align="center"><sub>Remaining quota, reset countdowns and today's cost for Claude Code, Codex, Cursor, Grok, GLM and 21+ tools — on one screen. (Real usage data.)</sub></p>
+<p align="center"><sub>Remaining quota and reset countdowns for Claude Code, Codex, Cursor, Grok, GLM and 21+ tools — on one screen.</sub></p>
 
-> [!TIP]
-> **New in 1.4:** an Account Management page to enable, pause and rename each account; Trends now splits input / output / cache write / cache read and estimates each model's output speed (tok/s) on your Mac; cost estimates in 13 display currencies; Claude Desktop / Cowork sessions count toward local usage. See the [changelog](CHANGELOG.md) for everything.
+> [!NOTE]
+> This is a personal fork (MyTokenRemain): automatic updates (Sparkle), the author's server pipeline, token-usage/cost statistics and the Trends page are removed — quota monitoring only — with an optional self-hosted WebDAV config sync added. See the [changelog](CHANGELOG.md) for the delta.
 
 ## Features
 
 ### 🧭 Quota — know whether you'll make it to reset
 
 - **21+ tools side by side**: every official quota window with a progress bar, reset countdown and freshness.
-- **Pace prediction**: real window progress decides whether your current pace lasts until reset, with an ETA when it won't.
 - **Multiple accounts**: each account of the same tool gets its own row; the Account Management page toggles monitoring per app, enables or pauses accounts, renames them and updates credentials, with an opt-in combined view for same-plan accounts.
 - **Wherever you look**: menu bar capsules, a floating window across Spaces, two meters on the Dock icon (you pick the apps), and Liquid Glass on macOS 26.
-
-### 📊 Usage — where the tokens go, and how fast
-
-- **Today's cost**: the bundled ccusage counts 15+ local coding agents offline (Claude Desktop / Cowork included), estimated at official API list prices.
-- **Token mix**: input, output, cache write and cache read counted separately; click any day in Trends for a per-model breakdown.
-- **Output speed**: end-to-end tok/s per model, estimated from local Claude Code and Codex session logs — only timestamps and token counters are read.
-- **Display currency**: USD, CNY, EUR, JPY and 9 more; only list-price estimates are converted, official bills and balances stay in their billing currency.
 
 ### 🔐 Privacy — credentials never leave your Mac
 
 - **Reads what's already there**: no account to create, no telemetry, never refreshes third-party tokens, never uploads credentials.
 - **Optional encrypted sync**: off by default; when on, only an allowlisted snapshot is encrypted into your own iCloud for iPhone, Apple Watch and Home Screen widgets.
-- **AI Feed**: curated posts from Anthropic, OpenAI and other official accounts, with local alerts for quota resets and major updates.
+- **Optional WebDAV config sync** (fork-only): writes account configuration and keys as plaintext JSON to your own WebDAV server to copy settings between Macs; off by default.
 - **Light on energy**: background CPU down 95% vs v1.2.2 ([method](docs/performance-v1.2.3.md)); interface in English, 简体中文, 繁體中文, 日本語, 한국어 and more.
 
 ## Screenshots
 
-<table>
-  <tr>
-    <td width="50%"><img src="site/assets/dash-limits.webp" alt="Limits page: official windows per provider with reset countdowns and pace reserve" /></td>
-    <td width="50%"><img src="site/assets/dash-models.webp" alt="Trends model detail: the day's token mix and per-model tok/s" /></td>
-  </tr>
-  <tr>
-    <td><b>Limits</b> · remaining quota, reset time and pace reserve for every window, flagged red with a run-out ETA when you're ahead of budget.</td>
-    <td><b>Model detail</b> · click any day: token mix, each model's share and its locally estimated output speed.</td>
-  </tr>
-</table>
+<p align="center">
+  <img src="site/assets/dash-limits.webp" width="80%" alt="Limits page: official windows per provider with reset countdowns" />
+</p>
+<p align="center"><sub><b>Limits</b> · remaining quota, reset time and freshness for every window.</sub></p>
 
 <details>
-<summary><b>More screenshots</b>: Trends, iPhone, Apple Watch and widgets</summary>
+<summary><b>More screenshots</b>: iPhone, Apple Watch and widgets</summary>
 <br/>
 
 <p align="center">
-  <img src="site/assets/dash-trends.webp" width="80%" alt="Trends page: stacked daily token bars per provider, token mix and quota-consumption curves" />
-</p>
-<p align="center">
   <img src="site/assets/phone-overview.jpg" width="24%" alt="iPhone overview page, aggregating up to 16 Macs" />
-  <img src="site/assets/phone-trends.jpg" width="24%" alt="iPhone trends page" />
-  <img src="site/assets/phone-aifeed.jpg" width="24%" alt="iPhone AI Feed page" />
   <img src="site/assets/watch-overview.png" width="16%" alt="Apple Watch overview" />
 </p>
 <p align="center">
@@ -96,13 +69,13 @@ The iPhone app is in [public TestFlight beta](https://testflight.apple.com/join/
 
 ## Quick start
 
-1. **Install**: [download the DMG](https://api.tokenremain.com/v1/downloads/macos), drag TokenRemain into Applications and open it.
+1. **Install**: this fork ships no DMG — build from source (see [CONTRIBUTING.md](CONTRIBUTING.md)): `USAGEDOCK_INSTALL_DIR="$HOME/Applications" bash ./script/build_and_run.sh`.
 2. **Pick your tools**: the welcome screen scans your Mac for installed AI tools — tick the ones to track. TokenRemain reuses each tool's own sign-in, so there's nothing to log into; Codex can reuse the official desktop app's sign-in.
 3. **Add keys if needed**: for services that need an API key (Z.ai, OpenRouter, …), paste it straight into that service's quota card, or under "API key settings" on the Data Sources page. Keys stay in your Mac's Keychain.
-4. **Tune it**: set the quota refresh interval (1–30 minutes or manual) in Settings › Refresh & Sync; choose the Dock icon's two apps and the display currency in Settings › General; manage multiple accounts on the Account Management page.
+4. **Tune it**: set the quota refresh interval (1–30 minutes or manual) in Settings › Refresh & Sync; choose the Dock icon's two apps in Settings › General; manage multiple accounts on the Account Management page.
 
 > [!NOTE]
-> Local token stats for Claude Code / Cowork need no extra CLI. Claude quota needs a readable Claude Code sign-in, or a claude.ai session configured on the Data Sources page (see the [FAQ](#faq)); signing in to the Claude desktop app alone doesn't guarantee the Code credential stays renewed.
+> Claude quota needs a readable Claude Code sign-in, or a claude.ai session configured on the Data Sources page (see the [FAQ](#faq)); signing in to the Claude desktop app alone doesn't guarantee the Code credential stays renewed.
 
 ## Supported services
 
@@ -123,7 +96,7 @@ The iPhone app is in [public TestFlight beta](https://testflight.apple.com/join/
 | <img src="site/assets/providers/openrouter.svg" width="16" alt="" /> **OpenRouter** | 🔑 | Key limits, credits and account balance |
 
 <details>
-<summary><b>11 more extended providers</b> and local cost sources</summary>
+<summary><b>11 more extended providers</b></summary>
 <br/>
 
 | Service | Connection | | Service | Connection |
@@ -137,8 +110,6 @@ The iPhone app is in [public TestFlight beta](https://testflight.apple.com/join/
 
 **How cookie-based services connect:** sign in to the service's website, copy the request Cookie from your browser's developer tools and paste it into that service's quota card (or provide it via `QODER_COOKIE`, `MIMO_COOKIE` or `OLLAMA_COOKIE`). Cookies are stored only in your Mac's Keychain, like API keys; TokenRemain never reads your browser's own cookie store. A cookie is a sign-in credential — never share it; signing out of the website invalidates it, so paste a fresh one afterwards.
 
-**Local cost sources:** the bundled ccusage collector discovers 15+ local agents (Claude Code, Codex, Gemini, Goose, …) and merges `~/.claude`, `~/.config/claude`, `CLAUDE_CONFIG_DIR` and Claude Cowork session folders (deduplicated; add custom folders on the Data Sources page). Trae contributes only timestamps, model names and token counts from a folder you select. Hosted models use official list-price estimates; local models like Ollama stay at zero cost, and tokens are kept even when a price is unknown.
-
 </details>
 
 ## Privacy
@@ -151,11 +122,10 @@ Every claim links to the code or test that backs it:
 
 - **Read-only credentials, never refreshed** — Reads the tokens your tools already maintain, never writes back, never competes for refresh tokens; background reads disable Keychain UI, so no system prompt appears. <sub>🔍 [contract script](script/verify_keychain_read_contract.sh) · [tests](Tests/UsageDockTests/KeychainReadTests.swift#L45) · [source](Sources/UsageDock/Services/ClaudeOAuthUsageService.swift#L9)</sub>
 - **Pasted keys stay in the local Keychain** — API keys go into the macOS Keychain and are barred from syncing to iCloud Keychain. <sub>🔍 [source](Sources/UsageDock/Services/KeychainSecretStore.swift#L176) · [tests](Tests/UsageDockTests/AppOwnedKeychainTests.swift#L15)</sub>
-- **No account, no telemetry, no credential relay** — Quota queries go straight to each provider's official API; the only dependencies are Sparkle and this repo's sync package, with no analytics SDK. <sub>🔍 [dependencies](Package.swift)</sub>
-- **Price and rate updates carry no local data** — The price table is fetched by at most one GET per day with no body, query string or auth header; only when you pick a currency other than USD does an equally fixed request fetch public reference rates. <sub>🔍 [pricing tests](Tests/UsageDockTests/CCUsagePricingServiceTests.swift#L19) · [contract script](script/verify_bundled_ccusage_contract.sh#L42) · [rates source](Sources/UsageDock/Services/ExchangeRateService.swift)</sub>
+- **No account, no telemetry, no credential relay** — Quota queries go straight to each provider's official API; the only dependency is this repo's sync package, with no analytics SDK. <sub>🔍 [dependencies](Package.swift)</sub>
 - **Sync is off by default and end-to-end encrypted** — When enabled, only an allowlisted display snapshot is AES-GCM encrypted on your Mac, then written to your own private iCloud database. <sub>🔍 [off-by-default test](Tests/UsageDockTests/CrossDeviceSyncDefaultsTests.swift#L8) · [field allowlist](Sources/UsageDock/Sync/MobileSnapshotRedactor.swift#L7) · [encryption](Packages/TokenRemainSyncKit/Sources/TokenRemainSyncKit/EncryptedSyncEnvelope.swift#L66)</sub>
 
-**Other network activity** (never carries credentials or usage): AI Feed fetches public posts from `api.tokenremain.com`; notifications are off by default and register a random install ID only when enabled. Service status reads the public endpoints of `status.openai.com` and `status.claude.com`. A non-USD display currency reads public reference rates from `open.er-api.com`. Update checks read a signed appcast on GitHub. Direct LAN sync listens on TCP 47831 and accepts only paired devices.
+**Other network activity** (never carries credentials): service status reads the public endpoints of `status.openai.com` and `status.claude.com`; WebDAV sync, when enabled, contacts only the server you configure; direct LAN sync listens on TCP 47831 and accepts only paired devices.
 
 Details in the [privacy policy](https://tokenremain.com/privacy).
 
@@ -187,13 +157,6 @@ The card is showing the last good cached snapshot; TokenRemain retries once the 
 
 </details>
 
-<details>
-<summary><b>Is Claude Desktop / Cowork usage counted?</b></summary>
-<br/>
-
-Yes. Local stats merge `~/.claude`, `~/.config/claude`, an inherited `CLAUDE_CONFIG_DIR` and Claude Cowork's `.claude/projects` folders, read offline and deduplicated by the bundled ccusage. The Data Sources page lists the folders it found and lets you add a custom config folder that contains `projects`. Plain chats, web and phone sessions leave no local token logs, so they aren't counted.
-
-</details>
 
 <details>
 <summary><b>The top alert and the card show different percentages</b></summary>
@@ -203,21 +166,7 @@ The alert reflects the tightest of all windows (usually the 7-day one), while th
 
 </details>
 
-<details>
-<summary><b>Today's cost doesn't match my bill</b></summary>
-<br/>
 
-Cost is an estimate of local token usage at official API list prices. It shows the scale of your usage, not your subscription bill. Switching the display currency converts only these estimates; official billed amounts and balances always stay in their billing currency.
-
-</details>
-
-<details>
-<summary><b>How is tok/s calculated?</b></summary>
-<br/>
-
-After each local usage refresh, TokenRemain reads only the newly appended part of Claude Code and Codex session logs, extracts timestamps, model names and token counters, and estimates each model's end-to-end output speed (time to first token included). The scan runs at low priority with time and size limits, and the results stay on your Mac.
-
-</details>
 
 <details>
 <summary><b>A card is labeled "third-party API"</b></summary>
@@ -248,28 +197,10 @@ Still stuck? [Open an issue](https://github.com/Carstin520/token-remain/issues) 
 
 Issues and pull requests are welcome. Build steps, tests, repository layout and conventions are in [CONTRIBUTING.md](CONTRIBUTING.md); please report security issues privately as described in [SECURITY.md](SECURITY.md), not in a public issue.
 
-## Downloads over time
-
-<div align="center">
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://api.tokenremain.com/v1/downloads/chart.svg?theme=dark&amp;lang=en" />
-  <source media="(prefers-color-scheme: light)" srcset="https://api.tokenremain.com/v1/downloads/chart.svg?theme=light&amp;lang=en" />
-  <img src="https://api.tokenremain.com/v1/downloads/chart.svg?theme=dark&amp;lang=en" width="920" alt="Cumulative website download chart, rendered from daily snapshots of the anonymous aggregate counter" />
-</picture>
-
-<sub>Starts from 163 historical downloads as of 2026-08-07 ([breakdown](docs/download-baseline.md)), then grows through the anonymous download link and an hourly reconciliation with GitHub's DMG download total; no personal data involved.</sub>
-
-</div>
-
 ## Acknowledgments
 
 - [token-monitor](https://github.com/Javis603/token-monitor) (MIT) — the extended providers' quota readers are ported from this project, which also inspired the floating window and preferences.
-- [ccusage](https://github.com/ryoppippi/ccusage) (MIT) — bundled with the app to count local agents' token usage.
 - [OpenUsage](https://github.com/robinebers/openusage) (MIT) — reference for the direct Claude quota API provider design.
-- [LiteLLM](https://github.com/BerriAI/litellm) — the public model price table.
-- [ExchangeRate-API](https://www.exchangerate-api.com) — public reference rates for display currencies.
-- [Sparkle](https://github.com/sparkle-project/Sparkle) (MIT) — signed app updates.
 
 Third-party copyright and license notices are in [NOTICE](NOTICE).
 
