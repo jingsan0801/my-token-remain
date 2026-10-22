@@ -271,7 +271,7 @@ struct PopoverQuotaWidget: View {
                 Divider().overlay(DashboardSurface.border)
                 ProviderSpendRow(spend: spend)
             }
-            freshnessRow(quota)
+            freshnessRow(quota, showsCached: trailingNotice != nil)
         }
         if let trailingNotice {
             noticeRow(trailingNotice, offersCookieSignIn: offersCookieSignIn)
@@ -335,11 +335,14 @@ struct PopoverQuotaWidget: View {
         }
     }
 
-    private func freshnessRow(_ quota: ProviderQuota) -> some View {
+    private func freshnessRow(_ quota: ProviderQuota, showsCached: Bool) -> some View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
-            let isStale = context.date.timeIntervalSince(quota.capturedAt) >= 600
+            // With a failed latest refresh the widget shows the cached
+            // snapshot; label it as such even inside the staleness threshold.
+            let isStale = showsCached || context.date.timeIntervalSince(quota.capturedAt) >= 600
+            let freshness = UsageFormatting.freshnessDescription(since: quota.capturedAt, now: context.date)
             Label(
-                UsageFormatting.freshnessDescription(since: quota.capturedAt, now: context.date),
+                showsCached ? L10n.format("freshness.cached", freshness) : freshness,
                 systemImage: isStale ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
             )
             .numericFont(10)

@@ -50,6 +50,7 @@
 "freshness.minutes" = "Vor %d Min aktualisiert";
 "freshness.hours" = "Vor %d Std aktualisiert";
 "freshness.days" = "Vor %d T aktualisiert";
+"freshness.cached" = "Zwischengespeichert · %1$@";
 "quota.window" = "%1$@-Fenster";
 "quota.remaining" = "%1$@ verbleibend";
 "quota.window_accessibility" = "%1$@ %2$@-Fenster";
@@ -383,6 +384,7 @@
 "service.common.request_failed" = "Anfrage an die %1$@-Nutzungs-API fehlgeschlagen (HTTP %2$d)";
 "service.common.request_failed_plain" = "Anfrage an die %1$@-Nutzungs-API fehlgeschlagen (HTTP %2$d)";
 "service.common.secret_missing" = "Keine Zugangsdaten für %1$@ konfiguriert; direkt in die entsprechende Kontingentkarte einfügen";
+"service.common.secret_unavailable" = "%1$@-Zugangsdaten nicht lesbar; sie könnten in einer anderen App-Version gespeichert sein oder wurden entfernt";
 "service.common.secret_rejected" = "%1$@ hat die aktuellen Zugangsdaten abgelehnt (HTTP %2$d); bitte in der entsprechenden Kontingentkarte aktualisieren";
 "service.common.stale_login_reopen" = "%1$@ wurde lange nicht genutzt und die Anmeldedaten sind abgelaufen; %1$@ einmal öffnen, um die Kontingent-Aktualisierung fortzusetzen";
 "service.common.token_rejected_plain" = "%1$@-Nutzungs-API hat die aktuellen Anmeldedaten abgelehnt (HTTP %2$d)";

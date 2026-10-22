@@ -39,6 +39,10 @@ ARCHIVE_DIR="${USAGEDOCK_ARCHIVE_DIR:-$ROOT_DIR/dist-release}"
 # A non-sync development build must never replace or stop the production sync
 # app. It gets its own bundle, bundle identifier, executable/process name, and
 # installed path. Only a profile-backed sync build may target TokenRemain.app.
+# Fork note: this personal fork ships a single app identity — there is no Dev
+# variant. Plain builds use the same name, executable and bundle id as the
+# sync release, so Keychain items and UserDefaults live in one namespace and
+# there is exactly one installed MyTokenRemain.
 if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
   APP_NAME="MyTokenRemain"
   EXECUTABLE_NAME="UsageDock"
@@ -49,10 +53,14 @@ if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
     "$INSTALL_DIR/TokenRemain.app"
   )
 else
-  APP_NAME="MyTokenRemain Dev"
-  EXECUTABLE_NAME="UsageDockDev"
-  BUNDLE_ID="com.jingsan0801.mytokenremain.dev"
+  APP_NAME="MyTokenRemain"
+  EXECUTABLE_NAME="UsageDock"
+  BUNDLE_ID="com.jingsan0801.mytokenremain"
   LEGACY_INSTALLED_APPS=(
+    "$INSTALL_DIR/UsageDock.app"
+    "$INSTALL_DIR/Token Remain.app"
+    "$INSTALL_DIR/TokenRemain.app"
+    "$INSTALL_DIR/MyTokenRemain Dev.app"
     "$INSTALL_DIR/UsageDock Dev.app"
     "$INSTALL_DIR/TokenRemain Dev.app"
   )
@@ -335,10 +343,9 @@ verify_sync_signature() {
 verify_development_isolation() {
   local signed_app="$1"
   local entitlements
-  if [[ "$INSTALLED_APP" == "$STABLE_SYNC_APP" ]]; then
-    echo "A non-sync development build cannot target the stable sync app." >&2
-    exit 1
-  fi
+  # Fork note: with the Dev variant removed, plain builds intentionally target
+  # the single stable install path; upstream's "development build cannot
+  # target the stable sync app" refusal is dropped together with the variant.
   /usr/bin/codesign --verify --deep --strict "$signed_app"
   if [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$signed_app/Contents/Info.plist")" != "$BUNDLE_ID" \
     || "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$signed_app/Contents/Info.plist")" != "$EXECUTABLE_NAME" ]]; then

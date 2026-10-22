@@ -230,6 +230,10 @@ struct DashboardView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        // Suppress the system-blue key focus ring: selection is already shown
+        // by the violet capsule, and the window otherwise auto-focuses the
+        // first row (概览) with a stray blue outline.
+        .focusable(false)
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 

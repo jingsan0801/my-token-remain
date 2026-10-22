@@ -1796,8 +1796,20 @@ final class UsageStore: ObservableObject {
             if credentialIssue == nil, Self.invalidatesCachedQuota(error) {
                 self.assign(nil, to: provider)
             }
-            providerNotices[provider] = credentialIssue ?? error.localizedDescription
+            providerNotices[provider] = credentialIssue ?? noticeDescription(for: error, provider: provider)
         }
+    }
+
+    /// A credential that worked before is not "never configured": the cached
+    /// quota proves setup happened, so a missing read means it vanished (a
+    /// different app version's Keychain namespace, a cleared item, …). The
+    /// "paste a key" wording would send the user to redo what they already
+    /// did, so the vanished case gets its own message.
+    private func noticeDescription(for error: Error, provider: ProviderQuota.Provider) -> String {
+        if case ExtendedProviderError.notConfigured = error, localQuotas[provider] != nil {
+            return L10n.format("service.common.secret_unavailable", provider.displayName)
+        }
+        return error.localizedDescription
     }
 
     private func syncSystemAccountNotice(_ provider: ProviderQuota.Provider) {

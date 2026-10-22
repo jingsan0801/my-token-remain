@@ -255,9 +255,14 @@ struct QuotaCard: View {
                 ProviderModelUsageRow(models: models)
             }
             TimelineView(.periodic(from: .now, by: 60)) { context in
-                let isStale = context.date.timeIntervalSince(quota.capturedAt) >= 600
+                // A failed latest refresh means everything on the card is the
+                // cached snapshot, even when it is younger than the staleness
+                // threshold — say so instead of implying live data.
+                let isCached = notice != nil
+                let isStale = isCached || context.date.timeIntervalSince(quota.capturedAt) >= 600
+                let freshness = UsageFormatting.freshnessDescription(since: quota.capturedAt, now: context.date)
                 Label {
-                    Text(UsageFormatting.freshnessDescription(since: quota.capturedAt, now: context.date))
+                    Text(isCached ? L10n.format("freshness.cached", freshness) : freshness)
                         .numericFont(10)
                 } icon: {
                     Image(systemName: isStale ? "exclamationmark.circle.fill" : "checkmark.circle.fill")

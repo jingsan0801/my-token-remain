@@ -50,6 +50,7 @@
 "freshness.minutes" = "Actualizado hace %d min";
 "freshness.hours" = "Actualizado hace %d h";
 "freshness.days" = "Actualizado hace %d d";
+"freshness.cached" = "En caché · %1$@";
 "quota.window" = "Ventana de %1$@";
 "quota.remaining" = "%1$@ restante";
 "quota.window_accessibility" = "Ventana %1$@ de %2$@";
@@ -383,6 +384,7 @@
 "service.common.request_failed" = "Falló la solicitud a la API de uso de %1$@ (HTTP %2$d)";
 "service.common.request_failed_plain" = "Falló la solicitud a la API de uso de %1$@ (HTTP %2$d)";
 "service.common.secret_missing" = "No hay credenciales de %1$@ configuradas; pégalas directamente en su tarjeta de cuota";
+"service.common.secret_unavailable" = "No se puede leer la credencial de %1$@; puede estar guardada en otra versión de la app o haberse eliminado";
 "service.common.secret_rejected" = "%1$@ rechazó las credenciales actuales (HTTP %2$d); actualízalas en su tarjeta de cuota";
 "service.common.stale_login_reopen" = "%1$@ lleva tiempo sin usarse y sus credenciales han caducado; abre la app %1$@ una vez para reanudar la actualización de cuota";
 "service.common.token_rejected_plain" = "La API de uso de %1$@ rechazó las credenciales actuales (HTTP %2$d)";

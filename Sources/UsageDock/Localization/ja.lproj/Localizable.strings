@@ -50,6 +50,7 @@
 "freshness.minutes" = "%d分前に更新";
 "freshness.hours" = "%d時間前に更新";
 "freshness.days" = "%d日前に更新";
+"freshness.cached" = "キャッシュ · %1$@";
 "quota.window" = "%1$@ ウィンドウ";
 "quota.remaining" = "残り %1$@";
 "quota.window_accessibility" = "%1$@ %2$@ ウィンドウ";
@@ -383,6 +384,7 @@
 "service.common.request_failed" = "%1$@の使用量 API リクエストに失敗しました(HTTP %2$d)";
 "service.common.request_failed_plain" = "%1$@の使用量 API リクエストに失敗しました(HTTP %2$d)";
 "service.common.secret_missing" = "%1$@の認証情報が未設定です。対応するクォータカードに直接貼り付けてください";
+"service.common.secret_unavailable" = "%1$@の認証情報を読み取れません。別のアプリバージョンに保存されているか、削除された可能性があります";
 "service.common.secret_rejected" = "%1$@が現在の認証情報を拒否しました(HTTP %2$d)。対応するクォータカードで更新してください";
 "service.common.stale_login_reopen" = "%1$@が長期間使われておらず、ログイン認証情報の有効期限が切れました。%1$@アプリを一度開くと上限の更新が再開されます";
 "service.common.token_rejected_plain" = "%1$@の使用量 API が現在の認証情報を拒否しました(HTTP %2$d)";

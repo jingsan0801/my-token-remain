@@ -50,6 +50,7 @@
 "freshness.minutes" = "Updated %d min ago";
 "freshness.hours" = "Updated %d hr ago";
 "freshness.days" = "Updated %d d ago";
+"freshness.cached" = "Cached · %1$@";
 "quota.window" = "%1$@ window";
 "quota.remaining" = "%1$@ remaining";
 "quota.window_accessibility" = "%1$@ %2$@ window";
@@ -384,6 +385,7 @@
 "service.common.request_failed" = "%1$@ usage API request failed (HTTP %2$d)";
 "service.common.request_failed_plain" = "%1$@ usage API request failed (HTTP %2$d)";
 "service.common.secret_missing" = "No %1$@ credentials configured; paste them directly in its quota card";
+"service.common.secret_unavailable" = "%1$@ credential unreadable; it may be stored in another app version or was removed";
 "service.common.secret_rejected" = "%1$@ rejected the current credentials (HTTP %2$d); update them in its quota card";
 "service.common.stale_login_reopen" = "%1$@ has been idle and its login credentials expired; open the %1$@ app once to resume quota refresh";
 "service.common.token_rejected_plain" = "%1$@ usage API rejected the current credentials (HTTP %2$d)";

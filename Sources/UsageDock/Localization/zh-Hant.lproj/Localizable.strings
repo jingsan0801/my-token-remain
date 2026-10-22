@@ -50,6 +50,7 @@
 "freshness.minutes" = "%d 分鐘前更新";
 "freshness.hours" = "%d 小時前更新";
 "freshness.days" = "%d 天前更新";
+"freshness.cached" = "快取資料 · %1$@";
 "quota.window" = "%1$@視窗";
 "quota.remaining" = "剩餘 %1$@";
 "quota.window_accessibility" = "%1$@ %2$@視窗";
@@ -387,6 +388,7 @@
 "service.common.request_failed" = "%1$@ 用量 API 請求失敗（HTTP %2$d）";
 "service.common.request_failed_plain" = "%1$@ 用量 API 請求失敗 (HTTP %2$d)";
 "service.common.secret_missing" = "尚未設定 %1$@ 憑證；請直接在對應額度卡中貼上";
+"service.common.secret_unavailable" = "%1$@ 憑據讀取不到：可能儲存在其他 app 版本或已被清除";
 "service.common.secret_rejected" = "%1$@ 拒絕了目前的憑證（HTTP %2$d）；請在對應額度卡中更新";
 "service.common.stale_login_reopen" = "%1$@ 長時間未使用，登入憑證已過期；開啟一次 %1$@ App 即可恢復額度更新";
 "service.common.token_rejected_plain" = "%1$@ 用量 API 拒絕了目前的憑證 (HTTP %2$d)";
