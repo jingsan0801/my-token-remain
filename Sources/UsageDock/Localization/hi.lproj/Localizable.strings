@@ -1,17 +1,14 @@
 "widget.local_usage" = "आज का स्थानीय उपयोग";
 "widget.ai_feed" = "AI फ़ीड";
-"usage.api_cost" = "API लागत";
 "nav.group.monitor" = "निगरानी";
 "nav.group.system" = "सिस्टम";
 "nav.overview" = "अवलोकन";
 "nav.limits" = "सीमाएँ";
-"nav.trends" = "रुझान";
 "nav.devices" = "डिवाइस";
 "nav.data_sources" = "डेटा स्रोत";
 "nav.settings" = "सेटिंग्स";
 "section.overview.subtitle" = "कोटा जोखिम और लाइव आधिकारिक कोटा";
 "section.limits.subtitle" = "आपके AI कोडिंग टूल की आधिकारिक कोटा विंडो";
-"section.trends.subtitle" = "समय के साथ उपयोग · लोकल ccusage";
 "section.devices.subtitle" = "यह Mac और भावी क्रॉस-डिवाइस निगरानी";
 "section.data_sources.subtitle" = "डेटा स्रोत स्थिति और गोपनीयता";
 "section.settings.subtitle" = "स्टार्टअप, रीफ़्रेश और ऐप नियंत्रण";
@@ -25,12 +22,10 @@
 "risk.headline.medium" = "उपयोग की गति पर नज़र रखें";
 "risk.headline.high" = "कोटा लगभग समाप्त है";
 "risk.headline.unknown" = "आधिकारिक कोटा की प्रतीक्षा";
-"risk.headline.projected_runout" = "वर्तमान गति पर कोटा जल्दी समाप्त हो सकता है";
 "risk.summary.low" = "वर्तमान गति पर कोटा अगले रीसेट तक चलना चाहिए।";
 "risk.summary.medium" = "कुछ विंडो में कोटा कम है। उपयोग घटाएँ या रीसेट समय देखें।";
 "risk.summary.high" = "कोटा लगभग समाप्त है। सावधानी से उपयोग करें या रीसेट की प्रतीक्षा करें।";
 "risk.summary.unknown" = "अभी आधिकारिक कोटा स्नैपशॉट नहीं है। स्वतः पुनः प्रयास होगा।";
-"risk.summary.projected_runout" = "%1$@ %2$@ के %3$@ में, आधिकारिक रीसेट से पहले समाप्त होने का अनुमान है। उपयोग घटाएँ या प्रदाता बदलें।";
 "feed.tier.primary" = "प्राथमिक";
 "feed.tier.rotating" = "द्वितीयक";
 "feed.priority.token" = "कोटा / Token";
@@ -53,12 +48,6 @@
 "quota.window" = "%1$@ विंडो";
 "quota.remaining" = "%1$@ शेष";
 "quota.window_accessibility" = "%1$@ %2$@ विंडो";
-"pace.on_track" = "सही गति";
-"pace.reserve" = "%1$@ अतिरिक्त";
-"pace.deficit" = "%1$@ आगे";
-"pace.lasts_until_reset" = "रीसेट तक चलेगा";
-"pace.projected_early" = "जल्दी समाप्त होने का अनुमान";
-"pace.projected_in" = "%1$@ में समाप्त होने का अनुमान";
 "widget.all_visible" = "सभी विजेट दिखाई दे रहे हैं";
 "widget.add_named" = "%1$@ जोड़ें";
 "widget.keep_expanded" = "खुला रखें";
@@ -81,12 +70,6 @@
 "action.settings" = "सेटिंग";
 "action.quit" = "बंद करें";
 "action.quit_app" = "MyTokenRemain बंद करें";
-"usage.updated_local" = "%1$@ अपडेट · डेटा इसी Mac पर रहता है";
-"usage.loading_local" = "उपयोग पढ़ा जा रहा है · डेटा इसी Mac पर रहता है";
-"usage.provider_breakdown_empty" = "प्रदाता के अनुसार विवरण उपलब्ध नहीं";
-"usage.loading_ccusage" = "स्थानीय ccusage डेटा पढ़ा जा रहा है…";
-"usage.provider_help" = "%1$@: API लागत %2$@, %3$@ tokens, कुल का %4$@";
-"usage.provider_accessibility" = "%1$@, API लागत %2$@, %3$@ tokens";
 "quota.loading_official" = "आधिकारिक कोटा पढ़ा जा रहा है…";
 "quota.login_recovery_hint" = "लॉगिन नहीं मिला; लॉग इन करने पर डेटा अपने आप वापस आ जाएगा";
 "feed.updating" = "अपडेट हो रहा है";
@@ -98,19 +81,9 @@
 "feed.open_x_hint" = "X पर मूल पोस्ट खोलें";
 
 /* Spend tiles & extra usage (OpenUsage-style) */
-"usage.spend_today" = "आज";
-"usage.spend_yesterday" = "कल";
-"usage.spend_last30" = "पिछले 30 दिन";
-"usage.trend" = "उपयोग रुझान";
 "quota.extra_usage" = "अतिरिक्त उपयोग";
 "quota.spent" = "%@ खर्च";
-"quota.official_spend" = "आधिकारिक खर्च";
-"quota.models_this_cycle" = "इस चक्र के मॉडल";
-"quota.models_more" = "+%1$d और";
 "quota.account_balance" = "खाता शेष";
-"quota.spend_week" = "इस सप्ताह";
-"quota.spend_month" = "इस महीने";
-"quota.spend_all_time" = "सभी समय";
 "datasource.zai_region" = "API क्षेत्र";
 "datasource.zai_region_global" = "वैश्विक";
 "datasource.zai_region_china" = "चीन";
@@ -135,38 +108,8 @@
 "settings.quota_details" = "Quota details";
 "settings.antigravity_3p" = "Show Antigravity Claude / GPT pools";
 "settings.antigravity_3p_hint" = "Show the Claude and GPT-OSS 5-hour and weekly pools next to Gemini; shown by default.";
-"trends.model_other_format" = "Other (%1$d models)";
-"trends.model_detail_tag" = "MODEL DETAIL";
-"trends.model_detail_accumulating" = "Model detail accumulates from this version onward; older cached days cannot be backfilled.";
-"trends.model_io_format" = "In %1$@ · Out %2$@ · Cache %3$@";
-"trends.tooltip_click_hint" = "Click for model detail";
 
 /* Usage page: token mix, model speed, display currency */
-"composition.input" = "इनपुट";
-"composition.output" = "आउटपुट";
-"composition.cache_write" = "कैश लेखन";
-"composition.cache_read" = "कैश पठन";
-"composition.cache_unsplit" = "कैश";
-"composition.range_title" = "टोकन संरचना · पिछले %d दिन";
-"composition.day_title" = "टोकन संरचना · %@";
-"trends.model_io_split_format" = "इनपुट %1$@ · आउटपुट %2$@ · कैश लेखन %3$@ · कैश पठन %4$@";
-"trends.model_tps_format" = "≈%@ tok/s";
-"trends.model_tps_help" = "औसत आउटपुट गति: आउटपुट टोकन ÷ अनुरोध से अंतिम हिस्से तक का समय, स्थानीय सत्र लॉग के टाइमस्टैम्प से अनुमानित। पहले टोकन तक का समय शामिल है।";
-"trends.model_tps_note" = "tok/s का अनुमान Claude Code और Codex लॉग के टाइमस्टैम्प से स्थानीय रूप से लगाया जाता है और इसमें पहले टोकन तक का समय शामिल है।";
-"usage.provider_cost_amount_accessibility" = "%1$@, %2$@ टोकन, %3$@, लागत का %4$@";
-"settings.currency_title" = "मुद्रा";
-"settings.currency_display" = "लागत प्रदर्शन मुद्रा";
-"settings.currency_hint" = "लागत का अनुमान API सूची मूल्यों से USD में लगाया जाता है और दैनिक संदर्भ दरों से बदला जाता है। आधिकारिक बिल राशि और शेष अपनी बिलिंग मुद्रा में रहते हैं।";
-"settings.currency_rate" = "1 USD = %1$@ %2$@";
-"settings.currency_updated" = "%@ को अपडेट";
-"settings.currency_refresh" = "दर रीफ़्रेश करें";
-"settings.currency_fallback" = "अभी कोई विनिमय दर नहीं; लागत USD में दिखाई जा रही है।";
-"settings.currency_attribution" = "दरें: ExchangeRate-API";
-"currency.error_invalid" = "विनिमय दर सेवा ने अनुपयोगी डेटा लौटाया। पिछली दरें रखी गई हैं।";
-"currency.error_throttled" = "दरें अभी मांगी गई थीं। कुछ सेकंड बाद फिर कोशिश करें।";
-"currency.error_timeout" = "विनिमय दर अनुरोध का समय समाप्त हुआ। पिछली दरें रखी गई हैं।";
-"currency.error_network" = "विनिमय दर सेवा से कनेक्ट नहीं हो सका। पिछली दरें रखी गई हैं।";
-"quota.model_speed_help" = "%1$@ · पिछले %2$d दिनों की औसत आउटपुट गति, स्थानीय लॉग टाइमस्टैम्प से अनुमानित (पहले टोकन तक का समय शामिल)।";
 
 /* Web Cookie guide and web-session providers */
 "cookieguide.title" = "Connect %@ with a browser Cookie";

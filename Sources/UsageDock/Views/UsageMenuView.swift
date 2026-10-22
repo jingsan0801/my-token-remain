@@ -27,9 +27,7 @@ struct UsageMenuView: View {
         UsageInsights(
             claude: nil,
             codex: nil,
-            others: store.headlineQuotas,
-            daily: store.daily,
-            history: store.history
+            others: store.headlineQuotas
         )
     }
 
@@ -262,7 +260,7 @@ struct UsageMenuView: View {
 
     private var refreshButton: some View {
         Button {
-            Task { await store.refresh(forceCCUsage: true, forceClaude: true) }
+            Task { await store.refresh(force: true) }
         } label: {
             Group {
                 if store.isRefreshing {

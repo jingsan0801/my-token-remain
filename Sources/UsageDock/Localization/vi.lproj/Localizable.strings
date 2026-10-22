@@ -1,17 +1,14 @@
 "widget.local_usage" = "Mức dùng cục bộ hôm nay";
 "widget.ai_feed" = "Bảng tin AI";
-"usage.api_cost" = "Chi phí API";
 "nav.group.monitor" = "GIÁM SÁT";
 "nav.group.system" = "HỆ THỐNG";
 "nav.overview" = "Tổng quan";
 "nav.limits" = "Hạn mức";
-"nav.trends" = "Xu hướng";
 "nav.devices" = "Thiết bị";
 "nav.data_sources" = "Nguồn dữ liệu";
 "nav.settings" = "Cài đặt";
 "section.overview.subtitle" = "Rủi ro hạn mức và hạn mức chính thức trực tiếp";
 "section.limits.subtitle" = "Cửa sổ hạn mức chính thức của các công cụ lập trình AI";
-"section.trends.subtitle" = "Mức dùng theo thời gian · ccusage cục bộ";
 "section.devices.subtitle" = "Máy Mac này và giám sát đa thiết bị trong tương lai";
 "section.data_sources.subtitle" = "Trạng thái nguồn dữ liệu và quyền riêng tư";
 "section.settings.subtitle" = "Khởi động, làm mới và điều khiển ứng dụng";
@@ -25,12 +22,10 @@
 "risk.headline.medium" = "Hãy theo dõi nhịp sử dụng";
 "risk.headline.high" = "Hạn mức sắp cạn";
 "risk.headline.unknown" = "Đang chờ hạn mức chính thức";
-"risk.headline.projected_runout" = "Nhịp hiện tại có thể làm cạn hạn mức sớm";
 "risk.summary.low" = "Theo nhịp hiện tại, hạn mức sẽ đủ đến lần đặt lại tiếp theo.";
 "risk.summary.medium" = "Một số cửa sổ còn ít. Hãy giảm mức dùng hoặc theo dõi thời gian đặt lại.";
 "risk.summary.high" = "Hạn mức sắp cạn. Hãy dùng cẩn thận hoặc chờ đặt lại.";
 "risk.summary.unknown" = "Chưa có ảnh chụp hạn mức chính thức. Ứng dụng sẽ tự thử lại.";
-"risk.summary.projected_runout" = "%1$@ %2$@ dự kiến cạn sau %3$@, trước lần đặt lại chính thức. Hãy giảm mức dùng hoặc đổi nhà cung cấp.";
 "feed.tier.primary" = "Chính";
 "feed.tier.rotating" = "Phụ";
 "feed.priority.token" = "Hạn mức / Token";
@@ -53,12 +48,6 @@
 "quota.window" = "Cửa sổ %1$@";
 "quota.remaining" = "Còn %1$@";
 "quota.window_accessibility" = "Cửa sổ %2$@ của %1$@";
-"pace.on_track" = "Đúng nhịp";
-"pace.reserve" = "Dự phòng %1$@";
-"pace.deficit" = "Vượt trước %1$@";
-"pace.lasts_until_reset" = "Đủ đến lần đặt lại";
-"pace.projected_early" = "Dự kiến cạn sớm";
-"pace.projected_in" = "Dự kiến cạn sau %1$@";
 "widget.all_visible" = "Tất cả tiện ích đều đang hiển thị";
 "widget.add_named" = "Thêm %1$@";
 "widget.keep_expanded" = "Giữ mở rộng";
@@ -81,12 +70,6 @@
 "action.settings" = "Cài đặt";
 "action.quit" = "Thoát";
 "action.quit_app" = "Thoát MyTokenRemain";
-"usage.updated_local" = "Đã cập nhật %1$@ · dữ liệu được giữ trên máy Mac này";
-"usage.loading_local" = "Đang đọc mức dùng · dữ liệu được giữ trên máy Mac này";
-"usage.provider_breakdown_empty" = "Không có phân tích theo nhà cung cấp";
-"usage.loading_ccusage" = "Đang đọc dữ liệu ccusage cục bộ…";
-"usage.provider_help" = "%1$@: chi phí API %2$@, %3$@ tokens, %4$@ tổng số";
-"usage.provider_accessibility" = "%1$@, chi phí API %2$@, %3$@ tokens";
 "quota.loading_official" = "Đang đọc hạn mức chính thức…";
 "quota.login_recovery_hint" = "Không phát hiện đăng nhập; hãy đăng nhập để dữ liệu tự động khôi phục";
 "feed.updating" = "Đang cập nhật";
@@ -98,19 +81,9 @@
 "feed.open_x_hint" = "Mở bài đăng gốc trên X";
 
 /* Spend tiles & extra usage (OpenUsage-style) */
-"usage.spend_today" = "Hôm nay";
-"usage.spend_yesterday" = "Hôm qua";
-"usage.spend_last30" = "30 ngày qua";
-"usage.trend" = "Xu hướng sử dụng";
 "quota.extra_usage" = "Sử dụng thêm";
 "quota.spent" = "Đã dùng %@";
-"quota.official_spend" = "Chi tiêu chính thức";
-"quota.models_this_cycle" = "Mô hình trong chu kỳ";
-"quota.models_more" = "+%1$d khác";
 "quota.account_balance" = "Số dư tài khoản";
-"quota.spend_week" = "Tuần này";
-"quota.spend_month" = "Tháng này";
-"quota.spend_all_time" = "Từ trước đến nay";
 "datasource.zai_region" = "Khu vực API";
 "datasource.zai_region_global" = "Toàn cầu";
 "datasource.zai_region_china" = "Trung Quốc";
@@ -135,38 +108,8 @@
 "settings.quota_details" = "Quota details";
 "settings.antigravity_3p" = "Show Antigravity Claude / GPT pools";
 "settings.antigravity_3p_hint" = "Show the Claude and GPT-OSS 5-hour and weekly pools next to Gemini; shown by default.";
-"trends.model_other_format" = "Other (%1$d models)";
-"trends.model_detail_tag" = "MODEL DETAIL";
-"trends.model_detail_accumulating" = "Model detail accumulates from this version onward; older cached days cannot be backfilled.";
-"trends.model_io_format" = "In %1$@ · Out %2$@ · Cache %3$@";
-"trends.tooltip_click_hint" = "Click for model detail";
 
 /* Usage page: token mix, model speed, display currency */
-"composition.input" = "Đầu vào";
-"composition.output" = "Đầu ra";
-"composition.cache_write" = "Ghi bộ nhớ đệm";
-"composition.cache_read" = "Đọc bộ nhớ đệm";
-"composition.cache_unsplit" = "Bộ nhớ đệm";
-"composition.range_title" = "Thành phần token · %d ngày qua";
-"composition.day_title" = "Thành phần token · %@";
-"trends.model_io_split_format" = "Vào %1$@ · Ra %2$@ · Ghi đệm %3$@ · Đọc đệm %4$@";
-"trends.model_tps_format" = "≈%@ tok/s";
-"trends.model_tps_help" = "Tốc độ đầu ra trung bình: số token đầu ra chia cho thời gian từ lúc gửi yêu cầu đến đoạn cuối, ước tính từ dấu thời gian nhật ký phiên cục bộ. Bao gồm thời gian đến token đầu tiên.";
-"trends.model_tps_note" = "tok/s được ước tính cục bộ từ dấu thời gian nhật ký Claude Code và Codex, bao gồm thời gian đến token đầu tiên.";
-"usage.provider_cost_amount_accessibility" = "%1$@, %2$@ token, %3$@, %4$@ chi phí";
-"settings.currency_title" = "Tiền tệ";
-"settings.currency_display" = "Tiền tệ hiển thị chi phí";
-"settings.currency_hint" = "Chi phí được ước tính bằng USD theo giá niêm yết API và quy đổi theo tỷ giá tham chiếu hằng ngày. Số tiền hóa đơn và số dư chính thức giữ nguyên đơn vị tiền thanh toán.";
-"settings.currency_rate" = "1 USD = %1$@ %2$@";
-"settings.currency_updated" = "Cập nhật %@";
-"settings.currency_refresh" = "Làm mới tỷ giá";
-"settings.currency_fallback" = "Chưa có tỷ giá; chi phí đang hiển thị bằng USD.";
-"settings.currency_attribution" = "Tỷ giá từ ExchangeRate-API";
-"currency.error_invalid" = "Dịch vụ tỷ giá trả về dữ liệu không dùng được. Giữ tỷ giá gần nhất.";
-"currency.error_throttled" = "Vừa yêu cầu tỷ giá. Hãy thử lại sau vài giây.";
-"currency.error_timeout" = "Yêu cầu tỷ giá đã hết thời gian. Giữ tỷ giá gần nhất.";
-"currency.error_network" = "Không kết nối được dịch vụ tỷ giá. Giữ tỷ giá gần nhất.";
-"quota.model_speed_help" = "%1$@ · tốc độ đầu ra trung bình %2$d ngày qua, ước tính từ dấu thời gian nhật ký cục bộ (gồm thời gian đến token đầu tiên).";
 
 /* Web Cookie guide and web-session providers */
 "cookieguide.title" = "Connect %@ with a browser Cookie";

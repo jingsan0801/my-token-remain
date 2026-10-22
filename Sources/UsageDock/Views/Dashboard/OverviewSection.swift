@@ -93,15 +93,9 @@ struct OverviewSection: View {
         }
     }
 
-    /// 今日 token 用量最高的两个 provider;没有本地统计时默认 Claude / Codex。
-    /// 排名靠前但没有官方额度快照的候选会被顺延,保证只要有数据就凑满两行。
+    /// 固定顺序下前两个有官方额度快照的 provider。
     private var officialQuotaProviders: [ProviderQuota.Provider] {
-        var candidates = insights.providersByTokenUsage
-        let fallbacks = [ProviderQuota.Provider.claude, .codex] + insights.quotas.map(\.provider)
-        for fallback in fallbacks where !candidates.contains(fallback) {
-            candidates.append(fallback)
-        }
-        return Array(candidates.filter { summaryWindow(for: $0) != nil }.prefix(2))
+        insights.quotas.map(\.provider).filter { summaryWindow(for: $0) != nil }.prefix(2).map { $0 }
     }
 
     private func summaryWindow(for provider: ProviderQuota.Provider) -> UsageInsights.Window? {

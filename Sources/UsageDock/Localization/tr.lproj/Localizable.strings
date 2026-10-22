@@ -1,17 +1,14 @@
 "widget.local_usage" = "Bugünkü yerel kullanım";
 "widget.ai_feed" = "Yapay zekâ akışı";
-"usage.api_cost" = "API maliyeti";
 "nav.group.monitor" = "İZLEME";
 "nav.group.system" = "SİSTEM";
 "nav.overview" = "Genel bakış";
 "nav.limits" = "Limitler";
-"nav.trends" = "Eğilimler";
 "nav.devices" = "Aygıtlar";
 "nav.data_sources" = "Veri kaynakları";
 "nav.settings" = "Ayarlar";
 "section.overview.subtitle" = "Kota riski ve canlı resmi kotalar";
 "section.limits.subtitle" = "Yapay zekâ kodlama araçlarının resmî kota pencereleri";
-"section.trends.subtitle" = "Zaman içinde kullanım · yerel ccusage";
 "section.devices.subtitle" = "Bu Mac ve gelecekte aygıtlar arası izleme";
 "section.data_sources.subtitle" = "Veri kaynağı durumu ve gizlilik";
 "section.settings.subtitle" = "Başlangıç, yenileme ve uygulama denetimleri";
@@ -25,12 +22,10 @@
 "risk.headline.medium" = "Kullanım temponuzu izleyin";
 "risk.headline.high" = "Kota neredeyse tükendi";
 "risk.headline.unknown" = "Resmî kota bekleniyor";
-"risk.headline.projected_runout" = "Mevcut tempoda kota erken tükenebilir";
 "risk.summary.low" = "Mevcut tempoda kota bir sonraki sıfırlamaya kadar yetmeli.";
 "risk.summary.medium" = "Bazı pencereler düşük. Kullanımı azaltın veya sıfırlamayı izleyin.";
 "risk.summary.high" = "Kota neredeyse tükendi. Dikkatli kullanın veya sıfırlamayı bekleyin.";
 "risk.summary.unknown" = "Henüz resmî kota anlık görüntüsü yok. Otomatik olarak yeniden denenecek.";
-"risk.summary.projected_runout" = "%1$@ %2$@ resmî sıfırlamadan önce, %3$@ içinde tükenecek. Kullanımı azaltın veya sağlayıcıyı değiştirin.";
 "feed.tier.primary" = "Birincil";
 "feed.tier.rotating" = "İkincil";
 "feed.priority.token" = "Kota / Token";
@@ -53,12 +48,6 @@
 "quota.window" = "%1$@ penceresi";
 "quota.remaining" = "%1$@ kaldı";
 "quota.window_accessibility" = "%1$@ %2$@ penceresi";
-"pace.on_track" = "Plan dahilinde";
-"pace.reserve" = "%1$@ rezerv";
-"pace.deficit" = "%1$@ önde";
-"pace.lasts_until_reset" = "Sıfırlamaya kadar yeter";
-"pace.projected_early" = "Erken tükenecek";
-"pace.projected_in" = "%1$@ içinde tükenecek";
 "widget.all_visible" = "Tüm araç takımları görünür";
 "widget.add_named" = "%1$@ ekle";
 "widget.keep_expanded" = "Açık tut";
@@ -81,12 +70,6 @@
 "action.settings" = "Ayarlar";
 "action.quit" = "Çık";
 "action.quit_app" = "MyTokenRemain'den çık";
-"usage.updated_local" = "%1$@ güncellendi · veriler bu Mac'te kalır";
-"usage.loading_local" = "Kullanım okunuyor · veriler bu Mac'te kalır";
-"usage.provider_breakdown_empty" = "Sağlayıcı dökümü yok";
-"usage.loading_ccusage" = "Yerel ccusage verileri okunuyor…";
-"usage.provider_help" = "%1$@: API maliyeti %2$@, %3$@ tokens, toplamın %4$@";
-"usage.provider_accessibility" = "%1$@, API maliyeti %2$@, %3$@ tokens";
 "quota.loading_official" = "Resmî kota okunuyor…";
 "quota.login_recovery_hint" = "Oturum açma algılanmadı; verilerin otomatik olarak geri gelmesi için giriş yapın";
 "feed.updating" = "Güncelleniyor";
@@ -98,19 +81,9 @@
 "feed.open_x_hint" = "X'teki özgün gönderiyi aç";
 
 /* Spend tiles & extra usage (OpenUsage-style) */
-"usage.spend_today" = "Bugün";
-"usage.spend_yesterday" = "Dün";
-"usage.spend_last30" = "Son 30 Gün";
-"usage.trend" = "Kullanım eğilimi";
 "quota.extra_usage" = "Ek kullanım";
 "quota.spent" = "%@ harcandı";
-"quota.official_spend" = "Resmî harcama";
-"quota.models_this_cycle" = "Bu dönemin modelleri";
-"quota.models_more" = "+%1$d daha";
 "quota.account_balance" = "Hesap bakiyesi";
-"quota.spend_week" = "Bu hafta";
-"quota.spend_month" = "Bu ay";
-"quota.spend_all_time" = "Tüm zamanlar";
 "datasource.zai_region" = "API bölgesi";
 "datasource.zai_region_global" = "Küresel";
 "datasource.zai_region_china" = "Çin";
@@ -135,38 +108,8 @@
 "settings.quota_details" = "Quota details";
 "settings.antigravity_3p" = "Show Antigravity Claude / GPT pools";
 "settings.antigravity_3p_hint" = "Show the Claude and GPT-OSS 5-hour and weekly pools next to Gemini; shown by default.";
-"trends.model_other_format" = "Other (%1$d models)";
-"trends.model_detail_tag" = "MODEL DETAIL";
-"trends.model_detail_accumulating" = "Model detail accumulates from this version onward; older cached days cannot be backfilled.";
-"trends.model_io_format" = "In %1$@ · Out %2$@ · Cache %3$@";
-"trends.tooltip_click_hint" = "Click for model detail";
 
 /* Usage page: token mix, model speed, display currency */
-"composition.input" = "Girdi";
-"composition.output" = "Çıktı";
-"composition.cache_write" = "Önbellek yazma";
-"composition.cache_read" = "Önbellek okuma";
-"composition.cache_unsplit" = "Önbellek";
-"composition.range_title" = "Token bileşimi · son %d gün";
-"composition.day_title" = "Token bileşimi · %@";
-"trends.model_io_split_format" = "Girdi %1$@ · Çıktı %2$@ · Önbellek yazma %3$@ · Önbellek okuma %4$@";
-"trends.model_tps_format" = "≈%@ tok/s";
-"trends.model_tps_help" = "Ortalama çıktı hızı: çıktı tokenları ÷ istekten son parçaya kadar geçen süre; yerel oturum günlüğü zaman damgalarından tahmin edilir ve ilk tokena kadar geçen süreyi içerir.";
-"trends.model_tps_note" = "tok/s, Claude Code ve Codex yerel günlük zaman damgalarından tahmin edilir ve ilk tokena kadar geçen süreyi içerir.";
-"usage.provider_cost_amount_accessibility" = "%1$@, %2$@ token, %3$@, maliyetin %4$@ kadarı";
-"settings.currency_title" = "Para birimi";
-"settings.currency_display" = "Maliyet para birimi";
-"settings.currency_hint" = "Maliyetler API liste fiyatlarıyla USD olarak tahmin edilir ve günlük referans kurlarla çevrilir. Resmî fatura tutarları ve bakiyeler fatura para biriminde kalır.";
-"settings.currency_rate" = "1 USD = %1$@ %2$@";
-"settings.currency_updated" = "Güncellendi: %@";
-"settings.currency_refresh" = "Kuru yenile";
-"settings.currency_fallback" = "Henüz kur yok; maliyetler USD olarak gösteriliyor.";
-"settings.currency_attribution" = "Kurlar: ExchangeRate-API";
-"currency.error_invalid" = "Döviz kuru hizmeti kullanılamaz veri döndürdü. Son kurlar korunuyor.";
-"currency.error_throttled" = "Kurlar az önce istendi. Birkaç saniye sonra tekrar deneyin.";
-"currency.error_timeout" = "Döviz kuru isteği zaman aşımına uğradı. Son kurlar korunuyor.";
-"currency.error_network" = "Döviz kuru hizmetine ulaşılamadı. Son kurlar korunuyor.";
-"quota.model_speed_help" = "%1$@ · son %2$d günün ortalama çıktı hızı; yerel günlük zaman damgalarından tahmin edilir (ilk tokena kadar geçen süre dahil).";
 
 /* Web Cookie guide and web-session providers */
 "cookieguide.title" = "Connect %@ with a browser Cookie";

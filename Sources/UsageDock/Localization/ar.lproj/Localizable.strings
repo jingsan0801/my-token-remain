@@ -1,17 +1,14 @@
 "widget.local_usage" = "الاستخدام المحلي اليوم";
 "widget.ai_feed" = "موجز الذكاء الاصطناعي";
-"usage.api_cost" = "تكلفة API";
 "nav.group.monitor" = "المراقبة";
 "nav.group.system" = "النظام";
 "nav.overview" = "نظرة عامة";
 "nav.limits" = "الحدود";
-"nav.trends" = "الاتجاهات";
 "nav.devices" = "الأجهزة";
 "nav.data_sources" = "مصادر البيانات";
 "nav.settings" = "الإعدادات";
 "section.overview.subtitle" = "مخاطر الحصة والحصص الرسمية المباشرة";
 "section.limits.subtitle" = "نوافذ الحصة الرسمية لأدوات الترميز بالذكاء الاصطناعي";
-"section.trends.subtitle" = "الاستخدام عبر الزمن · ccusage المحلي";
 "section.devices.subtitle" = "هذا الـ Mac والمراقبة المستقبلية بين الأجهزة";
 "section.data_sources.subtitle" = "حالة المصادر والخصوصية";
 "section.settings.subtitle" = "بدء التشغيل والتحديث وعناصر التحكم";
@@ -25,12 +22,10 @@
 "risk.headline.medium" = "راقب وتيرة الاستخدام";
 "risk.headline.high" = "الحصة على وشك النفاد";
 "risk.headline.unknown" = "بانتظار الحصة الرسمية";
-"risk.headline.projected_runout" = "قد تنفد الحصة مبكرًا بالوتيرة الحالية";
 "risk.summary.low" = "بالوتيرة الحالية، يُفترض أن تكفي الحصة حتى إعادة الضبط التالية.";
 "risk.summary.medium" = "بعض النوافذ منخفضة. خفف الاستخدام أو راقب وقت إعادة الضبط.";
 "risk.summary.high" = "الحصة على وشك النفاد. استخدم بحذر أو انتظر إعادة الضبط.";
 "risk.summary.unknown" = "لا توجد لقطة رسمية للحصة بعد. ستتم إعادة المحاولة تلقائيًا.";
-"risk.summary.projected_runout" = "من المتوقع أن تنفد نافذة %2$@ لدى %1$@ خلال %3$@، قبل إعادة الضبط الرسمية. خفف الاستخدام أو بدّل المزوّد.";
 "feed.tier.primary" = "أساسي";
 "feed.tier.rotating" = "ثانوي";
 "feed.priority.token" = "الحصة / Token";
@@ -53,12 +48,6 @@
 "quota.window" = "نافذة %1$@";
 "quota.remaining" = "متبقٍ %1$@";
 "quota.window_accessibility" = "نافذة %2$@ لـ %1$@";
-"pace.on_track" = "ضمن الوتيرة";
-"pace.reserve" = "احتياطي %1$@";
-"pace.deficit" = "متقدم %1$@";
-"pace.lasts_until_reset" = "تكفي حتى إعادة الضبط";
-"pace.projected_early" = "نفاد مبكر متوقع";
-"pace.projected_in" = "متوقع أن تنفد خلال %1$@";
 "widget.all_visible" = "جميع الأدوات ظاهرة";
 "widget.add_named" = "إضافة %1$@";
 "widget.keep_expanded" = "إبقاء موسّعًا";
@@ -81,12 +70,6 @@
 "action.settings" = "الإعدادات";
 "action.quit" = "إنهاء";
 "action.quit_app" = "إنهاء MyTokenRemain";
-"usage.updated_local" = "تم التحديث %1$@ · تبقى البيانات على هذا الـ Mac";
-"usage.loading_local" = "جارٍ قراءة الاستخدام · تبقى البيانات على هذا الـ Mac";
-"usage.provider_breakdown_empty" = "لا يوجد تفصيل حسب المزوّد";
-"usage.loading_ccusage" = "جارٍ قراءة بيانات ccusage المحلية…";
-"usage.provider_help" = "%1$@: تكلفة API ‏%2$@، %3$@ tokens، %4$@ من الإجمالي";
-"usage.provider_accessibility" = "%1$@، تكلفة API ‏%2$@، %3$@ tokens";
 "quota.loading_official" = "جارٍ قراءة الحصة الرسمية…";
 "quota.login_recovery_hint" = "لم يُكتشف تسجيل الدخول؛ سجّل الدخول لاستعادة البيانات تلقائيًا";
 "feed.updating" = "جارٍ التحديث";
@@ -98,19 +81,9 @@
 "feed.open_x_hint" = "فتح المنشور الأصلي على X";
 
 /* Spend tiles & extra usage (OpenUsage-style) */
-"usage.spend_today" = "اليوم";
-"usage.spend_yesterday" = "أمس";
-"usage.spend_last30" = "آخر 30 يومًا";
-"usage.trend" = "اتجاه الاستخدام";
 "quota.extra_usage" = "استخدام إضافي";
 "quota.spent" = "تم إنفاق %@";
-"quota.official_spend" = "الإنفاق الرسمي";
-"quota.models_this_cycle" = "نماذج هذه الدورة";
-"quota.models_more" = "+%1$d أخرى";
 "quota.account_balance" = "رصيد الحساب";
-"quota.spend_week" = "هذا الأسبوع";
-"quota.spend_month" = "هذا الشهر";
-"quota.spend_all_time" = "كل الوقت";
 "datasource.zai_region" = "منطقة API";
 "datasource.zai_region_global" = "عالمي";
 "datasource.zai_region_china" = "الصين";
@@ -135,38 +108,8 @@
 "settings.quota_details" = "Quota details";
 "settings.antigravity_3p" = "Show Antigravity Claude / GPT pools";
 "settings.antigravity_3p_hint" = "Show the Claude and GPT-OSS 5-hour and weekly pools next to Gemini; shown by default.";
-"trends.model_other_format" = "Other (%1$d models)";
-"trends.model_detail_tag" = "MODEL DETAIL";
-"trends.model_detail_accumulating" = "Model detail accumulates from this version onward; older cached days cannot be backfilled.";
-"trends.model_io_format" = "In %1$@ · Out %2$@ · Cache %3$@";
-"trends.tooltip_click_hint" = "Click for model detail";
 
 /* Usage page: token mix, model speed, display currency */
-"composition.input" = "الإدخال";
-"composition.output" = "الإخراج";
-"composition.cache_write" = "كتابة ذاكرة التخزين المؤقت";
-"composition.cache_read" = "قراءة ذاكرة التخزين المؤقت";
-"composition.cache_unsplit" = "ذاكرة التخزين المؤقت";
-"composition.range_title" = "تركيبة الرموز · آخر %d يوم";
-"composition.day_title" = "تركيبة الرموز · %@";
-"trends.model_io_split_format" = "إدخال %1$@ · إخراج %2$@ · كتابة مؤقتة %3$@ · قراءة مؤقتة %4$@";
-"trends.model_tps_format" = "≈%@ tok/s";
-"trends.model_tps_help" = "متوسط سرعة الإخراج: رموز الإخراج مقسومة على الوقت من الطلب حتى آخر جزء، مقدّرة من الطوابع الزمنية لسجلات الجلسات المحلية، وتشمل زمن الوصول إلى أول رمز.";
-"trends.model_tps_note" = "تُقدَّر tok/s محليًا من الطوابع الزمنية لسجلات Claude Code وCodex وتشمل زمن الوصول إلى أول رمز.";
-"usage.provider_cost_amount_accessibility" = "%1$@، %2$@ رمز، %3$@، %4$@ من التكلفة";
-"settings.currency_title" = "العملة";
-"settings.currency_display" = "عملة عرض التكلفة";
-"settings.currency_hint" = "تُقدَّر التكاليف بالدولار الأمريكي وفق أسعار قائمة API ثم تُحوَّل بأسعار صرف مرجعية يومية. تبقى المبالغ المفوترة والأرصدة الرسمية بعملة الفوترة.";
-"settings.currency_rate" = "1 USD = %1$@ %2$@";
-"settings.currency_updated" = "تم التحديث %@";
-"settings.currency_refresh" = "تحديث السعر";
-"settings.currency_fallback" = "لا يوجد سعر صرف بعد؛ تُعرض التكاليف بالدولار الأمريكي.";
-"settings.currency_attribution" = "الأسعار من ExchangeRate-API";
-"currency.error_invalid" = "أعادت خدمة أسعار الصرف بيانات غير صالحة. يتم الاحتفاظ بآخر الأسعار.";
-"currency.error_throttled" = "طُلبت الأسعار للتو. حاول مرة أخرى بعد بضع ثوانٍ.";
-"currency.error_timeout" = "انتهت مهلة طلب أسعار الصرف. يتم الاحتفاظ بآخر الأسعار.";
-"currency.error_network" = "تعذّر الوصول إلى خدمة أسعار الصرف. يتم الاحتفاظ بآخر الأسعار.";
-"quota.model_speed_help" = "%1$@ · متوسط سرعة الإخراج خلال آخر %2$d أيام، مقدّر من الطوابع الزمنية للسجلات المحلية (يشمل زمن الوصول إلى أول رمز).";
 
 /* Web Cookie guide and web-session providers */
 "cookieguide.title" = "Connect %@ with a browser Cookie";

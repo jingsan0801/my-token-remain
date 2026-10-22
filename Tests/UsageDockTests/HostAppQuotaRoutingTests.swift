@@ -516,34 +516,6 @@ struct HostAppQuotaRoutingTests {
         #expect(UsageStore.auxProviders.contains(.thirdParty))
     }
 
-    @Test("Quota trends do not connect different billing routes")
-    func historyKeepsOnlyLatestBillingRoute() {
-        let official = ProviderQuota(
-            provider: .claude,
-            primary: QuotaWindow(usedPercent: 40, windowMinutes: 300, resetsAt: nil),
-            secondary: nil,
-            planName: nil,
-            capturedAt: Date(timeIntervalSince1970: 1_000)
-        )
-        let external = ProviderQuota(
-            provider: .claude,
-            primary: QuotaWindow(usedPercent: 0, windowMinutes: 0, resetsAt: nil),
-            secondary: nil,
-            planName: nil,
-            capturedAt: Date(timeIntervalSince1970: 2_000),
-            attribution: QuotaAttribution(
-                provider: .deepseek,
-                displayName: "DeepSeek API",
-                routeIdentifier: "claude|deepseek|api.deepseek.com"
-            )
-        )
-        let history = QuotaUsageHistory.empty.recording(official).recording(external)
-        let visible = history.samples(for: .claude)
-
-        #expect(visible.count == 1)
-        #expect(visible.first?.attribution?.provider == .deepseek)
-    }
-
     private func codexRoute(
         config: String,
         auth: String? = nil,

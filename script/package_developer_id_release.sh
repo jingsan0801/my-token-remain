@@ -11,7 +11,6 @@ RELEASE_TAG="v$VERSION"
 if [[ -r "$RELEASE_TAG_FILE" ]]; then
   RELEASE_TAG="$(/usr/bin/tr -d '[:space:]' < "$RELEASE_TAG_FILE")"
 fi
-CCUSAGE_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :TokenRemainBundledCCUsageVersion' "$INFO_PLIST")"
 OUTPUT_DIR="${TOKENREMAIN_RELEASE_OUTPUT_DIR:-$ROOT_DIR/dist-release/$VERSION-$BUILD}"
 APP="$OUTPUT_DIR/TokenRemain.app"
 ZIP="$OUTPUT_DIR/TokenRemain-$VERSION-$BUILD-macOS.zip"
@@ -111,14 +110,9 @@ verify_app() {
   ! /usr/libexec/PlistBuddy -c 'Print :SUScheduledImpatientCheckInterval' "$app/Contents/Info.plist" >/dev/null 2>&1
   [[ "$(/usr/libexec/PlistBuddy -c 'Print :SURequireSignedFeed' "$app/Contents/Info.plist")" == "true" ]]
   [[ -d "$app/Contents/Frameworks/Sparkle.framework" ]]
-  [[ -x "$app/Contents/Helpers/ccusage" ]]
   /usr/bin/lipo "$app/Contents/MacOS/UsageDock" -verify_arch arm64 x86_64
   /usr/bin/lipo "$app/Contents/Frameworks/Sparkle.framework/Versions/B/Sparkle" -verify_arch arm64 x86_64
-  /usr/bin/lipo "$app/Contents/Helpers/ccusage" -verify_arch arm64 x86_64
   /usr/bin/codesign --verify --strict "$app/Contents/Frameworks/Sparkle.framework"
-  /usr/bin/codesign --verify --strict "$app/Contents/Helpers/ccusage"
-  [[ "$("$app/Contents/Helpers/ccusage" --version)" == "ccusage $CCUSAGE_VERSION" ]]
-  [[ "$(/usr/libexec/PlistBuddy -c 'Print :TokenRemainBundledCCUsageVersion' "$app/Contents/Info.plist")" == "$CCUSAGE_VERSION" ]]
   /usr/bin/codesign -d --entitlements :- "$app/Contents/MacOS/UsageDock" > "$entitlements" 2>/dev/null
   [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.icloud-container-environment' "$entitlements")" == "Production" ]]
   [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.icloud-container-identifiers:0' "$entitlements")" == "iCloud.com.jingsan0801.mytokenremain" ]]
@@ -233,15 +227,6 @@ build_notarized_dmg() {
 }
 
 build_app() {
-  local previous_ccusage_version="$CCUSAGE_VERSION"
-  "$ROOT_DIR/script/verify_ccusage_freshness.sh" --update
-  CCUSAGE_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :TokenRemainBundledCCUsageVersion' "$INFO_PLIST")"
-  if [[ "$CCUSAGE_VERSION" != "$previous_ccusage_version" ]]; then
-    echo "Bundled ccusage was updated from $previous_ccusage_version to $CCUSAGE_VERSION." >&2
-    echo "Commit and push the verified helper update before packaging the release, then rerun this command." >&2
-    exit 1
-  fi
-  "$ROOT_DIR/script/verify_bundled_ccusage_contract.sh"
   require_signing_inputs
   mkdir -p "$OUTPUT_DIR"
   USAGEDOCK_SYNC_RELEASE=1 \

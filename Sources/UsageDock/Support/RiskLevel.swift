@@ -11,7 +11,9 @@ enum RiskLevel {
     case unknown
 
     /// Thresholds are expressed on remaining percentage (0…100).
-    init(minRemainingPercent: Double?, projectedRunOut: Bool = false) {
+    /// Fork note: 自用版移除了配速预测,风险只看剩余额度,不再因
+    /// "预计提前耗尽"上调等级。
+    init(minRemainingPercent: Double?) {
         guard let remaining = minRemainingPercent else {
             self = .unknown
             return
@@ -19,7 +21,6 @@ enum RiskLevel {
         switch remaining {
         case ..<10: self = .high
         case ..<30: self = .medium
-        case _ where projectedRunOut: self = .medium
         default: self = .low
         }
     }

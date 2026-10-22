@@ -17,8 +17,6 @@ enum MobileSnapshotRedactor {
 
     static func makeSnapshot(
         from quotas: [ProviderQuota.Provider: ProviderQuota],
-        history: DailyUsageHistory? = nil,
-        includesUsageHistory: Bool = false,
         sourceInstanceID: UUID,
         sequence: UInt64,
         generatedAt: Date = Date()
@@ -34,77 +32,10 @@ enum MobileSnapshotRedactor {
             expiresAt: generatedAt.addingTimeInterval(maximumLifetime),
             providers: providers,
             aggregateUsage: nil,
-            dailyUsageHistory: includesUsageHistory
-                ? history.map { redact($0, now: generatedAt) }
-                : nil,
+            // Fork note: 自用版不再采集 token 用量/成本,快照不再携带用量历史。
+            dailyUsageHistory: nil,
             curatedFeed: nil
         )
-    }
-
-    private static func redact(
-        _ history: DailyUsageHistory,
-        now: Date
-    ) -> SyncedDailyUsageHistory {
-        var sourceCalendar = Calendar(identifier: .gregorian)
-        sourceCalendar.locale = Locale(identifier: "en_US_POSIX")
-        sourceCalendar.timeZone = .current
-        let sourceToday = sourceCalendar.startOfDay(for: now)
-
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.locale = Locale(identifier: "en_US_POSIX")
-        // Wire day keys are canonical UTC. The receiver validates against the
-        // same UTC calendar, so a local/UTC midnight crossing cannot make an
-        // otherwise live snapshot invalid before its authenticated expiry.
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
-        let start = calendar.startOfDay(for: now)
-        let earliest = calendar.date(
-            byAdding: .day,
-            value: -SyncedDailyUsageHistory.maximumDays,
-            to: start
-        ) ?? .distantPast
-        let latest = calendar.date(byAdding: .day, value: 1, to: start) ?? now
-
-        var byDay: [String: SyncedDailyUsageDay] = [:]
-        for item in history.days where item.date >= earliest && item.date <= latest {
-            let components = calendar.dateComponents([.year, .month, .day], from: item.date)
-            guard let year = components.year,
-                  let month = components.month,
-                  let day = components.day else { continue }
-            let key = String(format: "%04d-%02d-%02d", year, month, day)
-            byDay[key] = SyncedDailyUsageDay(
-                day: key,
-                claudeTokens: boundedTokens(item.claudeTokens),
-                claudeCost: boundedCost(item.claudeCost),
-                codexTokens: boundedTokens(item.codexTokens),
-                codexCost: boundedCost(item.codexCost)
-            )
-        }
-
-        return SyncedDailyUsageHistory(
-            days: Array(
-                byDay.values.sorted { $0.day < $1.day }
-                    .suffix(SyncedDailyUsageHistory.maximumDays)
-            ),
-            capturedAt: history.capturedAt,
-            sourceDay: wireDayKey(for: sourceToday, calendar: calendar)
-        )
-    }
-
-    private static func wireDayKey(for date: Date, calendar: Calendar) -> String? {
-        let components = calendar.dateComponents([.year, .month, .day], from: date)
-        guard let year = components.year,
-              let month = components.month,
-              let day = components.day else { return nil }
-        return String(format: "%04d-%02d-%02d", year, month, day)
-    }
-
-    private static func boundedTokens(_ value: Int64) -> Int64 {
-        min(max(value, 0), SyncedDailyUsageHistory.maximumTokensPerProviderPerDay)
-    }
-
-    private static func boundedCost(_ value: Double) -> Double {
-        guard value.isFinite else { return 0 }
-        return min(max(value, 0), SyncedDailyUsageHistory.maximumCostPerProviderPerDay)
     }
 
     private static func redact(_ quota: ProviderQuota) -> SyncedProviderQuota {

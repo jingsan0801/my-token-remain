@@ -1,17 +1,14 @@
 "widget.local_usage" = "Utilizzo locale di oggi";
 "widget.ai_feed" = "Feed IA";
-"usage.api_cost" = "Costo API";
 "nav.group.monitor" = "MONITOR";
 "nav.group.system" = "SISTEMA";
 "nav.overview" = "Panoramica";
 "nav.limits" = "Limiti";
-"nav.trends" = "Tendenze";
 "nav.devices" = "Dispositivi";
 "nav.data_sources" = "Origini dati";
 "nav.settings" = "Impostazioni";
 "section.overview.subtitle" = "Rischio quota e quote ufficiali in tempo reale";
 "section.limits.subtitle" = "Finestre quota ufficiali dei tuoi strumenti di coding AI";
-"section.trends.subtitle" = "Utilizzo nel tempo · ccusage locale";
 "section.devices.subtitle" = "Questo Mac e futuro monitoraggio tra dispositivi";
 "section.data_sources.subtitle" = "Stato delle origini e privacy";
 "section.settings.subtitle" = "Avvio, aggiornamento e controlli app";
@@ -25,12 +22,10 @@
 "risk.headline.medium" = "Controlla il ritmo di utilizzo";
 "risk.headline.high" = "Quota quasi esaurita";
 "risk.headline.unknown" = "In attesa della quota ufficiale";
-"risk.headline.projected_runout" = "Il ritmo attuale può esaurire la quota in anticipo";
 "risk.summary.low" = "Al ritmo attuale, la quota dovrebbe durare fino al prossimo ripristino.";
 "risk.summary.medium" = "Alcune finestre sono basse. Riduci l’uso o controlla il ripristino.";
 "risk.summary.high" = "Quota quasi esaurita. Usala con cautela o attendi il ripristino.";
 "risk.summary.unknown" = "Nessuna istantanea ufficiale disponibile. Il nuovo tentativo sarà automatico.";
-"risk.summary.projected_runout" = "%1$@ %2$@ dovrebbe esaurirsi tra %3$@, prima del ripristino ufficiale. Riduci l’uso o cambia fornitore.";
 "feed.tier.primary" = "Principale";
 "feed.tier.rotating" = "Secondario";
 "feed.priority.token" = "Quota / Token";
@@ -53,12 +48,6 @@
 "quota.window" = "Finestra di %1$@";
 "quota.remaining" = "%1$@ rimanente";
 "quota.window_accessibility" = "Finestra %1$@ di %2$@";
-"pace.on_track" = "In linea";
-"pace.reserve" = "Margine %1$@";
-"pace.deficit" = "Anticipo %1$@";
-"pace.lasts_until_reset" = "Dura fino al ripristino";
-"pace.projected_early" = "Esaurimento anticipato";
-"pace.projected_in" = "Esaurimento tra %1$@";
 "widget.all_visible" = "Tutti i widget sono visibili";
 "widget.add_named" = "Aggiungi %1$@";
 "widget.keep_expanded" = "Mantieni espanso";
@@ -81,12 +70,6 @@
 "action.settings" = "Impostazioni";
 "action.quit" = "Esci";
 "action.quit_app" = "Esci da MyTokenRemain";
-"usage.updated_local" = "Aggiornato %1$@ · i dati restano su questo Mac";
-"usage.loading_local" = "Lettura utilizzo · i dati restano su questo Mac";
-"usage.provider_breakdown_empty" = "Nessuna suddivisione per provider";
-"usage.loading_ccusage" = "Lettura dei dati ccusage locali…";
-"usage.provider_help" = "%1$@: costo API %2$@, %3$@ tokens, %4$@ del totale";
-"usage.provider_accessibility" = "%1$@, costo API %2$@, %3$@ tokens";
 "quota.loading_official" = "Lettura della quota ufficiale…";
 "quota.login_recovery_hint" = "Accesso non rilevato; accedi per ripristinare automaticamente i dati";
 "feed.updating" = "Aggiornamento";
@@ -98,19 +81,9 @@
 "feed.open_x_hint" = "Apri il post originale su X";
 
 /* Spend tiles & extra usage (OpenUsage-style) */
-"usage.spend_today" = "Oggi";
-"usage.spend_yesterday" = "Ieri";
-"usage.spend_last30" = "Ultimi 30 giorni";
-"usage.trend" = "Trend di utilizzo";
 "quota.extra_usage" = "Utilizzo extra";
 "quota.spent" = "%@ spesi";
-"quota.official_spend" = "Spesa ufficiale";
-"quota.models_this_cycle" = "Modelli di questo ciclo";
-"quota.models_more" = "+%1$d altri";
 "quota.account_balance" = "Saldo account";
-"quota.spend_week" = "Questa settimana";
-"quota.spend_month" = "Questo mese";
-"quota.spend_all_time" = "Da sempre";
 "datasource.zai_region" = "Regione API";
 "datasource.zai_region_global" = "Globale";
 "datasource.zai_region_china" = "Cina";
@@ -135,38 +108,8 @@
 "settings.quota_details" = "Quota details";
 "settings.antigravity_3p" = "Show Antigravity Claude / GPT pools";
 "settings.antigravity_3p_hint" = "Show the Claude and GPT-OSS 5-hour and weekly pools next to Gemini; shown by default.";
-"trends.model_other_format" = "Other (%1$d models)";
-"trends.model_detail_tag" = "MODEL DETAIL";
-"trends.model_detail_accumulating" = "Model detail accumulates from this version onward; older cached days cannot be backfilled.";
-"trends.model_io_format" = "In %1$@ · Out %2$@ · Cache %3$@";
-"trends.tooltip_click_hint" = "Click for model detail";
 
 /* Usage page: token mix, model speed, display currency */
-"composition.input" = "Input";
-"composition.output" = "Output";
-"composition.cache_write" = "Scrittura cache";
-"composition.cache_read" = "Lettura cache";
-"composition.cache_unsplit" = "Cache";
-"composition.range_title" = "Composizione token · ultimi %d giorni";
-"composition.day_title" = "Composizione token · %@";
-"trends.model_io_split_format" = "Input %1$@ · Output %2$@ · Scrittura cache %3$@ · Lettura cache %4$@";
-"trends.model_tps_format" = "≈%@ tok/s";
-"trends.model_tps_help" = "Velocità media di output: token di output divisi per il tempo dalla richiesta all'ultimo frammento, stimata dai timestamp dei log locali. Include il tempo al primo token.";
-"trends.model_tps_note" = "I tok/s sono stimati localmente dai timestamp dei log di Claude Code e Codex e includono il tempo al primo token.";
-"usage.provider_cost_amount_accessibility" = "%1$@, %2$@ token, %3$@, %4$@ del costo";
-"settings.currency_title" = "Valuta";
-"settings.currency_display" = "Valuta per i costi";
-"settings.currency_hint" = "I costi sono stimati in USD dai prezzi di listino delle API e convertiti con tassi di riferimento giornalieri. Importi fatturati e saldi ufficiali restano nella valuta di fatturazione.";
-"settings.currency_rate" = "1 USD = %1$@ %2$@";
-"settings.currency_updated" = "Aggiornato %@";
-"settings.currency_refresh" = "Aggiorna tasso";
-"settings.currency_fallback" = "Nessun tasso disponibile; i costi sono mostrati in USD.";
-"settings.currency_attribution" = "Tassi di ExchangeRate-API";
-"currency.error_invalid" = "Il servizio dei tassi di cambio ha restituito dati non utilizzabili. Restano gli ultimi tassi.";
-"currency.error_throttled" = "I tassi sono appena stati richiesti. Riprova tra qualche secondo.";
-"currency.error_timeout" = "La richiesta dei tassi di cambio è scaduta. Restano gli ultimi tassi.";
-"currency.error_network" = "Impossibile raggiungere il servizio dei tassi di cambio. Restano gli ultimi tassi.";
-"quota.model_speed_help" = "%1$@ · velocità media di output negli ultimi %2$d giorni, stimata dai timestamp dei log locali (incluso il tempo al primo token).";
 
 /* Web Cookie guide and web-session providers */
 "cookieguide.title" = "Connect %@ with a browser Cookie";

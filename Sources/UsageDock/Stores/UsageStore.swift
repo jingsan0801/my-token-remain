@@ -5,21 +5,6 @@ import TokenRemainSyncKit
 
 @MainActor
 final class UsageStore: ObservableObject {
-    enum LocalUsageStatus: Equatable {
-        /// No bundled-helper result has completed in this process yet.
-        case loading
-        /// Today's report contains at least one real agent row.
-        case available
-        /// The helper completed successfully, but today has no local events.
-        case empty
-        /// The bundled helper could not be executed or its output was invalid.
-        case failed(String)
-    }
-
-    nonisolated static func localUsageStatus(for daily: DailyUsage) -> LocalUsageStatus {
-        daily.agents.isEmpty ? .empty : .available
-    }
-
     struct LogoQuotaSelection: Equatable {
         let provider: ProviderQuota.Provider
         let remainingPercent: Double
@@ -92,23 +77,9 @@ final class UsageStore: ObservableObject {
     func clearAccountManagementNotice(for provider: ProviderQuota.Provider) {
         accountManagementNotices[provider] = nil
     }
-    @Published private(set) var daily: DailyUsage?
-    @Published private(set) var history: DailyUsageHistory?
-    /// Locally estimated per-model output speed; empty until the first scan.
-    @Published private(set) var modelThroughput: ModelThroughputSnapshot = .empty
-    @Published private(set) var quotaUsageHistory: QuotaUsageHistory = .empty
     /// Official public service status for providers that publish a dedicated
     /// coding-product component (currently Claude Code and Codex).
     @Published private(set) var serviceStatuses: [ProviderQuota.Provider: ProviderServiceStatus] = [:]
-    @Published private(set) var localUsageStatus: LocalUsageStatus = .loading
-    @Published private(set) var discoveredLocalUsageSourceIDs: Set<String> = []
-    @Published private(set) var disabledLocalUsageSourceIDs: Set<String> = []
-    @Published private(set) var traeAgentDirectories: [URL] = []
-
-    var configuredTraeAgentDirectories: [URL] {
-        traeAgentTrajectoryStore.configuredDirectories
-    }
-    @Published private(set) var isCCUsageRefreshing = false
     @Published private(set) var isRefreshing = false
     /// 单卡片手动刷新的进度。刻意与整轮自动刷新的 `isRefreshing` 分开:
     /// 卡片按钮只反映自己发起的请求,也不会因为另一张卡片在刷新而错位。
@@ -119,13 +90,8 @@ final class UsageStore: ObservableObject {
     private let defaults: UserDefaults
     /// 内部可读:WebDAV 配置同步导出/导入账号元数据与受管账号凭证用。
     let providerAccountsStore: ProviderAccountsStore
-    private let traeAgentTrajectoryStore: TraeAgentTrajectoryStore
     private var cancellables = Set<AnyCancellable>()
     private var refreshTask: Task<Void, Never>?
-    private var historyRefreshTask: Task<Void, Never>?
-    private var throughputTask: Task<Void, Never>?
-    private var throughputClaudeDirectories: (urls: [URL], resolvedAt: Date)?
-    private var lastCCUsageRefresh: Date?
     private var lastClaudeAttempt: Date?
     private var lastCodexAPIAttempt: Date?
     private var lastCodexLocalAttempt: Date?
@@ -136,21 +102,16 @@ final class UsageStore: ObservableObject {
     private var claudeRetryAfter: Date?
     private var claudeConsecutiveFailures = 0
     private var lowLatencySyncEnabled = false
-    /// 由状态栏控制器注入:本地用量正出现在任一可见界面(弹窗/仪表板/
-    /// 浮窗)时返回 true。后台 ccusage 扫描据此决定是否维持分钟级节奏。
+    /// 由状态栏控制器注入:主界面(弹窗/仪表板/浮窗)可见时返回 true,
+    /// 后台额度刷新据此维持分钟级节奏。
     var localUsageUIVisibilityProvider: (() -> Bool)?
     private let quotaCache: QuotaCache
     private let sessionAlerts = ProviderSessionAlertCenter.shared
     private let providerAccountQuotaCache: ProviderAccountQuotaCache
-    private let historyCache = DailyHistoryCache()
-    private let quotaUsageHistoryCache: QuotaUsageHistoryCache
     private let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "UsageRefresh")
     private let claudeRetryAfterKey = "claudeRetryAfter"
     private let serviceStatusRefreshInterval: TimeInterval = 300
     private var quotaErrorMessage: String?
-    private var historyErrorMessage: String?
-    private var latestLocalUsageSnapshot: LocalUsageSnapshot?
-    private let disabledLocalUsageSourcesKey = "tokenRemain.disabledLocalUsageSources.v1"
     private let sessionActivityMonitor: LocalAISessionActivityMonitor
     private let hostQuotaRouter: HostAppQuotaRoutingService
 
@@ -357,44 +318,6 @@ final class UsageStore: ObservableObject {
         }
     }
 
-    var localUsageSourceIDs: [String] {
-        discoveredLocalUsageSourceIDs.sorted {
-            LocalUsageSourceCatalog.sortKey($0) < LocalUsageSourceCatalog.sortKey($1)
-        }
-    }
-
-    func isLocalUsageSourceEnabled(_ id: String) -> Bool {
-        !disabledLocalUsageSourceIDs.contains(LocalUsageSourceCatalog.canonicalID(id))
-    }
-
-    func setLocalUsageSourceEnabled(_ enabled: Bool, id: String) {
-        let canonical = LocalUsageSourceCatalog.canonicalID(id)
-        guard LocalUsageSourceCatalog.isWellFormed(canonical) else { return }
-        if enabled {
-            disabledLocalUsageSourceIDs.remove(canonical)
-        } else {
-            disabledLocalUsageSourceIDs.insert(canonical)
-        }
-        defaults.set(Array(disabledLocalUsageSourceIDs).sorted(), forKey: disabledLocalUsageSourcesKey)
-        if let latestLocalUsageSnapshot {
-            applyLocalUsageSnapshot(latestLocalUsageSnapshot)
-        } else {
-            refreshLocalUsage()
-        }
-    }
-
-    func addTraeAgentDirectory(_ url: URL) {
-        traeAgentTrajectoryStore.add(url)
-        reloadTraeAgentDirectories()
-        refreshLocalUsage()
-    }
-
-    func removeTraeAgentDirectory(_ url: URL) {
-        traeAgentTrajectoryStore.remove(url)
-        reloadTraeAgentDirectories()
-        refreshLocalUsage()
-    }
-
     private func assign(_ value: ProviderQuota?, to provider: ProviderQuota.Provider) {
         let resolvedValue: ProviderQuota?
         if let value, let previous = localQuotas[provider],
@@ -418,13 +341,6 @@ final class UsageStore: ObservableObject {
             state.quota = resolvedValue
             state.isRefreshing = false
             providerAccountStates[systemID] = state
-        }
-        if let resolvedValue {
-            let updated = quotaUsageHistory.recording(resolvedValue)
-            if updated != quotaUsageHistory {
-                quotaUsageHistory = updated
-                quotaUsageHistoryCache.save(updated)
-            }
         }
     }
 
@@ -533,7 +449,6 @@ final class UsageStore: ObservableObject {
         providerAccountsStore: ProviderAccountsStore? = nil,
         automaticallyStarts: Bool = true,
         quotaCache: QuotaCache = QuotaCache(),
-        quotaUsageHistoryCache: QuotaUsageHistoryCache = QuotaUsageHistoryCache(),
         providerAccountQuotaCache: ProviderAccountQuotaCache = ProviderAccountQuotaCache(),
         operationTimeout: TimeInterval = AsyncDeadline.providerTimeout,
         credentialValidation: @escaping @Sendable (ProviderQuota.Provider, String, Date) async throws -> ProviderQuota = { provider, credential, now in
@@ -558,7 +473,6 @@ final class UsageStore: ObservableObject {
         self.providerAccountsStore = providerAccountsStore ?? ProviderAccountsStore(defaults: defaults)
         self.sessionActivityMonitor = sessionActivityMonitor
         self.quotaCache = quotaCache
-        self.quotaUsageHistoryCache = quotaUsageHistoryCache
         self.providerAccountQuotaCache = providerAccountQuotaCache
         self.accountLogin = accountLogin
         self.operationTimeout = operationTimeout
@@ -568,7 +482,6 @@ final class UsageStore: ObservableObject {
         hostQuotaRouter = HostAppQuotaRoutingService(
             detector: HostAppQuotaRouteDetector(homeDirectory: home)
         )
-        traeAgentTrajectoryStore = TraeAgentTrajectoryStore(defaults: defaults, home: home)
         // In-memory hosts/tests can exercise account state without loading
         // shared caches or starting real provider collection.
         if !automaticallyStarts {
@@ -576,12 +489,6 @@ final class UsageStore: ObservableObject {
             providerAccountSelections = self.providerAccountsStore.selections
             return
         }
-        disabledLocalUsageSourceIDs = Set(
-            (defaults.stringArray(forKey: disabledLocalUsageSourcesKey) ?? [])
-                .map(LocalUsageSourceCatalog.canonicalID)
-                .filter(LocalUsageSourceCatalog.isWellFormed)
-        )
-        traeAgentDirectories = traeAgentTrajectoryStore.availableDirectories
         if let cached = quotaCache.load() {
             localQuotas = cached.byProvider
             for hostProvider in [ProviderQuota.Provider.claude, .codex] {
@@ -612,19 +519,6 @@ final class UsageStore: ObservableObject {
             guard let cached else { return nil }
             return (profile.id, ProviderAccountState(quota: cached))
         })
-        history = historyCache.load()
-        Task { @MainActor [weak self] in
-            let cached = await ModelThroughputService.shared.cachedSnapshot()
-            guard let self, self.modelThroughput == .empty else { return }
-            self.modelThroughput = cached
-        }
-        discoveredLocalUsageSourceIDs.formUnion(
-            history?.days.flatMap(\.agents).map { LocalUsageSourceCatalog.canonicalID($0.id) } ?? []
-        )
-        if !traeAgentDirectories.isEmpty {
-            discoveredLocalUsageSourceIDs.insert(TraeAgentUsageService.agentID)
-        }
-        quotaUsageHistory = quotaUsageHistoryCache.load() ?? .empty
         claudeRetryAfter = UserDefaults.standard.object(forKey: claudeRetryAfterKey) as? Date
         pruneDisabledProviders()
 
@@ -637,7 +531,7 @@ final class UsageStore: ObservableObject {
             .sink { [weak self] _ in
                 guard let self else { return }
                 self.pruneDisabledProviders()
-                Task { await self.refresh(forceCCUsage: false, forceClaude: true) }
+                Task { await self.refresh(force: true) }
             }
             .store(in: &cancellables)
 
@@ -704,10 +598,7 @@ final class UsageStore: ObservableObject {
                     now.timeIntervalSince($0) >= scheduledInterval
                 } ?? true
                 if isInitialRefresh || scheduledRefreshIsDue {
-                    await refresh(
-                        forceCCUsage: isInitialRefresh,
-                        forceClaude: isInitialRefresh
-                    )
+                    await refresh(force: isInitialRefresh)
                     lastScheduledRefresh = now
                     isInitialRefresh = false
                 }
@@ -730,14 +621,10 @@ final class UsageStore: ObservableObject {
         guard enabled != lowLatencySyncEnabled else { return }
         lowLatencySyncEnabled = enabled
         guard enabled else { return }
-        Task { await refresh(forceCCUsage: false, forceClaude: true) }
+        Task { await refresh(force: true) }
     }
 
-    func refresh(forceCCUsage: Bool = true, forceClaude: Bool = false) async {
-        // Local usage has its own task and must be scheduled before the quota
-        // refresh lock. Otherwise opening the UI while a provider request is
-        // running silently drops the user's forced ccusage refresh.
-        refreshLocalUsage(force: forceCCUsage)
+    func refresh(force: Bool = false) async {
         guard !isRefreshing else { return }
         isRefreshing = true
         defer { isRefreshing = false }
@@ -764,14 +651,14 @@ final class UsageStore: ObservableObject {
         }
         // 失败后写入的退避窗口是硬性拦截,不只是补触发条件:活跃会话的
         // 60 秒节奏不能在退避期内每分钟重新发起一次最长 30 秒的 PTY 探针。
-        // 用户的手动刷新(forceClaude)仍可穿透。
+        // 用户的手动刷新(force)仍可穿透。
         let claudeBackoffActive = claudeRetryAfter.map { now < $0 } ?? false
         // The cadence decides when this provider is due; the source toggle
         // decides whether the default login may be read. Managed Claude/Codex
         // accounts keep the cadence even when the default source is parked.
         let claudeDue = tracked.isEnabled(.claude)
             && (
-                forceClaude
+                force
                     || (!claudeBackoffActive
                         && autoDue(since: lastClaudeAttempt, interval: localAIInterval))
             )
@@ -779,9 +666,9 @@ final class UsageStore: ObservableObject {
         let shouldRefreshClaude = claudeDue && claudeSystemSourceEnabled
         let codexSystemSourceEnabled = tracked.isSystemSourceEnabled(.codex)
 
-        let codexAPIDue = forceClaude
+        let codexAPIDue = force
             || autoDue(since: lastCodexAPIAttempt, interval: localAIInterval)
-        let codexLocalDue = forceClaude || autoDue(
+        let codexLocalDue = force || autoDue(
             since: lastCodexLocalAttempt,
             interval: AdaptiveRefreshPolicy.codexLocalSnapshotInterval(
                 localSessionActive: localSessionActive,
@@ -794,7 +681,7 @@ final class UsageStore: ObservableObject {
         // to check immediately.
         let statusProviders: [ProviderQuota.Provider] = [.claude, .codex].filter(tracked.isEnabled)
         let serviceStatusDue = !statusProviders.isEmpty && (
-            forceClaude
+            force
                 || lastServiceStatusAttempt.map {
                     now.timeIntervalSince($0) >= serviceStatusRefreshInterval
                 } ?? true
@@ -806,7 +693,7 @@ final class UsageStore: ObservableObject {
         let codexRouteIsExternal = hostQuotaRouter.route(for: .codex).isExternal
         let dueProviderSources = Self.auxProviders.filter { provider in
             guard tracked.isEnabled(provider) else { return false }
-            if forceClaude { return true }
+            if force { return true }
             if let retryAfter = auxProviderRetryAfter[provider], now < retryAfter {
                 return false
             }
@@ -931,7 +818,7 @@ final class UsageStore: ObservableObject {
     /// forced network request. Local usage follows the same due check; explicit
     /// surface opens can still force its pre-existing presentation refresh.
     func refreshForVisibleSurface() async {
-        await refresh(forceCCUsage: false, forceClaude: false)
+        await refresh()
     }
 
     private func applyQuotaRefreshOutput(
@@ -1079,151 +966,8 @@ final class UsageStore: ObservableObject {
         }
     }
 
-    /// Refreshes only the bundled ccusage snapshot. Presentation surfaces use
-    /// this entry point so showing local totals does not also trigger network
-    /// provider requests.
-    func refreshLocalUsage(force: Bool = true) {
-        // Costs shown on any surface use the display rate; checking here keeps
-        // it current for menu-bar-only users. Cheap and self-throttled.
-        CurrencyStore.shared.refreshIfStale()
-        scheduleCCUsageRefresh(force: force)
-    }
-
-    private func scheduleCCUsageRefresh(force: Bool, now: Date = .now) {
-        guard historyRefreshTask == nil else { return }
-        let interval = AdaptiveRefreshPolicy.localUsageInterval(
-            preferred: PreferencesStore.shared.refreshInterval,
-            lowLatencySyncEnabled: lowLatencySyncEnabled,
-            localUsageUIVisible: localUsageUIVisibilityProvider?() ?? false,
-            localSessionActive: sessionActivityMonitor.hasRecentSessionActivity(at: now)
-        )
-        guard AdaptiveRefreshPolicy.localUsageRefreshIsDue(
-            interval: interval,
-            lastRefresh: lastCCUsageRefresh,
-            now: now,
-            force: force
-        ) else { return }
-        lastCCUsageRefresh = now
-        isCCUsageRefreshing = true
-
-        historyRefreshTask = Task { @MainActor [weak self] in
-            guard let self else { return }
-            defer {
-                isCCUsageRefreshing = false
-                historyRefreshTask = nil
-                publishErrors()
-            }
-            var merged: LocalUsageSnapshot?
-            var errors: [String] = []
-            do {
-                merged = try await AsyncDeadline.run {
-                    try await CCUsageService().fetchSnapshot(days: 30, now: now)
-                }
-            } catch {
-                errors.append("ccusage: \(error.localizedDescription)")
-            }
-
-            let traeDirectories = traeAgentDirectories
-            let ccusageAlreadyIncludesTrae = merged.map { snapshot in
-                snapshot.daily.agents.contains { $0.id == TraeAgentUsageService.agentID }
-                    || snapshot.history.days.contains { day in
-                        day.agents.contains { $0.id == TraeAgentUsageService.agentID }
-                    }
-            } == true
-            if !traeDirectories.isEmpty, !ccusageAlreadyIncludesTrae {
-                do {
-                    let trae = try await AsyncDeadline.run {
-                        await TraeAgentUsageService(directories: traeDirectories)
-                            .fetchSnapshot(days: 30, now: now)
-                    }
-                    merged = merged.map { $0.merging(trae) } ?? trae
-                } catch {
-                    errors.append("Trae: \(AsyncDeadline.message(for: error))")
-                }
-            }
-
-            guard !Task.isCancelled else { return }
-            if let merged {
-                latestLocalUsageSnapshot = merged
-                applyLocalUsageSnapshot(merged)
-                scheduleThroughputRefresh(now: now)
-            } else if daily == nil {
-                localUsageStatus = .failed(errors.joined(separator: "\n"))
-            }
-            historyErrorMessage = errors.isEmpty ? nil : errors.joined(separator: "\n")
-        }
-    }
-
-    /// Rides the ccusage cadence instead of owning a timer. Each pass reads
-    /// only bytes appended since the last one, at utility priority, bounded by
-    /// the service's byte and time budget; the UI never waits on it.
-    private func scheduleThroughputRefresh(now: Date) {
-        guard throughputTask == nil else { return }
-        throughputTask = Task { @MainActor [weak self] in
-            guard let self else { return }
-            defer { throughputTask = nil }
-            let directories: [URL]
-            if let cached = throughputClaudeDirectories,
-               now.timeIntervalSince(cached.resolvedAt) < 3_600 {
-                directories = cached.urls
-            } else {
-                directories = (try? await CCUsageService.claudeLogDirectories()) ?? []
-                throughputClaudeDirectories = (directories, now)
-            }
-            // A local source the user turned off is not read for speed either.
-            let roots = ModelThroughputService.defaultRoots(claudeConfigDirectories: directories)
-                .filter { self.isLocalUsageSourceEnabled($0.kind.rawValue) }
-            let snapshot = await Task.detached(priority: .utility) {
-                await ModelThroughputService.shared.refresh(roots: roots, now: now)
-            }.value
-            guard !Task.isCancelled, snapshot != modelThroughput else { return }
-            modelThroughput = snapshot
-        }
-    }
-
-    private func applyLocalUsageSnapshot(_ snapshot: LocalUsageSnapshot) {
-        let discovered = snapshot.daily.agents.map(\.id)
-            + snapshot.history.days.flatMap(\.agents).map(\.id)
-        discoveredLocalUsageSourceIDs.formUnion(
-            discovered
-                .map(LocalUsageSourceCatalog.canonicalID)
-                .filter(LocalUsageSourceCatalog.isWellFormed)
-        )
-        if !traeAgentDirectories.isEmpty {
-            discoveredLocalUsageSourceIDs.insert(TraeAgentUsageService.agentID)
-        }
-
-        let visibleDaily = DailyUsage(
-            date: snapshot.daily.date,
-            agents: snapshot.daily.agents.filter {
-                isLocalUsageSourceEnabled($0.id)
-            },
-            capturedAt: snapshot.daily.capturedAt
-        )
-        let visibleHistory = DailyUsageHistory(
-            days: snapshot.history.days.map { day in
-                DailyUsageHistory.Day(
-                    date: day.date,
-                    agents: day.agents.filter { isLocalUsageSourceEnabled($0.id) }
-                )
-            },
-            capturedAt: snapshot.history.capturedAt
-        )
-        daily = visibleDaily
-        history = visibleHistory
-        historyCache.save(visibleHistory)
-        localUsageStatus = Self.localUsageStatus(for: visibleDaily)
-    }
-
-    private func reloadTraeAgentDirectories() {
-        traeAgentDirectories = traeAgentTrajectoryStore.availableDirectories
-        if !traeAgentDirectories.isEmpty {
-            discoveredLocalUsageSourceIDs.insert(TraeAgentUsageService.agentID)
-        }
-    }
-
     private func publishErrors() {
-        let combined = [quotaErrorMessage, historyErrorMessage]
+        let combined = [quotaErrorMessage]
             .compactMap { $0 }
             .joined(separator: "\n")
         errorMessage = combined.isEmpty ? nil : combined
@@ -1429,7 +1173,7 @@ final class UsageStore: ObservableObject {
         if provider == .claude {
             claudeWebOrganizationChoices = []
             assign(nil, to: .claude) // changing source must not retain the web account's quota
-            await refresh(forceCCUsage: false, forceClaude: true)
+            await refresh(force: true)
         } else {
             await refreshKeyProvider(provider)
         }
@@ -1724,7 +1468,7 @@ final class UsageStore: ObservableObject {
         if profile.isSystem {
             switch profile.provider {
             case .claude:
-                await refresh(forceCCUsage: false, forceClaude: true)
+                await refresh(force: true)
             case .codex:
                 let result = await result {
                     try await self.hostQuotaRouter.fetchCodex(preferAPI: true)
@@ -1792,7 +1536,7 @@ final class UsageStore: ObservableObject {
                accountSnapshots(for: provider).contains(where: {
                    $0.id == .system(.claude) && $0.profile.isEnabled
                }) {
-                await refresh(forceCCUsage: false, forceClaude: true)
+                await refresh(force: true)
                 return
             }
             let enabledIDs = accountSnapshots(for: provider)
@@ -1945,7 +1689,6 @@ final class UsageStore: ObservableObject {
 
     deinit {
         refreshTask?.cancel()
-        historyRefreshTask?.cancel()
     }
 
     private func remainingText(for quota: ProviderQuota?) -> String {

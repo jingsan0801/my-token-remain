@@ -21,7 +21,6 @@ struct ZAIBalanceParserTests {
         #expect(quota.secondary == nil)
         #expect(quota.scopedWindows == nil)
         #expect(quota.extraUsage == nil)
-        #expect(quota.spend == nil)
         #expect(quota.capturedAt == balanceNow)
     }
 

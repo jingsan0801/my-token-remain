@@ -72,19 +72,11 @@ APP_CONTENTS="$APP_BUNDLE/Contents"
 APP_MACOS="$APP_CONTENTS/MacOS"
 APP_RESOURCES="$APP_CONTENTS/Resources"
 APP_FRAMEWORKS="$APP_CONTENTS/Frameworks"
-APP_HELPERS="$APP_CONTENTS/Helpers"
 APP_BINARY="$APP_MACOS/$EXECUTABLE_NAME"
 # The shipped executable is stripped, so the only way to symbolicate a crash
 # report is the archived companion dSYM. It sits beside the bundle rather than
 # inside it: shipping 47 MB of DWARF to every user would defeat the strip.
 APP_DSYM="$DIST_DIR/$APP_NAME.app.dSYM"
-CCUSAGE_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :TokenRemainBundledCCUsageVersion' "$ROOT_DIR/Resources/Info.plist")"
-CCUSAGE_RELATIVE_PATH="$CCUSAGE_VERSION/darwin-universal/ccusage"
-CCUSAGE_SOURCE="$ROOT_DIR/Vendor/ccusage/$CCUSAGE_RELATIVE_PATH"
-CCUSAGE_LICENSE="$ROOT_DIR/Vendor/ccusage/LICENSE"
-CCUSAGE_CHECKSUM_FILE="$ROOT_DIR/Vendor/ccusage/SHA256"
-CCUSAGE_EXPECTED_SHA256="$(/usr/bin/awk -v path="$CCUSAGE_RELATIVE_PATH" '$2 == path { print $1 }' "$CCUSAGE_CHECKSUM_FILE")"
-CCUSAGE_HELPER="$APP_HELPERS/ccusage"
 
 resolve_signing_common_name() {
   local selector="$1"
@@ -370,19 +362,6 @@ verify_universal_binary() {
   [[ " $archs " == *" arm64 "* && " $archs " == *" x86_64 "* ]]
 }
 
-sign_embedded_ccusage() {
-  local timestamp_option="--timestamp=none"
-
-  [[ -x "$CCUSAGE_HELPER" ]] || {
-    echo "The packaged application is missing its bundled ccusage helper." >&2
-    exit 1
-  }
-  if [[ "$SIGNING_COMMON_NAME" == "Developer ID Application:"* ]]; then
-    timestamp_option="--timestamp"
-  fi
-  /usr/bin/codesign --force --sign "$SIGNING_IDENTITY" --options runtime "$timestamp_option" \
-    "$CCUSAGE_HELPER"
-}
 
 sign_outer_bundle() {
   local entitlements_path="${1:-}"
@@ -402,26 +381,6 @@ sign_outer_bundle() {
   /usr/bin/codesign "${signing_options[@]}" "$APP_BUNDLE"
 }
 
-verify_embedded_ccusage() {
-  local signed_app="$1"
-  local helper="$signed_app/Contents/Helpers/ccusage"
-  local version
-
-  [[ -x "$helper" ]] || {
-    echo "Signed application is missing its bundled ccusage helper." >&2
-    exit 1
-  }
-  verify_universal_binary "$helper" || {
-    echo "Signed application contains a non-universal ccusage helper." >&2
-    exit 1
-  }
-  /usr/bin/codesign --verify --strict "$helper"
-  version="$("$helper" --version)"
-  [[ "$version" == "ccusage $CCUSAGE_VERSION" ]] || {
-    echo "Signed application contains unexpected ccusage version: $version" >&2
-    exit 1
-  }
-}
 
 # Guards the download-size contract. A regression here is invisible in QA —
 # the app behaves identically, it is just megabytes larger — so assert it.
@@ -453,7 +412,6 @@ verify_bundle_for_mode() {
     exit 1
   }
   verify_bundle_payload "$signed_app"
-  verify_embedded_ccusage "$signed_app"
   if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
     verify_sync_signature "$signed_app"
   else
@@ -481,7 +439,7 @@ BUILD_DIR="$(swift build "${SWIFT_BUILD_ARGS[@]}" --show-bin-path)"
 BUILD_BINARY="$BUILD_DIR/$PRODUCT_NAME"
 
 rm -rf "$APP_BUNDLE"
-mkdir -p "$APP_MACOS" "$APP_RESOURCES" "$APP_FRAMEWORKS" "$APP_HELPERS"
+mkdir -p "$APP_MACOS" "$APP_RESOURCES" "$APP_FRAMEWORKS"
 cp "$BUILD_BINARY" "$APP_BINARY"
 # A release executable carries ~7 MB of symbol table per architecture, which is
 # larger than its own __TEXT. Archive the DWARF first, verify it describes the
@@ -540,27 +498,6 @@ if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
 else
   "$ROOT_DIR/script/compile_app_icon.sh" "$APP_RESOURCES"
 fi
-[[ -x "$CCUSAGE_SOURCE" ]] || {
-  echo "Missing executable vendored ccusage $CCUSAGE_VERSION helper." >&2
-  exit 1
-}
-[[ -r "$CCUSAGE_LICENSE" ]] || {
-  echo "Missing vendored ccusage MIT license." >&2
-  exit 1
-}
-[[ "$CCUSAGE_EXPECTED_SHA256" =~ ^[0-9a-f]{64}$ ]] || {
-  echo "Missing universal ccusage checksum entry." >&2
-  exit 1
-}
-CCUSAGE_ACTUAL_SHA256="$(/usr/bin/shasum -a 256 "$CCUSAGE_SOURCE" | /usr/bin/awk '{print $1}')"
-[[ "$CCUSAGE_ACTUAL_SHA256" == "$CCUSAGE_EXPECTED_SHA256" ]] || {
-  echo "Vendored ccusage checksum mismatch." >&2
-  exit 1
-}
-cp "$CCUSAGE_SOURCE" "$CCUSAGE_HELPER"
-chmod +x "$CCUSAGE_HELPER"
-mkdir -p "$APP_RESOURCES/ThirdPartyLicenses"
-cp "$CCUSAGE_LICENSE" "$APP_RESOURCES/ThirdPartyLicenses/ccusage.txt"
 # Localized strings live in the app bundle so SwiftUI and NSLocalizedString
 # automatically follow the system language or the per-app macOS language.
 for localization in "$ROOT_DIR/Sources/UsageDock/Localization/"*.lproj; do
@@ -609,10 +546,8 @@ if [[ "$SYNC_RELEASE_MODE" == "1" ]]; then
   # the locally built bundle, Gatekeeper treats this development app as an
   # internet-distributed, unnotarized app and kills it before main() runs.
   /usr/bin/xattr -c "$APP_CONTENTS/embedded.provisionprofile" 2>/dev/null || true
-  sign_embedded_ccusage
   sign_outer_bundle "$SYNC_RESOLVED_ENTITLEMENTS"
 else
-  sign_embedded_ccusage
   sign_outer_bundle
 fi
 # On File Provider-backed workspaces, codesign itself can cause provenance

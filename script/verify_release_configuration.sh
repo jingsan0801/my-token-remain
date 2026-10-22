@@ -7,9 +7,6 @@ cd "$ROOT_DIR"
 ./script/verify_version_consistency.sh
 ./script/verify_automatic_update_contract.sh
 ./script/verify_installation_isolation.sh
-./script/verify_ccusage_freshness.sh --update
-./script/verify_bundled_ccusage_contract.sh
-./script/verify_ccusage_freshness.sh --local
 ./script/verify_keychain_read_contract.sh
 ./script/verify_website_release_contract.sh
 
@@ -40,8 +37,6 @@ SYNC_SUCCESS_MARKER='Private sync source upload succeeded'
 /usr/bin/grep -Fq "$SYNC_SUCCESS_MARKER" script/build_and_run.sh
 /bin/bash -n script/verify_automatic_update_contract.sh
 /bin/bash -n script/verify_installation_isolation.sh
-/bin/bash -n script/verify_bundled_ccusage_contract.sh
-/bin/bash -n script/verify_ccusage_freshness.sh
 /bin/bash -n script/verify_keychain_read_contract.sh
 /bin/bash -n script/verify_version_consistency.sh
 /bin/bash -n script/verify_website_release_contract.sh

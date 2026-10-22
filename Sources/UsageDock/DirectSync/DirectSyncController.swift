@@ -18,7 +18,6 @@ final class DirectSyncController: ObservableObject {
     @Published private(set) var pairingCode: String?
     @Published private(set) var pairingExpiresAt: Date?
     @Published private(set) var peers: [DirectSyncPeerRecord] = []
-    @Published private(set) var sharesUsageHistory: Bool
 
     let address: String
 
@@ -31,13 +30,11 @@ final class DirectSyncController: ObservableObject {
     private var pairingExpiryTask: Task<Void, Never>?
     private var started = false
     private let sequenceKey = "tokenRemain.directSync.sequence.v1"
-    private let sharesUsageHistoryKey = "tokenRemain.directSync.sharesUsageHistory.v1"
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         peerStore = DirectSyncPeerStore(defaults: defaults)
         peers = peerStore.peers
-        sharesUsageHistory = defaults.bool(forKey: sharesUsageHistoryKey)
         let host = ProcessInfo.processInfo.hostName
         address = "http://\(host):\(DirectSyncConstants.defaultPort)"
     }
@@ -87,12 +84,6 @@ final class DirectSyncController: ObservableObject {
     func removePeer(_ sourceInstanceID: UUID) {
         try? peerStore.remove(sourceInstanceID: sourceInstanceID)
         peers = peerStore.peers
-    }
-
-    func setSharesUsageHistory(_ enabled: Bool) {
-        guard enabled != sharesUsageHistory else { return }
-        sharesUsageHistory = enabled
-        defaults.set(enabled, forKey: sharesUsageHistoryKey)
     }
 
     private func route(_ request: DirectSyncHTTPRequest) -> DirectSyncHTTPResponse {
@@ -167,8 +158,6 @@ final class DirectSyncController: ObservableObject {
 
             let responseSnapshot = MobileSnapshotRedactor.makeSnapshot(
                 from: usageStore.localQuotasForDirectSync,
-                history: usageStore.history,
-                includesUsageHistory: sharesUsageHistory,
                 sourceInstanceID: sourceInstanceID,
                 sequence: nextSequence(),
                 generatedAt: now

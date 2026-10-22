@@ -362,7 +362,6 @@ struct CredentialWaitStateTests {
                 sessionActivityMonitor: LocalAISessionActivityMonitor(sessionRoots: [], startMonitoring: false),
                 providerAccountsStore: accounts, automaticallyStarts: false,
                 quotaCache: QuotaCache(url: root.appending(path: "quota-cache.json")),
-                quotaUsageHistoryCache: QuotaUsageHistoryCache(url: root.appending(path: "quota-history.json")),
                 providerAccountQuotaCache: ProviderAccountQuotaCache(url: root.appending(path: "account-cache.json")),
                 operationTimeout: timeout, credentialValidation: validate,
                 credentialSave: { _, credential in writes.record(credential) },

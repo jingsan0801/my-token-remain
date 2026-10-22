@@ -110,7 +110,6 @@ expect_block build_and_run.sh 'bash script/build_and_run.sh --print-install-cont
 expect_block verify_installation_isolation.sh 'script/verify_installation_isolation.sh'
 expect_block verify_release_configuration.sh 'script/verify_release_configuration.sh'
 expect_block verify_launch_stability.sh 'bash script/verify_launch_stability.sh --skip-build'
-expect_block verify_ccusage_freshness.sh 'bash script/verify_ccusage_freshness.sh --update'
 expect_block git-reset 'git reset --hard origin/main'
 expect_block git-clean 'git clean -fd'
 expect_block git-stash 'git stash'
@@ -169,13 +168,11 @@ expect_allow 'swift test --no-parallel --filter AccountLoginProcessTests 2>&1 | 
 expect_allow 'npm --prefix broadcast run check'
 expect_allow 'npm --prefix broadcast run deploy:dry-run'
 expect_allow 'npx wrangler deploy --dry-run'
-expect_allow 'bash script/verify_ccusage_freshness.sh --check'
 expect_allow 'bash script/verify_agent_docs.sh'
 expect_allow 'script/agent_issue.sh upsert --key drift:pstack --label agent:drift --title t --body-file /tmp/b.md'
 expect_allow 'rm -rf /tmp/tokenremain-agent-probe'
 expect_allow 'rm Tests/UsageDockTests/Fixtures/agent-probe.json'
 expect_allow 'find /tmp/agent-run -name "*.log" -delete'
-expect_allow 'curl -fsSL https://registry.npmjs.org/@ccusage%2fccusage-darwin-arm64/latest'
 expect_allow 'defaults read com.jingsan0801.mytokenremain.dev'
 
 # Lane identity: the worktree-private marker, and nothing else.

@@ -1,17 +1,14 @@
 "widget.local_usage" = "Локальное использование сегодня";
 "widget.ai_feed" = "Лента ИИ";
-"usage.api_cost" = "Стоимость API";
 "nav.group.monitor" = "МОНИТОРИНГ";
 "nav.group.system" = "СИСТЕМА";
 "nav.overview" = "Обзор";
 "nav.limits" = "Лимиты";
-"nav.trends" = "Тренды";
 "nav.devices" = "Устройства";
 "nav.data_sources" = "Источники данных";
 "nav.settings" = "Настройки";
 "section.overview.subtitle" = "Риск квоты и актуальные официальные квоты";
 "section.limits.subtitle" = "Официальные окна квот ваших ИИ-инструментов";
-"section.trends.subtitle" = "Использование во времени · локальный ccusage";
 "section.devices.subtitle" = "Этот Mac и будущий мониторинг между устройствами";
 "section.data_sources.subtitle" = "Состояние источников и конфиденциальность";
 "section.settings.subtitle" = "Запуск, обновление и управление приложением";
@@ -25,12 +22,10 @@
 "risk.headline.medium" = "Следите за темпом использования";
 "risk.headline.high" = "Квота почти исчерпана";
 "risk.headline.unknown" = "Ожидание официальной квоты";
-"risk.headline.projected_runout" = "При текущем темпе квота может закончиться раньше";
 "risk.summary.low" = "При текущем темпе квоты должно хватить до следующего сброса.";
 "risk.summary.medium" = "Некоторые окна почти исчерпаны. Снизьте использование или следите за сбросом.";
 "risk.summary.high" = "Квота почти исчерпана. Используйте осторожно или дождитесь сброса.";
 "risk.summary.unknown" = "Официального снимка квоты пока нет. Повтор будет выполнен автоматически.";
-"risk.summary.projected_runout" = "%1$@ %2$@ предположительно закончится через %3$@, до официального сброса. Снизьте использование или смените поставщика.";
 "feed.tier.primary" = "Основной";
 "feed.tier.rotating" = "Дополнительный";
 "feed.priority.token" = "Квота / Token";
@@ -53,12 +48,6 @@
 "quota.window" = "Окно %1$@";
 "quota.remaining" = "Осталось %1$@";
 "quota.window_accessibility" = "%1$@, окно %2$@";
-"pace.on_track" = "По плану";
-"pace.reserve" = "Запас %1$@";
-"pace.deficit" = "Опережение %1$@";
-"pace.lasts_until_reset" = "Хватит до сброса";
-"pace.projected_early" = "Закончится раньше";
-"pace.projected_in" = "Закончится через %1$@";
 "widget.all_visible" = "Все виджеты отображаются";
 "widget.add_named" = "Добавить %1$@";
 "widget.keep_expanded" = "Оставить развернутым";
@@ -81,12 +70,6 @@
 "action.settings" = "Настройки";
 "action.quit" = "Выйти";
 "action.quit_app" = "Выйти из MyTokenRemain";
-"usage.updated_local" = "Обновлено %1$@ · данные остаются на этом Mac";
-"usage.loading_local" = "Чтение использования · данные остаются на этом Mac";
-"usage.provider_breakdown_empty" = "Нет разбивки по поставщикам";
-"usage.loading_ccusage" = "Чтение локальных данных ccusage…";
-"usage.provider_help" = "%1$@: стоимость API %2$@, %3$@ tokens, %4$@ от общего";
-"usage.provider_accessibility" = "%1$@, стоимость API %2$@, %3$@ tokens";
 "quota.loading_official" = "Чтение официальной квоты…";
 "quota.login_recovery_hint" = "Вход не обнаружен; войдите, чтобы данные восстановились автоматически";
 "feed.updating" = "Обновление";
@@ -98,19 +81,9 @@
 "feed.open_x_hint" = "Открыть исходную публикацию в X";
 
 /* Spend tiles & extra usage (OpenUsage-style) */
-"usage.spend_today" = "Сегодня";
-"usage.spend_yesterday" = "Вчера";
-"usage.spend_last30" = "Последние 30 дней";
-"usage.trend" = "Тренд использования";
 "quota.extra_usage" = "Доп. расход";
 "quota.spent" = "%@ потрачено";
-"quota.official_spend" = "Официальные расходы";
-"quota.models_this_cycle" = "Модели за период";
-"quota.models_more" = "ещё %1$d";
 "quota.account_balance" = "Баланс аккаунта";
-"quota.spend_week" = "Эта неделя";
-"quota.spend_month" = "Этот месяц";
-"quota.spend_all_time" = "За всё время";
 "datasource.zai_region" = "Регион API";
 "datasource.zai_region_global" = "Глобальный";
 "datasource.zai_region_china" = "Китай";
@@ -135,38 +108,8 @@
 "settings.quota_details" = "Quota details";
 "settings.antigravity_3p" = "Show Antigravity Claude / GPT pools";
 "settings.antigravity_3p_hint" = "Show the Claude and GPT-OSS 5-hour and weekly pools next to Gemini; shown by default.";
-"trends.model_other_format" = "Other (%1$d models)";
-"trends.model_detail_tag" = "MODEL DETAIL";
-"trends.model_detail_accumulating" = "Model detail accumulates from this version onward; older cached days cannot be backfilled.";
-"trends.model_io_format" = "In %1$@ · Out %2$@ · Cache %3$@";
-"trends.tooltip_click_hint" = "Click for model detail";
 
 /* Usage page: token mix, model speed, display currency */
-"composition.input" = "Ввод";
-"composition.output" = "Вывод";
-"composition.cache_write" = "Запись в кэш";
-"composition.cache_read" = "Чтение из кэша";
-"composition.cache_unsplit" = "Кэш";
-"composition.range_title" = "Состав токенов · последние %d дн.";
-"composition.day_title" = "Состав токенов · %@";
-"trends.model_io_split_format" = "Ввод %1$@ · Вывод %2$@ · Запись в кэш %3$@ · Чтение кэша %4$@";
-"trends.model_tps_format" = "≈%@ tok/s";
-"trends.model_tps_help" = "Средняя скорость вывода: выходные токены, делённые на время от запроса до последнего фрагмента; оценивается по временным меткам локальных журналов сеансов и включает задержку до первого токена.";
-"trends.model_tps_note" = "tok/s оценивается локально по временным меткам журналов Claude Code и Codex и включает задержку до первого токена.";
-"usage.provider_cost_amount_accessibility" = "%1$@, %2$@ токенов, %3$@, %4$@ стоимости";
-"settings.currency_title" = "Валюта";
-"settings.currency_display" = "Валюта отображения расходов";
-"settings.currency_hint" = "Расходы оцениваются в долларах США по прейскурантным ценам API и пересчитываются по ежедневным справочным курсам. Официальные суммы счетов и балансы остаются в валюте расчётов.";
-"settings.currency_rate" = "1 USD = %1$@ %2$@";
-"settings.currency_updated" = "Обновлено %@";
-"settings.currency_refresh" = "Обновить курс";
-"settings.currency_fallback" = "Курса пока нет; расходы показаны в USD.";
-"settings.currency_attribution" = "Курсы: ExchangeRate-API";
-"currency.error_invalid" = "Сервис курсов вернул непригодные данные. Сохранены последние курсы.";
-"currency.error_throttled" = "Курсы только что запрошены. Повторите через несколько секунд.";
-"currency.error_timeout" = "Истекло время запроса курсов. Сохранены последние курсы.";
-"currency.error_network" = "Не удалось подключиться к сервису курсов. Сохранены последние курсы.";
-"quota.model_speed_help" = "%1$@ · средняя скорость вывода за последние %2$d дн., оценка по временным меткам локальных журналов (с задержкой до первого токена).";
 
 /* Web Cookie guide and web-session providers */
 "cookieguide.title" = "Connect %@ with a browser Cookie";

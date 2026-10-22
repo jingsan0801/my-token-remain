@@ -562,7 +562,7 @@ struct SettingsSection: View {
                     HStack {
                         Spacer()
                         Button {
-                            Task { await store.refresh(forceCCUsage: true, forceClaude: true) }
+                            Task { await store.refresh(force: true) }
                         } label: {
                             Label(
                                 store.isRefreshing

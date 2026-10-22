@@ -33,10 +33,7 @@ struct DashboardView: View {
         UsageInsights(
             claude: nil,
             codex: nil,
-            others: Array(store.quotas.values),
-            daily: store.daily,
-            history: store.history,
-            quotaUsageHistory: store.quotaUsageHistory
+            others: Array(store.quotas.values)
         )
     }
 
@@ -256,7 +253,7 @@ struct DashboardView: View {
                     .foregroundStyle(DashboardTheme.mutedText)
                 Spacer()
                 Button {
-                    Task { await store.refresh(forceCCUsage: true, forceClaude: true) }
+                    Task { await store.refresh(force: true) }
                 } label: {
                     if store.isRefreshing {
                         ProgressView().controlSize(.small)

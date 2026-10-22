@@ -1,17 +1,14 @@
 "widget.local_usage" = "Penggunaan lokal hari ini";
 "widget.ai_feed" = "Feed AI";
-"usage.api_cost" = "Biaya API";
 "nav.group.monitor" = "MONITOR";
 "nav.group.system" = "SISTEM";
 "nav.overview" = "Ringkasan";
 "nav.limits" = "Batas";
-"nav.trends" = "Tren";
 "nav.devices" = "Perangkat";
 "nav.data_sources" = "Sumber data";
 "nav.settings" = "Pengaturan";
 "section.overview.subtitle" = "Risiko kuota dan kuota resmi langsung";
 "section.limits.subtitle" = "Jendela kuota resmi semua alat coding AI Anda";
-"section.trends.subtitle" = "Penggunaan dari waktu ke waktu · ccusage lokal";
 "section.devices.subtitle" = "Mac ini dan pemantauan lintas perangkat mendatang";
 "section.data_sources.subtitle" = "Status sumber data dan privasi";
 "section.settings.subtitle" = "Mulai, segarkan, dan kontrol aplikasi";
@@ -25,12 +22,10 @@
 "risk.headline.medium" = "Pantau laju penggunaan";
 "risk.headline.high" = "Kuota hampir habis";
 "risk.headline.unknown" = "Menunggu kuota resmi";
-"risk.headline.projected_runout" = "Laju saat ini dapat menghabiskan kuota lebih awal";
 "risk.summary.low" = "Dengan laju saat ini, kuota seharusnya cukup hingga reset berikutnya.";
 "risk.summary.medium" = "Beberapa jendela hampir habis. Kurangi penggunaan atau pantau waktu reset.";
 "risk.summary.high" = "Kuota hampir habis. Gunakan dengan hati-hati atau tunggu reset.";
 "risk.summary.unknown" = "Belum ada cuplikan kuota resmi. Percobaan ulang akan dilakukan otomatis.";
-"risk.summary.projected_runout" = "%1$@ %2$@ diperkirakan habis dalam %3$@, sebelum reset resmi. Kurangi penggunaan atau ganti penyedia.";
 "feed.tier.primary" = "Utama";
 "feed.tier.rotating" = "Sekunder";
 "feed.priority.token" = "Kuota / Token";
@@ -53,12 +48,6 @@
 "quota.window" = "Jendela %1$@";
 "quota.remaining" = "Tersisa %1$@";
 "quota.window_accessibility" = "Jendela %2$@ %1$@";
-"pace.on_track" = "Sesuai laju";
-"pace.reserve" = "Cadangan %1$@";
-"pace.deficit" = "%1$@ lebih cepat";
-"pace.lasts_until_reset" = "Cukup hingga reset";
-"pace.projected_early" = "Diperkirakan habis lebih awal";
-"pace.projected_in" = "Diperkirakan habis dalam %1$@";
 "widget.all_visible" = "Semua widget terlihat";
 "widget.add_named" = "Tambahkan %1$@";
 "widget.keep_expanded" = "Tetap diperluas";
@@ -81,12 +70,6 @@
 "action.settings" = "Pengaturan";
 "action.quit" = "Keluar";
 "action.quit_app" = "Keluar dari MyTokenRemain";
-"usage.updated_local" = "Diperbarui %1$@ · data tetap di Mac ini";
-"usage.loading_local" = "Membaca penggunaan · data tetap di Mac ini";
-"usage.provider_breakdown_empty" = "Tidak ada rincian per penyedia";
-"usage.loading_ccusage" = "Membaca data ccusage lokal…";
-"usage.provider_help" = "%1$@: biaya API %2$@, %3$@ tokens, %4$@ dari total";
-"usage.provider_accessibility" = "%1$@, biaya API %2$@, %3$@ tokens";
 "quota.loading_official" = "Membaca kuota resmi…";
 "quota.login_recovery_hint" = "Login tidak terdeteksi; masuk untuk memulihkan data secara otomatis";
 "feed.updating" = "Memperbarui";
@@ -98,19 +81,9 @@
 "feed.open_x_hint" = "Buka posting asli di X";
 
 /* Spend tiles & extra usage (OpenUsage-style) */
-"usage.spend_today" = "Hari ini";
-"usage.spend_yesterday" = "Kemarin";
-"usage.spend_last30" = "30 hari terakhir";
-"usage.trend" = "Tren penggunaan";
 "quota.extra_usage" = "Penggunaan ekstra";
 "quota.spent" = "%@ terpakai";
-"quota.official_spend" = "Pengeluaran resmi";
-"quota.models_this_cycle" = "Model siklus ini";
-"quota.models_more" = "+%1$d lainnya";
 "quota.account_balance" = "Saldo akun";
-"quota.spend_week" = "Minggu ini";
-"quota.spend_month" = "Bulan ini";
-"quota.spend_all_time" = "Sepanjang waktu";
 "datasource.zai_region" = "Wilayah API";
 "datasource.zai_region_global" = "Global";
 "datasource.zai_region_china" = "Tiongkok";
@@ -135,38 +108,8 @@
 "settings.quota_details" = "Quota details";
 "settings.antigravity_3p" = "Show Antigravity Claude / GPT pools";
 "settings.antigravity_3p_hint" = "Show the Claude and GPT-OSS 5-hour and weekly pools next to Gemini; shown by default.";
-"trends.model_other_format" = "Other (%1$d models)";
-"trends.model_detail_tag" = "MODEL DETAIL";
-"trends.model_detail_accumulating" = "Model detail accumulates from this version onward; older cached days cannot be backfilled.";
-"trends.model_io_format" = "In %1$@ · Out %2$@ · Cache %3$@";
-"trends.tooltip_click_hint" = "Click for model detail";
 
 /* Usage page: token mix, model speed, display currency */
-"composition.input" = "Input";
-"composition.output" = "Output";
-"composition.cache_write" = "Tulis cache";
-"composition.cache_read" = "Baca cache";
-"composition.cache_unsplit" = "Cache";
-"composition.range_title" = "Komposisi token · %d hari terakhir";
-"composition.day_title" = "Komposisi token · %@";
-"trends.model_io_split_format" = "Input %1$@ · Output %2$@ · Tulis cache %3$@ · Baca cache %4$@";
-"trends.model_tps_format" = "≈%@ tok/s";
-"trends.model_tps_help" = "Kecepatan output rata-rata: token output dibagi waktu dari permintaan hingga potongan terakhir, diperkirakan dari stempel waktu log sesi lokal. Termasuk waktu hingga token pertama.";
-"trends.model_tps_note" = "tok/s diperkirakan secara lokal dari stempel waktu log Claude Code dan Codex dan termasuk waktu hingga token pertama.";
-"usage.provider_cost_amount_accessibility" = "%1$@, %2$@ token, %3$@, %4$@ dari biaya";
-"settings.currency_title" = "Mata uang";
-"settings.currency_display" = "Mata uang tampilan biaya";
-"settings.currency_hint" = "Biaya diperkirakan dalam USD dari harga daftar API lalu dikonversi dengan kurs referensi harian. Jumlah tagihan dan saldo resmi tetap dalam mata uang penagihannya.";
-"settings.currency_rate" = "1 USD = %1$@ %2$@";
-"settings.currency_updated" = "Diperbarui %@";
-"settings.currency_refresh" = "Segarkan kurs";
-"settings.currency_fallback" = "Belum ada kurs; biaya ditampilkan dalam USD.";
-"settings.currency_attribution" = "Kurs dari ExchangeRate-API";
-"currency.error_invalid" = "Layanan kurs mengembalikan data yang tidak dapat digunakan. Kurs terakhir dipertahankan.";
-"currency.error_throttled" = "Kurs baru saja diminta. Coba lagi dalam beberapa detik.";
-"currency.error_timeout" = "Permintaan kurs melewati batas waktu. Kurs terakhir dipertahankan.";
-"currency.error_network" = "Tidak dapat menghubungi layanan kurs. Kurs terakhir dipertahankan.";
-"quota.model_speed_help" = "%1$@ · kecepatan output rata-rata %2$d hari terakhir, diperkirakan dari stempel waktu log lokal (termasuk waktu hingga token pertama).";
 
 /* Web Cookie guide and web-session providers */
 "cookieguide.title" = "Connect %@ with a browser Cookie";

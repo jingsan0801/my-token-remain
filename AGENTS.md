@@ -68,7 +68,7 @@
 
 执行入口见 [verify-tokenremain](.cursor/skills/verify-tokenremain/SKILL.md)。先读脚本实际行为，不凭 `verify`、`check`、`dry-run` 命名判断安全。
 
-- 不默认运行 `script/verify_release_configuration.sh`，它会调用 ccusage `--update`。
+- 不默认运行 `script/verify_release_configuration.sh`；它属于发布范围检查，只在校验发布配置时运行。
 - `script/build_and_run.sh --verify` 会停止对应进程、构建、安装并启动应用；普通 Dev 构建也需要实例归属检查。
 - `--print-install-contract` 在当前脚本中也安装了 EXIT 清理，可能删除 `dist/` 下对应暂存 bundle；`verify_installation_isolation.sh` 调用它，不能当作无副作用入口。
 - 普通开发保持非 sync 的 Dev 身份；不继承发布环境变量去覆盖生产 `TokenRemain.app`，不更改生产签名、权限或安装状态来让测试通过。

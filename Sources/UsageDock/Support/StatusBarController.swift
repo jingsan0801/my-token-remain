@@ -156,7 +156,6 @@ final class StatusBarController: NSObject {
         if visible {
             floatingControllerCreated = true
             popoverLayout.prepareForPresentation()
-            store.refreshLocalUsage()
             floatingWidgetController.show()
         } else if floatingControllerCreated {
             floatingWidgetController.hide()
@@ -258,9 +257,6 @@ final class StatusBarController: NSObject {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.updateStatusImage()
-                // 切回前台不强制扫描:相关界面可见时分钟级节奏本就在跑,
-                // 都不可见时按用户刷新偏好补扫即可。
-                self?.store.refreshLocalUsage(force: false)
                 TrackedProvidersStore.shared.scanForNewInstallations()
             }
             .store(in: &cancellables)
@@ -287,7 +283,6 @@ final class StatusBarController: NSObject {
         } else {
             popoverLayout.prepareForPresentation()
             showMenuBarPopup(relativeTo: button)
-            store.refreshLocalUsage()
             refreshVisibleSurface()
         }
     }
@@ -313,13 +308,11 @@ final class StatusBarController: NSObject {
     private func openDashboard(_ section: DashboardSection) {
         closeMenuBarPopup()
         dashboardCreated = true
-        store.refreshLocalUsage()
         dashboardController.show(section: section)
     }
 
-    /// 本地用量与 AI Feed 是否正被某个界面展示。仅在这些界面可见时,
-    /// 才值得维持分钟级 ccusage 扫描与 Feed 轮询(Apple 设备同步开启时
-    /// ccusage 另行保持分钟级)。
+    /// 主界面是否正被展示。仅在可见时,才值得维持分钟级额度刷新与
+    /// Feed 轮询。
     ///
     /// 每个 surface 都必须先经过 `SurfaceState`,把"还没建出来"显式说出口。
     /// 这不是绕弯:1.3.0-1.3.4 正是在这里读了一次 lazy 控制器的 isShown,
@@ -357,7 +350,6 @@ final class StatusBarController: NSObject {
     /// `--open-popover`. Regular launches still wait for a status-item click.
     func openPopoverForPreview() {
         popoverLayout.prepareForPresentation()
-        store.refreshLocalUsage()
         guard let button = statusItem.button, !menuBarPopupIsShown else { return }
         if usesLiquidGlassPopup {
             makeLiquidGlassPopupController().show(
@@ -459,8 +451,7 @@ final class StatusBarController: NSObject {
         let insights = UsageInsights(
             claude: nil,
             codex: nil,
-            others: store.headlineQuotas,
-            daily: nil
+            others: store.headlineQuotas
         )
         // 菜单栏文字维持用户自选项;Dock logo 的表情与双进度条只比较
         // 设置里选定的两个应用，其他 provider 仍出现在 tooltip 与面板里。

@@ -28,20 +28,6 @@ struct CrossDeviceSyncSettingsCard: View {
                 .toggleStyle(.switch)
                 .tint(DashboardTheme.violet)
 
-                Toggle(isOn: usageHistoryBinding) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(L10n.text("sync.toggle.history_title"))
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundStyle(DashboardTheme.text)
-                        Text(L10n.text("sync.toggle.history_detail"))
-                            .font(.system(size: 11))
-                            .foregroundStyle(DashboardTheme.secondaryText)
-                    }
-                }
-                .toggleStyle(.switch)
-                .tint(DashboardTheme.violet)
-                .disabled(!sync.isEnabled)
-
                 if sync.isEnabled {
                     LabeledContent(L10n.text("sync.health.icloud")) {
                         Label(iCloudHealthText, systemImage: iCloudHealthIcon)
@@ -84,15 +70,6 @@ struct CrossDeviceSyncSettingsCard: View {
                                     Text(windowSummary(provider.windows))
                                         .foregroundStyle(DashboardTheme.secondaryText)
                                 }
-                            }
-                        }
-                        if sync.syncUsageHistoryEnabled {
-                            HStack {
-                                Text(L10n.text("sync.preview.history_label"))
-                                    .foregroundStyle(DashboardTheme.text)
-                                Spacer()
-                                Text(L10n.format("sync.preview.history_days", sync.previewHistoryDays))
-                                    .foregroundStyle(DashboardTheme.secondaryText)
                             }
                         }
                         Text(L10n.text("sync.preview.whitelist_note"))
@@ -163,10 +140,6 @@ struct CrossDeviceSyncSettingsCard: View {
         Button(L10n.text("sync.action.delete_disconnect"), role: .destructive) {
             confirmsDeletion = true
         }
-    }
-
-    private var usageHistoryBinding: Binding<Bool> {
-        Binding(get: { sync.syncUsageHistoryEnabled }, set: sync.setUsageHistoryEnabled)
     }
 
     private var statusText: String {

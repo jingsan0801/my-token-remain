@@ -60,7 +60,6 @@ enum AppStoreSandboxProviderAudit {
             for await record in group {
                 collected.append(record)
             }
-            collected.append(await auditLocalUsageHistory())
             let order = Dictionary(
                 uniqueKeysWithValues: ProviderQuota.Provider.displayOrder.enumerated().map {
                     ($0.element.rawValue, $0.offset)
@@ -124,34 +123,6 @@ enum AppStoreSandboxProviderAudit {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
         return String(error.localizedDescription.prefix(320))
             .replacingOccurrences(of: home, with: "~")
-    }
-
-    private static func auditLocalUsageHistory() async -> Record {
-        do {
-            let history = try await CCUsageService().fetchHistory(days: 30)
-            return Record(
-                provider: "Local usage/history (ccusage)",
-                outcome: "success",
-                errorType: nil,
-                errorDomain: nil,
-                errorCode: nil,
-                detail: nil,
-                capturedAt: history.capturedAt,
-                primaryWindowMinutes: nil
-            )
-        } catch {
-            let nsError = error as NSError
-            return Record(
-                provider: "Local usage/history (ccusage)",
-                outcome: "failure",
-                errorType: String(reflecting: type(of: error)),
-                errorDomain: nsError.domain,
-                errorCode: nsError.code,
-                detail: safeDescription(error),
-                capturedAt: nil,
-                primaryWindowMinutes: nil
-            )
-        }
     }
 }
 #endif

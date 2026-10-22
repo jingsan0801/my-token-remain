@@ -8,9 +8,7 @@ import TokenRemainSyncKit
 /// upload the full encrypted snapshot again.
 enum SyncContentFingerprint {
     static func make(
-        quotas: [ProviderQuota.Provider: ProviderQuota],
-        history: DailyUsageHistory?,
-        includesUsageHistory: Bool
+        quotas: [ProviderQuota.Provider: ProviderQuota]
     ) -> String {
         struct Window: Codable {
             let usedPercent: Double
@@ -32,7 +30,6 @@ enum SyncContentFingerprint {
         }
         struct Payload: Codable {
             let providers: [Provider]
-            let historyDays: [DailyUsageHistory.Day]
         }
         let values = MobileSnapshotRedactor.publishedProviders.compactMap { provider -> Provider? in
             guard let quota = quotas[provider] else { return nil }
@@ -78,10 +75,7 @@ enum SyncContentFingerprint {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .sortedKeys
         encoder.dateEncodingStrategy = .millisecondsSince1970
-        let payload = Payload(
-            providers: values,
-            historyDays: includesUsageHistory ? (history?.days ?? []) : []
-        )
+        let payload = Payload(providers: values)
         let data = (try? encoder.encode(payload)) ?? Data()
         return SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
     }

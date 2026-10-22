@@ -293,7 +293,6 @@ struct OpenRouterUsageParserTests {
         // 有周期的 key 限额维持现状:积分池走 secondary,不需要 scoped 行。
         #expect(quota.uniqueScopedWindows.isEmpty)
         #expect(quota.planName == "Pay As You Go")
-        #expect(quota.spend == ProviderSpend(todayUSD: 1.5, weekUSD: 4, monthUSD: 9, allTimeUSD: 10))
     }
 
     @Test("A key limit without cadence keeps the credits pool as a scoped percent row")

@@ -4,65 +4,6 @@ import Testing
 
 @Suite("Claude desktop usage")
 struct ClaudeDesktopUsageTests {
-    private func temporaryHome() throws -> URL {
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-        return url
-    }
-
-    @Test func discoversDefaultsCoworkAndCustomWithoutDuplicates() throws {
-        let home = try temporaryHome()
-        defer { try? FileManager.default.removeItem(at: home) }
-        let relative = [".claude", ".config/claude", "custom", "Library/Application Support/Claude/local-agent-mode-sessions/a/b/local_c/.claude"]
-        for path in relative {
-            try FileManager.default.createDirectory(at: home.appendingPathComponent(path + "/projects"), withIntermediateDirectories: true)
-        }
-        let directories = try ClaudeLogDirectories.discover(home: home, environment: ["CLAUDE_CONFIG_DIR": home.appendingPathComponent("custom").path], additional: [home.appendingPathComponent(".claude").path])
-        #expect(directories.count == 4)
-        #expect(directories.contains(home.appendingPathComponent(relative[3])))
-        #expect(throws: ClaudeLogDirectories.DiscoveryError.self) {
-            try ClaudeLogDirectories.discover(home: home, environment: [:], additional: [], maximumEntries: 1)
-        }
-    }
-
-    @Test func bundledHelperCountsCoworkAndDeduplicatesUnknownPriceTokens() async throws {
-        let home = try temporaryHome()
-        defer { try? FileManager.default.removeItem(at: home) }
-        let cli = home.appendingPathComponent(".claude")
-        let cowork = home.appendingPathComponent("Library/Application Support/Claude/local-agent-mode-sessions/a/b/local_c/.claude")
-        func record(_ id: Int) -> Data {
-            Data("""
-            {"type":"assistant","timestamp":"2026-01-10T02:00:00Z","requestId":"fixture-request-\(id)","message":{"id":"fixture-message-\(id)","role":"assistant","model":"fixture-unknown-model","usage":{"input_tokens":101,"output_tokens":202,"cache_creation_input_tokens":303,"cache_read_input_tokens":404}}}
-            """.utf8)
-        }
-        for directory in [cli, cowork] {
-            let project = directory.appendingPathComponent("projects/fixture")
-            try FileManager.default.createDirectory(at: project, withIntermediateDirectories: true)
-            try record(1).write(to: project.appendingPathComponent("shared.jsonl"))
-        }
-        try record(2).write(to: cowork.appendingPathComponent("projects/fixture/cowork.jsonl"))
-        let directories = try ClaudeLogDirectories.discover(home: home, environment: [:], additional: [])
-        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-        let info = try PropertyListSerialization.propertyList(
-            from: Data(contentsOf: root.appendingPathComponent("Resources/Info.plist")), format: nil
-        ) as? [String: Any]
-        let helperVersion = try #require(info?["TokenRemainBundledCCUsageVersion"] as? String)
-        let helper = root.appendingPathComponent("Vendor/ccusage/\(helperVersion)/darwin-universal/ccusage")
-        let output = try await ProcessRunner.run(helper.path,
-            arguments: CCUsageService.commandArguments(since: "2026-01-10", timeZone: TimeZone(secondsFromGMT: 0)!),
-            environment: ["HOME": home.path, "PATH": "/usr/bin:/bin",
-                          "CLAUDE_CONFIG_DIR": directories.map(\.path).joined(separator: ","),
-                          "CODEX_HOME": home.appendingPathComponent("codex").path,
-                          "XDG_CONFIG_HOME": home.appendingPathComponent("config").path,
-                          "XDG_DATA_HOME": home.appendingPathComponent("data").path])
-        let history = try CCUsageService.parseHistory(output)
-        let agents = history.days.flatMap(\.agents)
-        #expect(agents.count == 1)
-        #expect(agents.first?.id == "claude")
-        #expect(agents.first?.tokens == 2020)
-        #expect(agents.first?.unpricedModels == ["fixture-unknown-model"])
-    }
-
     @Test func cookieParsingRejectsHeaderInjection() throws {
         #expect(try ClaudeWebUsageService.Configuration.decode("a=b; sessionKey=fixture-session; other=c").sessionKey == "fixture-session")
         #expect(throws: ClaudeWebUsageService.ServiceError.self) {
@@ -192,20 +133,6 @@ struct ClaudeDesktopUsageTests {
         }
         #expect(failures.map(ProviderSessionAlerts.requiresSignIn) == [true, true, false, false, false, false])
         #expect(UsageStore.claudeRetryBackoff(for: URLError(.notConnectedToInternet)) == nil)
-    }
-
-    @Test func incompleteDesktopScanFallsBackToConfiguredDirectories() async throws {
-        let configured = [URL(fileURLWithPath: "/fixture/.claude")]
-        let limited = try await CCUsageService.claudeLogDirectories { scanDesktop in
-            if scanDesktop { throw ClaudeLogDirectories.DiscoveryError.limitReached }
-            return configured
-        }
-        #expect(limited == configured)
-        let slow = try await CCUsageService.claudeLogDirectories(timeout: 0.05) { scanDesktop in
-            if scanDesktop { Thread.sleep(forTimeInterval: 0.5) }
-            return scanDesktop ? [URL(fileURLWithPath: "/fixture/late")] : configured
-        }
-        #expect(slow == configured)
     }
 
     @Test func timeoutCancelsRequestAndAllowsRetry() async throws {

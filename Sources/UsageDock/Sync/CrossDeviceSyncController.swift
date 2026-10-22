@@ -60,8 +60,6 @@ final class CrossDeviceSyncController: ObservableObject {
     @Published private(set) var state: State
     @Published private(set) var lastUploadedAt: Date?
     @Published private(set) var previewProviders: [PreviewProvider] = []
-    @Published private(set) var syncUsageHistoryEnabled: Bool
-    @Published private(set) var previewHistoryDays = 0
     @Published private(set) var lastAutomaticCheckAt: Date?
     @Published private(set) var iCloudAvailable: Bool?
     @Published private(set) var syncKeyAvailable: Bool?
@@ -73,16 +71,13 @@ final class CrossDeviceSyncController: ObservableObject {
         static let sequence = "crossDeviceSync.sequence"
         static let lastFingerprint = "crossDeviceSync.lastFingerprint"
         static let lastUploadedAt = "crossDeviceSync.lastUploadedAt"
-        static let syncUsageHistory = "crossDeviceSync.syncUsageHistory"
     }
 
     private let defaults: UserDefaults
     private let sourceIdentityStore: SourceIdentityStore
     private let logger = Logger(subsystem: "com.jingsan0801.mytokenremain", category: "PrivateSync")
     private var latestQuotas: [ProviderQuota.Provider: ProviderQuota] = [:]
-    private var latestHistory: DailyUsageHistory?
     private var storeSubscription: AnyCancellable?
-    private var historySubscription: AnyCancellable?
     private var accountSubscription: AnyCancellable?
     private var uploadTask: Task<Void, Never>?
     private var publishTask: Task<Void, Never>?
@@ -110,7 +105,6 @@ final class CrossDeviceSyncController: ObservableObject {
         let hasUploadHistory = defaults.object(forKey: DefaultsKey.lastUploadedAt) != nil
         let enabled = (defaults.object(forKey: DefaultsKey.enabled) as? Bool) ?? hasUploadHistory
         isEnabled = enabled
-        syncUsageHistoryEnabled = defaults.bool(forKey: DefaultsKey.syncUsageHistory)
         lastUploadedAt = defaults.object(forKey: DefaultsKey.lastUploadedAt) as? Date
         state = enabled ? .waitingForMacData : .off
         sourceAnonymousID = try? self.sourceIdentityStore.loadExisting().map {
@@ -123,7 +117,6 @@ final class CrossDeviceSyncController: ObservableObject {
         usageStore = store
         store.setLowLatencySyncEnabled(isEnabled)
         latestQuotas = store.localQuotasForDirectSync
-        latestHistory = store.history
         updatePreview()
         storeSubscription = store.$quotas
             .dropFirst()
@@ -131,15 +124,6 @@ final class CrossDeviceSyncController: ObservableObject {
             .sink { [weak self, weak store] _ in
                 guard let self, let store else { return }
                 self.latestQuotas = store.localQuotasForDirectSync
-                self.updatePreview()
-                self.scheduleUpload(after: 4)
-            }
-        historySubscription = store.$history
-            .dropFirst()
-            .receive(on: RunLoop.main)
-            .sink { [weak self] history in
-                guard let self else { return }
-                self.latestHistory = history
                 self.updatePreview()
                 self.scheduleUpload(after: 4)
             }
@@ -200,16 +184,6 @@ final class CrossDeviceSyncController: ObservableObject {
     func dismissGuidance() {
         dismissedGuidanceIssue = guidance
         guidance = nil
-    }
-
-    func setUsageHistoryEnabled(_ enabled: Bool) {
-        guard enabled != syncUsageHistoryEnabled else { return }
-        syncUsageHistoryEnabled = enabled
-        defaults.set(enabled, forKey: DefaultsKey.syncUsageHistory)
-        updatePreview()
-        if isEnabled {
-            scheduleUpload(after: 0, forceHeartbeat: true)
-        }
     }
 
     /// Removes only this Mac's source-v2 record and stops future publishing.
@@ -284,11 +258,8 @@ final class CrossDeviceSyncController: ObservableObject {
             defaults.removeObject(forKey: DefaultsKey.sequence)
             defaults.removeObject(forKey: DefaultsKey.lastFingerprint)
             defaults.removeObject(forKey: DefaultsKey.lastUploadedAt)
-            defaults.removeObject(forKey: DefaultsKey.syncUsageHistory)
             lastUploadedAt = nil
             sourceAnonymousID = nil
-            syncUsageHistoryEnabled = false
-            previewHistoryDays = 0
             iCloudAvailable = nil
             syncKeyAvailable = nil
             clearGuidanceIssue()
@@ -375,11 +346,7 @@ final class CrossDeviceSyncController: ObservableObject {
                 return
             }
 
-            let fingerprint = Self.fingerprint(
-                for: latestQuotas,
-                history: latestHistory,
-                includesUsageHistory: syncUsageHistoryEnabled
-            )
+            let fingerprint = Self.fingerprint(for: latestQuotas)
             let existingSource = try await cloud.fetchSource(
                 sourceInstanceID: localSourceID
             )
@@ -423,8 +390,6 @@ final class CrossDeviceSyncController: ObservableObject {
             let preparedAt = Date()
             let snapshot = MobileSnapshotRedactor.makeSnapshot(
                 from: latestQuotas,
-                history: latestHistory,
-                includesUsageHistory: syncUsageHistoryEnabled,
                 sourceInstanceID: localSourceID,
                 sequence: sequence,
                 generatedAt: preparedAt
@@ -681,7 +646,6 @@ final class CrossDeviceSyncController: ObservableObject {
                 capturedAt: quota.capturedAt
             )
         }
-        previewHistoryDays = syncUsageHistoryEnabled ? (latestHistory?.days.count ?? 0) : 0
     }
 
     private func nextSequence(after remoteSequence: UInt64?) -> UInt64? {
@@ -705,15 +669,9 @@ final class CrossDeviceSyncController: ObservableObject {
     }
 
     private static func fingerprint(
-        for quotas: [ProviderQuota.Provider: ProviderQuota],
-        history: DailyUsageHistory?,
-        includesUsageHistory: Bool
+        for quotas: [ProviderQuota.Provider: ProviderQuota]
     ) -> String {
-        SyncContentFingerprint.make(
-            quotas: quotas,
-            history: history,
-            includesUsageHistory: includesUsageHistory
-        )
+        SyncContentFingerprint.make(quotas: quotas)
     }
 
     private static func failure(for error: Error) -> Failure {

@@ -335,7 +335,7 @@ RELEASE_SCRIPTS = {
     "build_app_store_candidate.sh": "App Store candidate builds sign with real identities",
     "verify_launch_stability.sh": "launch stability installs and kills app processes (D-level, R8)",
     "verify_installation_isolation.sh": "calls build_and_run.sh --print-install-contract, which deletes dist/ bundles",
-    "verify_release_configuration.sh": "runs ccusage --update, which rewrites Vendor/",
+    "verify_release_configuration.sh": "release contract checks are release-scope, not lane-scope",
 }
 
 
@@ -366,8 +366,6 @@ def check_segment(segment, cwd, depth=0):
     rest = args[1:]
     if head in RELEASE_SCRIPTS:
         raise Blocked(head, RELEASE_SCRIPTS[head], segment)
-    if head == "verify_ccusage_freshness.sh" and "--update" in rest:
-        raise Blocked(head, "--update rewrites Vendor/; lanes use --check", segment)
     if re.search(r"\.app/Contents/MacOS/", args[0]):
         raise Blocked("app-binary", "launching the app is D-level (R8)", segment)
     if head == "git":

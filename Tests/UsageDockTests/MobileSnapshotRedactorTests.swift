@@ -111,12 +111,8 @@ struct MobileSnapshotRedactorTests {
         #expect(syncedFable.first?.window.usedPercent == 63)
         #expect(SyncContentFingerprint.make(
             quotas: [.claude: duplicated],
-            history: nil,
-            includesUsageHistory: false
         ) == SyncContentFingerprint.make(
             quotas: [.claude: canonical],
-            history: nil,
-            includesUsageHistory: false
         ))
     }
 
@@ -159,12 +155,8 @@ struct MobileSnapshotRedactorTests {
         }
         #expect(SyncContentFingerprint.make(
             quotas: [.claude: polluted],
-            history: nil,
-            includesUsageHistory: false
         ) == SyncContentFingerprint.make(
             quotas: [.claude: canonical],
-            history: nil,
-            includesUsageHistory: false
         ))
     }
 
@@ -264,12 +256,8 @@ struct MobileSnapshotRedactorTests {
         // dropped tail must not trigger a re-upload of an identical payload.
         #expect(SyncContentFingerprint.make(
             quotas: [.codex: quota(scopedWindows: scoped)],
-            history: nil,
-            includesUsageHistory: false
         ) == SyncContentFingerprint.make(
             quotas: [.codex: quota(scopedWindows: Array(scoped.prefix(6)))],
-            history: nil,
-            includesUsageHistory: false
         ))
     }
 
@@ -295,120 +283,6 @@ struct MobileSnapshotRedactorTests {
         #expect(snapshot.providers.count == SyncedProviderID.supportedOnCurrentMobile.count)
         #expect(Set(snapshot.providers.map(\.providerID)) == SyncedProviderID.supportedOnCurrentMobile)
         #expect(snapshot.providers.first { $0.providerID == "cursor" }?.planName == nil)
-    }
-
-    @Test("Daily token and cost history requires separate opt-in and stays aggregate-only")
-    func dailyHistoryOptIn() throws {
-        let now = Date(timeIntervalSince1970: 1_784_764_800)
-        let history = DailyUsageHistory(
-            days: [
-                DailyUsageHistory.Day(
-                    date: now - 86_400,
-                    agents: [
-                        .init(
-                            id: "claude",
-                            tokens: 12_000_000,
-                            cost: 22.5,
-                            models: [
-                                .init(
-                                    id: "private-model-alias",
-                                    inputTokens: 12_000_000,
-                                    outputTokens: 0,
-                                    cacheTokens: 0,
-                                    cost: 22.5
-                                )
-                            ]
-                        ),
-                        .init(id: "codex", tokens: 7_000_000, cost: 9.75)
-                    ]
-                ),
-                DailyUsageHistory.Day(
-                    date: now,
-                    claudeTokens: 14_000_000,
-                    claudeCost: 25.5,
-                    codexTokens: 8_000_000,
-                    codexCost: 10.75
-                )
-            ],
-            capturedAt: now
-        )
-
-        let off = MobileSnapshotRedactor.makeSnapshot(
-            from: [:],
-            history: history,
-            includesUsageHistory: false,
-            sourceInstanceID: UUID(),
-            sequence: 1,
-            generatedAt: now
-        )
-        #expect(off.dailyUsageHistory == nil)
-
-        let on = MobileSnapshotRedactor.makeSnapshot(
-            from: [:],
-            history: history,
-            includesUsageHistory: true,
-            sourceInstanceID: UUID(),
-            sequence: 1,
-            generatedAt: now
-        )
-        let synced = try #require(on.dailyUsageHistory)
-        #expect(synced.days.count == 2)
-        #expect(synced.days.last?.claudeTokens == 14_000_000)
-        #expect(synced.days.last?.codexCost == 10.75)
-        #expect(synced.sourceDay != nil)
-
-        let payload = try on.encodedPayload()
-        let text = try #require(String(data: payload, encoding: .utf8))
-        for deniedField in ["prompt", "project", "session", "account", "path", "request"] {
-            #expect(!text.lowercased().contains(deniedField))
-        }
-        #expect(!text.contains("modelBreakdowns"))
-        #expect(!text.contains("models"))
-        #expect(!text.contains("private-model-alias"))
-        #expect(throws: Never.self) {
-            try on.validatedForTransport(configuration: .current(now: now))
-        }
-    }
-
-    @Test("Daily history day keys are canonical UTC across the local midnight boundary")
-    func dailyHistoryUsesUTCDayKeys() throws {
-        let utcMidnight = Date(timeIntervalSince1970: 1_784_764_800)
-        let now = utcMidnight.addingTimeInterval(30 * 60)
-        let history = DailyUsageHistory(
-            days: [
-                DailyUsageHistory.Day(
-                    date: utcMidnight.addingTimeInterval(-30 * 60),
-                    claudeTokens: 1,
-                    claudeCost: 0,
-                    codexTokens: 0,
-                    codexCost: 0
-                ),
-                DailyUsageHistory.Day(
-                    date: now,
-                    claudeTokens: 2,
-                    claudeCost: 0,
-                    codexTokens: 0,
-                    codexCost: 0
-                )
-            ],
-            capturedAt: now
-        )
-
-        let snapshot = MobileSnapshotRedactor.makeSnapshot(
-            from: [:],
-            history: history,
-            includesUsageHistory: true,
-            sourceInstanceID: UUID(),
-            sequence: 1,
-            generatedAt: now
-        )
-
-        let synced = try #require(snapshot.dailyUsageHistory)
-        #expect(synced.days.map(\.day) == [
-            "2026-07-22",
-            "2026-07-23"
-        ])
-        #expect(synced.sourceDay.map { key in synced.days.contains { $0.day == key } } == true)
     }
 
     @Test("Every macOS provider has a well-formed stable wire identifier")

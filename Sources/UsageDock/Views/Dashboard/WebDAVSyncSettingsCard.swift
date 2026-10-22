@@ -121,7 +121,7 @@ struct WebDAVSyncSettingsCard: View {
                 if let payload = pendingImport {
                     sync.confirmImport(payload, using: store.providerAccountsStore)
                     pendingImport = nil
-                    Task { await store.refresh(forceCCUsage: true, forceClaude: true) }
+                    Task { await store.refresh(force: true) }
                 }
             }
             Button(L10n.text("action.cancel"), role: .cancel) {

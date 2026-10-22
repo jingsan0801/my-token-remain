@@ -375,7 +375,6 @@ struct AccountManagementTests {
                 sessionActivityMonitor: LocalAISessionActivityMonitor(sessionRoots: [], startMonitoring: false),
                 providerAccountsStore: accounts, automaticallyStarts: false,
                 quotaCache: QuotaCache(url: root.appending(path: "quota.json")),
-                quotaUsageHistoryCache: QuotaUsageHistoryCache(url: root.appending(path: "history.json")),
                 providerAccountQuotaCache: accountCache,
                 credentialValidation: { _, _, _ in throw CancellationError() },
                 credentialSave: { _, _ in Issue.record("Unexpected credential write") },

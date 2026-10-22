@@ -13,7 +13,7 @@ struct UsageInsightsTests {
             planName: "max",
             capturedAt: Date(timeIntervalSince1970: 1_000)
         )
-        let insights = UsageInsights(claude: claude, codex: nil, daily: nil)
+        let insights = UsageInsights(claude: claude, codex: nil)
 
         #expect(insights.minRemainingPercent == 5)
         #expect(insights.riskLevel == .high)
@@ -36,14 +36,14 @@ struct UsageInsightsTests {
                 )
             ]
         )
-        let windows = UsageInsights(claude: claude, codex: nil, daily: nil).windows
+        let windows = UsageInsights(claude: claude, codex: nil).windows
 
         #expect(windows.count == 3)
         #expect(windows.last?.scopeName == "Fable")
         #expect(windows.last?.id.contains("scope-fable") == true)
     }
 
-    @Test("Scoped model limits stay out of global risk and pace selection")
+    @Test("Scoped model limits stay out of global risk selection")
     func scopedLimitsDoNotDriveGlobalRisk() {
         let codex = ProviderQuota(
             provider: .codex,
@@ -59,7 +59,7 @@ struct UsageInsightsTests {
                 )
             ]
         )
-        let insights = UsageInsights(claude: nil, codex: codex, daily: nil)
+        let insights = UsageInsights(claude: nil, codex: codex)
 
         #expect(insights.windows.count == 3)
         #expect(insights.minRemainingPercent == 70)
@@ -83,7 +83,7 @@ struct UsageInsightsTests {
                 )
             ]
         )
-        let insights = UsageInsights(claude: claude, codex: nil, daily: nil)
+        let insights = UsageInsights(claude: claude, codex: nil)
         let headline = try #require(insights.scarcestGeneralWindow(for: .claude))
 
         #expect(headline.windowMinutes == 10_080)
@@ -124,7 +124,7 @@ struct UsageInsightsTests {
             scopedWindows: [first, latest]
         )
 
-        let windows = UsageInsights(claude: claude, codex: nil, daily: nil).windows
+        let windows = UsageInsights(claude: claude, codex: nil).windows
 
         #expect(windows.count == 2)
         #expect(windows.last?.usedPercent == 20)
@@ -146,7 +146,7 @@ struct UsageInsightsTests {
             planName: nil,
             capturedAt: .now
         )
-        let insights = UsageInsights(claude: claude, codex: codex, daily: nil)
+        let insights = UsageInsights(claude: claude, codex: codex)
 
         #expect(insights.constrainingWindow?.provider == .codex)
         #expect(insights.constrainingWindow?.remainingPercent == 38)
@@ -158,78 +158,15 @@ struct UsageInsightsTests {
         #expect(RiskLevel(minRemainingPercent: 5) == .high)
         #expect(RiskLevel(minRemainingPercent: 25) == .medium)
         #expect(RiskLevel(minRemainingPercent: 60) == .low)
-        #expect(RiskLevel(minRemainingPercent: 60, projectedRunOut: true) == .medium)
-    }
-
-    @Test("Projected run-out elevates risk before remaining quota is low")
-    func projectedRunOutElevatesRisk() throws {
-        let now = Date(timeIntervalSince1970: 2_000_000)
-        let week: TimeInterval = 7 * 24 * 60 * 60
-        let codex = ProviderQuota(
-            provider: .codex,
-            primary: QuotaWindow(
-                usedPercent: 40,
-                windowMinutes: 10_080,
-                resetsAt: now.addingTimeInterval(week * 0.9)
-            ),
-            secondary: nil,
-            planName: "pro",
-            capturedAt: now
-        )
-        let insights = UsageInsights(claude: nil, codex: codex, daily: nil)
-        let assessment = try #require(insights.paceAssessment(at: now))
-
-        #expect(insights.minRemainingPercent == 60)
-        #expect(insights.riskLevel(at: now) == .medium)
-        #expect(assessment.window.provider == .codex)
-        #expect(assessment.pace.estimatedRunOutAt == now.addingTimeInterval(90_720))
-        // Fork note: "预计耗尽"文案(decisionHeadline/decisionSummary)已随界面移除。
-    }
-
-    @Test("Today's totals and provider split come from ccusage agents")
-    func totalsAndSplit() {
-        let daily = DailyUsage(
-            date: "2026-07-18",
-            agents: [
-                DailyUsage.Agent(id: "codex", tokens: 100, estimatedCost: 0.5),
-                DailyUsage.Agent(id: "claude", tokens: 300, estimatedCost: 1.0)
-            ],
-            capturedAt: Date(timeIntervalSince1970: 2_000)
-        )
-        let insights = UsageInsights(claude: nil, codex: nil, daily: daily)
-
-        #expect(insights.totalTokens == 400)
-        #expect(insights.totalCost == 1.5)
-        // Highest tokens first.
-        #expect(insights.providerUsage.first?.id == "claude")
-        #expect(insights.providerUsage.first?.provider == .claude)
-        #expect(insights.providerUsage.map { insights.tokenShare(for: $0) } == [75, 25])
-        #expect(insights.providerUsage.map { insights.costShare(for: $0) } == [2.0 / 3.0 * 100, 1.0 / 3.0 * 100])
     }
 
     @Test("No quota yields an unknown, empty state instead of fabricated data")
     func emptyState() {
-        let insights = UsageInsights(claude: nil, codex: nil, daily: nil)
+        let insights = UsageInsights(claude: nil, codex: nil)
 
         #expect(insights.minRemainingPercent == nil)
         #expect(insights.riskLevel == .unknown)
-        #expect(insights.totalTokens == nil)
-        #expect(insights.providerUsage.isEmpty)
         #expect(insights.lastUpdated == nil)
-    }
-
-    @Test("Zero-token providers report a zero share")
-    func zeroTokenShare() throws {
-        let daily = DailyUsage(
-            date: "2026-07-18",
-            agents: [DailyUsage.Agent(id: "codex", tokens: 0, estimatedCost: 0)],
-            capturedAt: Date(timeIntervalSince1970: 2_000)
-        )
-        let insights = UsageInsights(claude: nil, codex: nil, daily: daily)
-
-        let provider = try #require(insights.providerUsage.first)
-        #expect(insights.tokenShare(for: provider) == 0)
-        #expect(insights.costShare(for: provider) == 0)
     }
 
     @Test("Last updated is the most recent capture across sources")
@@ -241,9 +178,8 @@ struct UsageInsightsTests {
             planName: nil,
             capturedAt: Date(timeIntervalSince1970: 1_000)
         )
-        let daily = DailyUsage(date: "2026-07-18", agents: [], capturedAt: Date(timeIntervalSince1970: 5_000))
-        let insights = UsageInsights(claude: claude, codex: nil, daily: daily)
+        let insights = UsageInsights(claude: claude, codex: nil)
 
-        #expect(insights.lastUpdated == Date(timeIntervalSince1970: 5_000))
+        #expect(insights.lastUpdated == Date(timeIntervalSince1970: 1_000))
     }
 }

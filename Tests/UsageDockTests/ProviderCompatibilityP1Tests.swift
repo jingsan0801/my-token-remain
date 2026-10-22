@@ -39,7 +39,6 @@ struct ProviderCompatibilityP1Tests {
         #expect(quota.provider == .thirdParty)
         #expect(quota.primary.remainingBalance == QuotaBalance(amount: 10, currencyCode: "USD"))
         #expect(abs(quota.primary.usedPercent - (5.0 / 15.0 * 100)) < 0.0001)
-        #expect(quota.spend?.allTimeUSD == 5)
     }
 
     @Test("New API token and custom mappings reject unsafe paths")
@@ -65,7 +64,6 @@ struct ProviderCompatibilityP1Tests {
             configuration: custom
         )
         #expect(customQuota.primary.remainingBalance == QuotaBalance(amount: 12.34, currencyCode: "CNY"))
-        #expect(customQuota.spend == nil)
         #expect(ThirdPartyConfiguration.normalizedEndpointPath("/../admin") == nil)
         #expect(ThirdPartyConfiguration.normalizedJSONPath("data.__proto__.x") == nil)
         #expect(ThirdPartyConfiguration.normalizedBaseURL("http://relay.example.com") == nil)

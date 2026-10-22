@@ -85,7 +85,6 @@ struct ZAITeamUsageService {
             planName: personal.planName ?? "Team",
             capturedAt: now,
             extraUsage: personal.extraUsage,
-            spend: personal.spend,
             accountBalance: personal.accountBalance,
             scopedWindows: personal.scopedWindows,
             remainingBalance: personal.remainingBalance
@@ -361,11 +360,6 @@ struct ThirdPartyUsageService {
             secondary: nil,
             planName: planName,
             capturedAt: now,
-            spend: (configuration.adapter != .custom || configuration.currency == "USD")
-                ? result.used.map {
-                    ProviderSpend(todayUSD: nil, weekUSD: nil, monthUSD: nil, allTimeUSD: $0)
-                }
-                : nil,
             remainingBalance: result.window.remainingBalance
         )
     }

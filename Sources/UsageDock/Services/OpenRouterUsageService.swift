@@ -129,7 +129,6 @@ enum OpenRouterUsageParser {
             throw OpenRouterUsageService.ServiceError.invalidResponse
         }
 
-        let spend = keyPayload.map(spendSummary).flatMap { $0.hasValues ? $0 : nil }
         let primaryBalance = primary.remainingBalance
         let canPublishCreditsWindow = keyWindow.map {
             $0.windowMinutes != creditsWindow?.windowMinutes
@@ -159,7 +158,6 @@ enum OpenRouterUsageParser {
             secondary: canPublishCreditsWindow ? creditsWindow : nil,
             planName: planNameOverride ?? keyPayload.flatMap(planName),
             capturedAt: now,
-            spend: spend,
             scopedWindows: scopedCredits,
             remainingBalance: primaryBalance
         )
@@ -217,19 +215,6 @@ enum OpenRouterUsageParser {
             windowMinutes: 0,
             resetsAt: nil,
             remainingBalance: QuotaBalance(amount: remaining, currencyCode: "USD")
-        )
-    }
-
-    private static func spendSummary(_ payload: [String: Any]) -> ProviderSpend {
-        func amount(_ key: String) -> Double? {
-            guard let value = number(payload[key]), value.isFinite else { return nil }
-            return max(0, value)
-        }
-        return ProviderSpend(
-            todayUSD: amount("usage_daily"),
-            weekUSD: amount("usage_weekly"),
-            monthUSD: amount("usage_monthly"),
-            allTimeUSD: amount("usage")
         )
     }
 

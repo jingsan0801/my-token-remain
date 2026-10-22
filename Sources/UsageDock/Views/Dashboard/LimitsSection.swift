@@ -29,7 +29,7 @@ struct LimitsSection: View {
     /// 本地用量不在这里重复触发,额度页只关心额度快照。
     private var refreshAllButton: some View {
         Button {
-            Task { await store.refresh(forceCCUsage: false, forceClaude: true) }
+            Task { await store.refresh(force: true) }
         } label: {
             HStack(spacing: 5) {
                 if store.isRefreshing {
