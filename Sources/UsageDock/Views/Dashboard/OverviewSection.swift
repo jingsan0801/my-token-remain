@@ -1,17 +1,11 @@
 import SwiftUI
 
-/// Dashboard Overview: risk-first KPIs and today's real ccusage composition plus
-/// live official quotas. Every value is derived from `UsageInsights`; anything
-/// that would require multi-day history lives in the Trends section instead.
+/// Dashboard Overview: risk-first KPI plus live official quotas.
+/// Fork note: 自用版移除了 token 用量、成本预估与"预计可用多久"等
+/// 配速/趋势内容,这里只保留额度剩余与风险信息。
 struct OverviewSection: View {
     let insights: UsageInsights
-    let localUsageStatus: UsageStore.LocalUsageStatus
-    let isCCUsageRefreshing: Bool
-    let onRetryCCUsage: () -> Void
-    @ObservedObject var feedStore: AIFeedStore
     @ObservedObject var preferences: PreferencesStore = .shared
-    @ObservedObject private var currencyStore = CurrencyStore.shared
-    let errorMessage: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -24,12 +18,6 @@ struct OverviewSection: View {
             kpiRow
 
             LazyVGrid(columns: overviewPanelColumns, alignment: .leading, spacing: DashboardOverviewLayout.gridSpacing) {
-                UsageCostCompositionCard(
-                    insights: insights,
-                    localUsageStatus: localUsageStatus,
-                    isRefreshing: isCCUsageRefreshing,
-                    onRetry: onRetryCCUsage
-                )
                 officialQuotaPanel
                 riskDetailPanel
             }
@@ -51,7 +39,7 @@ struct OverviewSection: View {
         ]
     }
 
-    // MARK: - KPIs (all real)
+    // MARK: - KPI
 
     private var kpiRow: some View {
         TimelineView(.periodic(from: .now, by: 60)) { context in
@@ -65,51 +53,8 @@ struct OverviewSection: View {
                     captionColor: risk.tint,
                     valueColor: risk == .unknown ? DashboardTheme.text : risk.tint
                 )
-                MetricCard(
-                    label: L10n.text("usage.today_tokens"),
-                    value: insights.totalTokens.map { UsageFormatting.compactNumber($0) } ?? "—",
-                    caption: L10n.text("usage.ccusage_local"),
-                    captionColor: DashboardTheme.secondaryText
-                )
-                MetricCard(
-                    label: L10n.text("usage.today_est_cost"),
-                    value: insights.totalCost.map { currencyStore.display.amount(usd: $0) } ?? "—",
-                    caption: insights.unpricedModels.isEmpty
-                        ? L10n.text("usage.api_price_estimate")
-                        : L10n.text("usage.price_unavailable"),
-                    captionColor: insights.unpricedModels.isEmpty
-                        ? DashboardTheme.secondaryText
-                        : DashboardTheme.warning
-                )
-                sustainabilityMetric(at: context.date)
             }
         }
-    }
-
-    private func sustainabilityMetric(at now: Date) -> MetricCard {
-        guard let assessment = insights.paceAssessment(at: now),
-              let runOutAt = assessment.pace.estimatedRunOutAt
-        else {
-            return MetricCard(
-                label: L10n.text("overview.kpi.sustainability"),
-                value: insights.riskLevel(at: now) == .unknown ? "—" : L10n.text("overview.kpi.until_reset"),
-                caption: L10n.text("overview.kpi.pace_basis"),
-                captionColor: insights.riskLevel(at: now) == .unknown
-                    ? DashboardTheme.secondaryText
-                    : DashboardTheme.success,
-                valueColor: DashboardTheme.text
-            )
-        }
-
-        let provider = assessment.window.displayName
-        let window = UsageFormatting.windowName(minutes: assessment.window.windowMinutes)
-        return MetricCard(
-            label: L10n.text("overview.kpi.projected_available"),
-            value: UsageFormatting.durationUntil(runOutAt, now: now),
-            caption: L10n.format("overview.kpi.window_before_reset", provider, window),
-            captionColor: DashboardTheme.warning,
-            valueColor: DashboardTheme.warning
-        )
     }
 
     // MARK: - Official quota (real, live)
@@ -174,23 +119,22 @@ struct OverviewSection: View {
         } content: {
             let now = Date()
             let risk = insights.riskLevel(at: now)
-            let paceAssessment = insights.paceAssessment(at: now)
 
             HStack(spacing: 7) {
                 PixelBadge(text: risk.badge, color: risk.tint, filled: risk == .high)
-                Text(insights.decisionHeadline(at: now))
+                Text(risk.headline)
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(DashboardTheme.text)
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
             }
 
-            Text(insights.decisionSummary(at: now))
+            Text(risk.summary)
                 .font(.system(size: 11))
                 .foregroundStyle(DashboardTheme.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
 
-            if let window = paceAssessment?.window ?? insights.constrainingWindow {
+            if let window = insights.constrainingWindow {
                 Divider().overlay(DashboardSurface.border)
                 InfoRow(
                     label: L10n.text("overview.scarcest_window"),
@@ -203,14 +147,6 @@ struct OverviewSection: View {
                     valueColor: risk.tint,
                     fontSize: 11
                 )
-                if let runOutAt = paceAssessment?.pace.estimatedRunOutAt {
-                    InfoRow(
-                        label: L10n.text("overview.projected_depletion"),
-                        value: L10n.format("overview.in_duration", UsageFormatting.durationUntil(runOutAt, now: now)),
-                        valueColor: DashboardTheme.warning,
-                        fontSize: 11
-                    )
-                }
                 if let reset = window.resetsAt {
                     InfoRow(
                         label: L10n.text("overview.projected_reset"),

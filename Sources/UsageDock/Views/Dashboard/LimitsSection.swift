@@ -113,24 +113,6 @@ struct LimitsSection: View {
                         .frame(maxWidth: .infinity, alignment: .top)
                 }
             }
-
-            DashboardCard {
-                VStack(alignment: .leading, spacing: 10) {
-                    PanelHeader(title: L10n.text("limits.about_windows_title"))
-                    Text(L10n.text("limits.about_windows_body"))
-                        .font(.system(size: 12))
-                        .foregroundStyle(DashboardTheme.secondaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(L10n.text("limits.manage_tracking_hint"))
-                        .font(.system(size: 12))
-                        .foregroundStyle(DashboardTheme.secondaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(L10n.text("limits.reset_time_note"))
-                        .font(.system(size: 12))
-                        .foregroundStyle(DashboardTheme.secondaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
         }
         .coordinateSpace(name: Self.reorderCoordinateSpace)
     }

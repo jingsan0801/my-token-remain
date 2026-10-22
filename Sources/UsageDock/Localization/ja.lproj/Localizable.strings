@@ -9,7 +9,7 @@
 "nav.devices" = "デバイス";
 "nav.data_sources" = "データソース";
 "nav.settings" = "設定";
-"section.overview.subtitle" = "上限リスク、今日の使用量、推定コスト";
+"section.overview.subtitle" = "上限リスクと公式上限のライブスナップショット";
 "section.limits.subtitle" = "AI コーディングツールの公式上限ウィンドウ";
 "section.trends.subtitle" = "日別の使用推移 · ローカル ccusage";
 "section.devices.subtitle" = "この Mac と将来のデバイス間モニタリング";

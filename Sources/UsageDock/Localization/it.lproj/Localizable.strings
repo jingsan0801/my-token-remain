@@ -9,7 +9,7 @@
 "nav.devices" = "Dispositivi";
 "nav.data_sources" = "Origini dati";
 "nav.settings" = "Impostazioni";
-"section.overview.subtitle" = "Rischio quota, utilizzo odierno e costo stimato";
+"section.overview.subtitle" = "Rischio quota e quote ufficiali in tempo reale";
 "section.limits.subtitle" = "Finestre quota ufficiali dei tuoi strumenti di coding AI";
 "section.trends.subtitle" = "Utilizzo nel tempo · ccusage locale";
 "section.devices.subtitle" = "Questo Mac e futuro monitoraggio tra dispositivi";

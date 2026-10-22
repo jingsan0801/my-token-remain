@@ -173,7 +173,7 @@ enum L10n {
         "nav.devices": "设备",
         "nav.data_sources": "数据来源",
         "nav.settings": "设置",
-        "section.overview.subtitle": "掌握额度风险、今日用量与预估成本",
+        "section.overview.subtitle": "掌握额度风险与官方额度实时快照",
         "section.limits.subtitle": "Claude 与 Codex 官方额度窗口明细",
         "section.trends.subtitle": "跨天使用趋势 · 本地 ccusage",
         "section.devices.subtitle": "本机与未来跨设备监测",

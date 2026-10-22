@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// Risk-first summary banner: the product's headline signal. Tint and copy come
-/// from live remaining quota plus the current-window pace projection. The
-/// trailing value names the service that currently constrains the user.
+/// from live remaining quota. The trailing value names the service that
+/// currently constrains the user.
 struct RiskStrip: View {
     let insights: UsageInsights
 
@@ -14,7 +14,7 @@ struct RiskStrip: View {
                 PixelBadge(text: risk.badge, color: risk.tint, filled: risk == .high)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(insights.decisionHeadline(at: context.date))
+                    Text(risk.headline)
                         .font(.system(size: 13, weight: .semibold))
                         .usageDockAdaptiveForeground(.primary)
                         .lineLimit(1)
@@ -48,7 +48,7 @@ struct RiskStrip: View {
             .accessibilityLabel(L10n.format(
                 "risk.accessibility_summary",
                 risk.badge,
-                insights.decisionHeadline(at: context.date)
+                risk.headline
             ))
             .accessibilityValue(
                 insights.constrainingWindow.map {

@@ -9,7 +9,7 @@
 "nav.devices" = "डिवाइस";
 "nav.data_sources" = "डेटा स्रोत";
 "nav.settings" = "सेटिंग्स";
-"section.overview.subtitle" = "कोटा जोखिम, आज का उपयोग और अनुमानित लागत";
+"section.overview.subtitle" = "कोटा जोखिम और लाइव आधिकारिक कोटा";
 "section.limits.subtitle" = "आपके AI कोडिंग टूल की आधिकारिक कोटा विंडो";
 "section.trends.subtitle" = "समय के साथ उपयोग · लोकल ccusage";
 "section.devices.subtitle" = "यह Mac और भावी क्रॉस-डिवाइस निगरानी";

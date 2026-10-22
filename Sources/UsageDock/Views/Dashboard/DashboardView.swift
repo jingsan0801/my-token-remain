@@ -13,7 +13,8 @@ final class DashboardNavigator: ObservableObject {
 
 /// The standalone Dashboard: a native macOS sidebar/detail split over the same
 /// live `UsageStore`. Real data drives Overview / Limits / Data Sources /
-/// Settings; Trends and Devices render honest empty states.
+/// Settings; Devices renders an honest empty state.
+/// Fork note: 趋势页与 token 用量/成本展示已在自用版中移除。
 struct DashboardView: View {
     @ObservedObject var store: UsageStore
     @ObservedObject var feedStore: AIFeedStore
@@ -167,7 +168,6 @@ struct DashboardView: View {
         .tint(DashboardTheme.violet)
         .task {
             store.start()
-            CurrencyStore.shared.refreshIfStale()
         }
     }
 
@@ -352,34 +352,13 @@ struct DashboardView: View {
     private var sectionContent: some View {
         switch navigator.selection {
         case .overview:
-            OverviewSection(
-                insights: insights,
-                localUsageStatus: store.localUsageStatus,
-                isCCUsageRefreshing: store.isCCUsageRefreshing,
-                onRetryCCUsage: {
-                    Task { await store.refresh(forceCCUsage: true, forceClaude: false) }
-                },
-                feedStore: feedStore,
-                errorMessage: store.errorMessage
-            )
+            OverviewSection(insights: insights)
         case .limits:
             LimitsSection(
                 insights: insights,
                 serviceStatuses: store.serviceStatuses,
                 store: store,
                 reorderInteraction: limitsReorderInteraction
-            )
-        case .trends:
-            TrendsSection(
-                insights: insights,
-                localUsageStatus: store.localUsageStatus,
-                isCCUsageRefreshing: store.isCCUsageRefreshing,
-                onRetryCCUsage: {
-                    Task { await store.refresh(forceCCUsage: true, forceClaude: false) }
-                },
-                tracked: tracked,
-                disabledLocalUsageSourceIDs: store.disabledLocalUsageSourceIDs,
-                throughput: store.modelThroughput
             )
         case .devices:
             DevicesSection(insights: insights)

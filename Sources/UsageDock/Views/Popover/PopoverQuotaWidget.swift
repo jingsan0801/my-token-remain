@@ -14,16 +14,6 @@ struct PopoverQuotaWidget: View {
     /// card while it needs signing in; isolated accounts sign in elsewhere.
     var onSignInWithCookie: (() -> Void)?
 
-    /// Speed of this provider's most-used model from local logs; nil for
-    /// providers without a log reader or without enough timed responses.
-    private var modelSpeed: ModelSpeedSummary? {
-        ModelSpeedSummary.make(
-            history: store.history,
-            throughput: store.modelThroughput,
-            agentID: provider.ccusageAgentID
-        )
-    }
-
     private var widget: PopoverWidget {
         PopoverWidget.allCases.first { $0.provider == provider } ?? .claude
     }
@@ -144,9 +134,7 @@ struct PopoverQuotaWidget: View {
                         if index > 0 {
                             Divider().overlay(DashboardSurface.border)
                         }
-                        // Local logs cannot tell accounts apart, so the speed
-                        // appears once, on the first account.
-                        accountQuotaContent(snapshot, showsModelSpeed: index == 0)
+                        accountQuotaContent(snapshot)
                     }
                 } else if let quota, let shortestWindow = orderedWindows.first {
                     quotaContent(
@@ -155,8 +143,7 @@ struct PopoverQuotaWidget: View {
                         remainingWindows: Array(orderedWindows.dropFirst()),
                         accountName: nil,
                         trailingNotice: notice,
-                        offersCookieSignIn: offersCookieSignIn,
-                        modelSpeed: modelSpeed
+                        offersCookieSignIn: offersCookieSignIn
                     )
                 } else if let notice {
                     noticeRow(notice, offersCookieSignIn: offersCookieSignIn)
@@ -170,8 +157,7 @@ struct PopoverQuotaWidget: View {
 
     @ViewBuilder
     private func accountQuotaContent(
-        _ snapshot: ProviderAccountSnapshot,
-        showsModelSpeed: Bool
+        _ snapshot: ProviderAccountSnapshot
     ) -> some View {
         if let quota = snapshot.quota {
             let windows = Self.orderedWindows(in: quota)
@@ -181,8 +167,7 @@ struct PopoverQuotaWidget: View {
                     shortestWindow: shortestWindow,
                     remainingWindows: Array(windows.dropFirst()),
                     accountName: snapshot.profile.accountDisplayName,
-                    trailingNotice: snapshot.notice,
-                    modelSpeed: showsModelSpeed ? modelSpeed : nil
+                    trailingNotice: snapshot.notice
                 )
             } else if let notice = snapshot.notice, !notice.isEmpty {
                 accountStatusRow(
@@ -210,8 +195,7 @@ struct PopoverQuotaWidget: View {
         remainingWindows: [(window: QuotaWindow, remainingBalance: QuotaBalance?)],
         accountName: String?,
         trailingNotice: String?,
-        offersCookieSignIn: Bool = false,
-        modelSpeed: ModelSpeedSummary? = nil
+        offersCookieSignIn: Bool = false
     ) -> some View {
         // This first row is deliberately stable across both states:
         // expanding only reveals its details and appends longer
@@ -223,8 +207,7 @@ struct PopoverQuotaWidget: View {
             attribution: quota.attribution,
             showsDetails: isExpanded,
             scopeName: accountName,
-            remainingBalance: shortestWindow.remainingBalance,
-            modelSpeed: modelSpeed
+            remainingBalance: shortestWindow.remainingBalance
         )
 
         if isExpanded {
@@ -266,10 +249,6 @@ struct PopoverQuotaWidget: View {
             if let balance = quota.accountBalance {
                 Divider().overlay(DashboardSurface.border)
                 AccountBalanceRow(balance: balance)
-            }
-            if let spend = quota.spend, spend.hasValues {
-                Divider().overlay(DashboardSurface.border)
-                ProviderSpendRow(spend: spend)
             }
             freshnessRow(quota, showsCached: trailingNotice != nil)
         }

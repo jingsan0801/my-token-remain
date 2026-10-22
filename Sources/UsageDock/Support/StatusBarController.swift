@@ -466,7 +466,7 @@ final class StatusBarController: NSObject {
         // 设置里选定的两个应用，其他 provider 仍出现在 tooltip 与面板里。
         var tooltipLines = [
             "MyTokenRemain",
-            insights.decisionHeadline()
+            insights.riskLevel.headline
         ]
         for provider in ProviderQuota.Provider.displayOrder {
             guard let quota = store.headlineQuota(for: provider, strategy: summaryStrategy) else { continue }

@@ -9,7 +9,7 @@
 "nav.devices" = "Geräte";
 "nav.data_sources" = "Datenquellen";
 "nav.settings" = "Einstellungen";
-"section.overview.subtitle" = "Kontingentrisiko, heutige Nutzung und geschätzte Kosten";
+"section.overview.subtitle" = "Kontingentrisiko und offizielle Kontingente in Echtzeit";
 "section.limits.subtitle" = "Offizielle Kontingentfenster deiner KI-Coding-Tools";
 "section.trends.subtitle" = "Nutzung im Zeitverlauf · lokales ccusage";
 "section.devices.subtitle" = "Dieser Mac und künftige geräteübergreifende Überwachung";

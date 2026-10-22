@@ -1,15 +1,15 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 /// Dashboard Data Sources: live status of each local source UsageDock reads,
 /// automatic local-app discovery plus explicit credential setup where required,
 /// any current error surfaced verbatim, and the privacy posture. All real.
+/// Fork note: 自用版移除了 token 用量/成本,ccusage、本地用量来源、
+/// Trae 目录与 Claude 日志目录等本地用量数据源不再出现在本页。
 struct DataSourcesSection: View {
     @ObservedObject var store: UsageStore
     let insights: UsageInsights
     @ObservedObject var feedStore: AIFeedStore
     let errorMessage: String?
-    @State private var isChoosingTraeDirectory = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -42,19 +42,6 @@ struct DataSourcesSection: View {
                     }
                 }
             }
-            .fileImporter(
-                isPresented: $isChoosingTraeDirectory,
-                allowedContentTypes: [.folder],
-                allowsMultipleSelection: true
-            ) { result in
-                guard case .success(let urls) = result else { return }
-                for url in urls {
-                    store.addTraeAgentDirectory(url)
-                }
-            }
-
-            DashboardCard { ClaudeLogDirectoriesRow(store: store) }
-
             if let errorMessage {
                 DashboardCard {
                     VStack(alignment: .leading, spacing: 8) {
@@ -76,7 +63,6 @@ struct DataSourcesSection: View {
                         L10n.text("privacy.local_only"),
                         L10n.text("privacy.readonly_credentials"),
                         L10n.text("privacy.zai_key"),
-                        L10n.text("privacy.cost_estimate"),
                         L10n.text("privacy.feed_managed")
                     ])
                 }
@@ -86,22 +72,13 @@ struct DataSourcesSection: View {
 
     private enum VisibleSource: Hashable {
         case provider(ProviderQuota.Provider)
-        case ccusage
-        case localAgent(String)
-        case traeConfiguration
         case feed
     }
 
     /// Provider 保留持久化的成功连接历史，同时让当前追踪的手动凭据型
-    /// 来源在首次连接前就显示输入框；ccusage 是安装包内置来源，首次读取
-    /// 结束后即展示，即使结果为空或失败也能被用户诊断。
+    /// 来源在首次连接前就显示输入框。
     private var visibleSources: [VisibleSource] {
         var sources = store.dataSourceProviders.map(VisibleSource.provider)
-        if store.localUsageStatus != .loading || insights.daily != nil {
-            sources.append(.ccusage)
-        }
-        sources.append(contentsOf: store.localUsageSourceIDs.map(VisibleSource.localAgent))
-        sources.append(.traeConfiguration)
         if feedStore.lastUpdated != nil { sources.append(.feed) }
         return sources
     }
@@ -119,29 +96,6 @@ struct DataSourcesSection: View {
                 disabled: !store.isSystemSourceEnabled(provider)
             )
             providerCredentialRow(for: provider)
-        case .ccusage:
-            SourceHealthRow(
-                name: "ccusage",
-                detail: L10n.text("datasource.ccusage_detail"),
-                healthy: ccusageHealthy,
-                capturedAt: insights.daily?.capturedAt ?? insights.history?.capturedAt
-            )
-        case .localAgent(let id):
-            LocalUsageSourceRow(
-                id: id,
-                enabled: Binding(
-                    get: { store.isLocalUsageSourceEnabled(id) },
-                    set: { store.setLocalUsageSourceEnabled($0, id: id) }
-                ),
-                capturedAt: localCapturedAt(for: id)
-            )
-        case .traeConfiguration:
-            TraeAgentDirectoryRow(
-                directories: store.traeAgentDirectories,
-                removableDirectories: Set(store.configuredTraeAgentDirectories.map(\.path)),
-                onChoose: { isChoosingTraeDirectory = true },
-                onRemove: store.removeTraeAgentDirectory
-            )
         case .feed:
             SourceHealthRow(
                 name: L10n.text("datasource.feed_name"),
@@ -149,26 +103,6 @@ struct DataSourcesSection: View {
                 healthy: true,
                 capturedAt: feedStore.lastUpdated
             )
-        }
-    }
-
-    private func localCapturedAt(for id: String) -> Date? {
-        let canonical = LocalUsageSourceCatalog.canonicalID(id)
-        let hasDaily = insights.daily?.agents.contains {
-            LocalUsageSourceCatalog.canonicalID($0.id) == canonical
-        } == true
-        let hasHistory = insights.history?.days.contains { day in
-            day.agents.contains { LocalUsageSourceCatalog.canonicalID($0.id) == canonical }
-        } == true
-        return hasDaily || hasHistory
-            ? insights.daily?.capturedAt ?? insights.history?.capturedAt
-            : nil
-    }
-
-    private var ccusageHealthy: Bool {
-        switch store.localUsageStatus {
-        case .available, .empty: return true
-        case .loading, .failed: return false
         }
     }
 
@@ -290,98 +224,6 @@ private struct ProviderAuthorizationRow: View {
         .padding(.top, 8)
         .padding(.leading, 20)
         .onDisappear { action.cancel() }
-    }
-}
-
-private struct LocalUsageSourceRow: View {
-    let id: String
-    @Binding var enabled: Bool
-    let capturedAt: Date?
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Circle()
-                .fill(enabled ? DashboardTheme.success : DashboardTheme.mutedText)
-                .frame(width: 8, height: 8)
-                .padding(.top, 5)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(LocalUsageSourceCatalog.displayName(for: id))
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(DashboardTheme.text)
-                Text(L10n.text("datasource.local_agent_detail"))
-                    .font(.system(size: 11))
-                    .foregroundStyle(DashboardTheme.secondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Spacer(minLength: 12)
-            VStack(alignment: .trailing, spacing: 3) {
-                Toggle("", isOn: $enabled)
-                    .labelsHidden()
-                    .toggleStyle(.switch)
-                    .controlSize(.small)
-                    .accessibilityLabel(
-                        L10n.format(
-                            "datasource.local_agent_toggle",
-                            LocalUsageSourceCatalog.displayName(for: id)
-                        )
-                    )
-                if let capturedAt {
-                    Text(capturedAt.formatted(date: .omitted, time: .shortened))
-                        .numericFont(10)
-                        .foregroundStyle(DashboardTheme.mutedText)
-                }
-            }
-        }
-    }
-}
-
-private struct TraeAgentDirectoryRow: View {
-    let directories: [URL]
-    let removableDirectories: Set<String>
-    let onChoose: () -> Void
-    let onRemove: (URL) -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "folder.badge.plus")
-                    .foregroundStyle(DashboardTheme.secondaryText)
-                    .frame(width: 8)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(L10n.text("datasource.trae_agent_title"))
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(DashboardTheme.text)
-                    Text(L10n.text("datasource.trae_agent_detail"))
-                        .font(.system(size: 11))
-                        .foregroundStyle(DashboardTheme.secondaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 12)
-                Button(L10n.text("datasource.choose_folder"), action: onChoose)
-                    .controlSize(.small)
-            }
-            ForEach(directories, id: \.path) { directory in
-                HStack(spacing: 8) {
-                    Text(directory.path)
-                        .font(.system(size: 10, design: .monospaced))
-                        .foregroundStyle(DashboardTheme.mutedText)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                    Spacer(minLength: 8)
-                    if removableDirectories.contains(directory.path) {
-                        Button {
-                            onRemove(directory)
-                        } label: {
-                            Image(systemName: "xmark.circle")
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(DashboardTheme.mutedText)
-                        .accessibilityLabel(L10n.text("datasource.remove_folder"))
-                    }
-                }
-                .padding(.leading, 20)
-            }
-        }
     }
 }
 

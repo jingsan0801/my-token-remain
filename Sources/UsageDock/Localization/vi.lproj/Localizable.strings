@@ -9,7 +9,7 @@
 "nav.devices" = "Thiết bị";
 "nav.data_sources" = "Nguồn dữ liệu";
 "nav.settings" = "Cài đặt";
-"section.overview.subtitle" = "Rủi ro hạn mức, mức dùng hôm nay và chi phí ước tính";
+"section.overview.subtitle" = "Rủi ro hạn mức và hạn mức chính thức trực tiếp";
 "section.limits.subtitle" = "Cửa sổ hạn mức chính thức của các công cụ lập trình AI";
 "section.trends.subtitle" = "Mức dùng theo thời gian · ccusage cục bộ";
 "section.devices.subtitle" = "Máy Mac này và giám sát đa thiết bị trong tương lai";

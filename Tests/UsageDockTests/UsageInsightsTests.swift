@@ -183,7 +183,7 @@ struct UsageInsightsTests {
         #expect(insights.riskLevel(at: now) == .medium)
         #expect(assessment.window.provider == .codex)
         #expect(assessment.pace.estimatedRunOutAt == now.addingTimeInterval(90_720))
-        #expect(insights.decisionHeadline(at: now) == "当前节奏可能提前用尽")
+        // Fork note: "预计耗尽"文案(decisionHeadline/decisionSummary)已随界面移除。
     }
 
     @Test("Today's totals and provider split come from ccusage agents")

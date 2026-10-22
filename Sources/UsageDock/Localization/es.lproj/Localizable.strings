@@ -9,7 +9,7 @@
 "nav.devices" = "Dispositivos";
 "nav.data_sources" = "Fuentes de datos";
 "nav.settings" = "Ajustes";
-"section.overview.subtitle" = "Riesgo de cuota, uso de hoy y coste estimado";
+"section.overview.subtitle" = "Riesgo de cuota y cuotas oficiales en vivo";
 "section.limits.subtitle" = "Ventanas de cuota oficiales de tus herramientas de codificación con IA";
 "section.trends.subtitle" = "Uso a lo largo del tiempo · ccusage local";
 "section.devices.subtitle" = "Este Mac y futura supervisión entre dispositivos";

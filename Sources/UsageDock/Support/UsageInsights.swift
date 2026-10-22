@@ -224,25 +224,8 @@ struct UsageInsights {
             }
     }
 
-    func decisionHeadline(at now: Date = .now) -> String {
-        if paceAssessment(at: now) != nil {
-            return L10n.text("risk.headline.projected_runout")
-        }
-        return riskLevel(at: now).headline
-    }
-
-    func decisionSummary(at now: Date = .now) -> String {
-        guard let assessment = paceAssessment(at: now),
-              let runOutAt = assessment.pace.estimatedRunOutAt
-        else {
-            return riskLevel(at: now).summary
-        }
-
-        let provider = assessment.window.provider.displayName
-        let window = UsageFormatting.windowName(minutes: assessment.window.windowMinutes)
-        let duration = UsageFormatting.durationUntil(runOutAt, now: now)
-        return L10n.format("risk.summary.projected_runout", provider, window, duration)
-    }
+    // Fork note: 自用版不再展示"预计耗尽"文案,decisionHeadline /
+    // decisionSummary 已随界面移除;pace 仅保留给风险等级与通知的内部判定。
 
     /// The soonest upcoming reset among all windows that report one.
     var soonestReset: Date? {

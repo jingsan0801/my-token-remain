@@ -9,7 +9,7 @@
 "nav.devices" = "Устройства";
 "nav.data_sources" = "Источники данных";
 "nav.settings" = "Настройки";
-"section.overview.subtitle" = "Риск квоты, использование сегодня и оценка стоимости";
+"section.overview.subtitle" = "Риск квоты и актуальные официальные квоты";
 "section.limits.subtitle" = "Официальные окна квот ваших ИИ-инструментов";
 "section.trends.subtitle" = "Использование во времени · локальный ccusage";
 "section.devices.subtitle" = "Этот Mac и будущий мониторинг между устройствами";

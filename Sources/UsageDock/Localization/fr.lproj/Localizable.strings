@@ -9,7 +9,7 @@
 "nav.devices" = "Appareils";
 "nav.data_sources" = "Sources de données";
 "nav.settings" = "Réglages";
-"section.overview.subtitle" = "Risque de quota, utilisation du jour et coût estimé";
+"section.overview.subtitle" = "Risque de quota et quotas officiels en direct";
 "section.limits.subtitle" = "Fenêtres de quota officielles de vos outils de codage IA";
 "section.trends.subtitle" = "Utilisation dans le temps · ccusage local";
 "section.devices.subtitle" = "Ce Mac et futur suivi multiappareil";

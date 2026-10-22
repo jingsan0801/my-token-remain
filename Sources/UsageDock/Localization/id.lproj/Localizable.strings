@@ -9,7 +9,7 @@
 "nav.devices" = "Perangkat";
 "nav.data_sources" = "Sumber data";
 "nav.settings" = "Pengaturan";
-"section.overview.subtitle" = "Risiko kuota, penggunaan hari ini, dan perkiraan biaya";
+"section.overview.subtitle" = "Risiko kuota dan kuota resmi langsung";
 "section.limits.subtitle" = "Jendela kuota resmi semua alat coding AI Anda";
 "section.trends.subtitle" = "Penggunaan dari waktu ke waktu · ccusage lokal";
 "section.devices.subtitle" = "Mac ini dan pemantauan lintas perangkat mendatang";

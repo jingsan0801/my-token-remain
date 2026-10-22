@@ -9,7 +9,7 @@
 "nav.devices" = "기기";
 "nav.data_sources" = "데이터 소스";
 "nav.settings" = "설정";
-"section.overview.subtitle" = "한도 위험, 오늘 사용량 및 예상 비용";
+"section.overview.subtitle" = "한도 위험과 실시간 공식 한도";
 "section.limits.subtitle" = "AI 코딩 도구의 공식 한도 윈도우";
 "section.trends.subtitle" = "기간별 사용 추세 · 로컬 ccusage";
 "section.devices.subtitle" = "이 Mac과 향후 기기 간 모니터링";

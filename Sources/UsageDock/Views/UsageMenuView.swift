@@ -172,15 +172,9 @@ struct UsageMenuView: View {
     private func widgetView(_ widget: PopoverWidget) -> some View {
         switch widget {
         case .localUsage:
-            LocalUsageCard(
-                insights: insights,
-                localUsageStatus: store.localUsageStatus,
-                isRefreshing: store.isCCUsageRefreshing,
-                onRetry: {
-                    Task { await store.refresh(forceCCUsage: true, forceClaude: false) }
-                },
-                layout: layout
-            )
+            // Fork note: 自用版移除了 token 用量/成本展示。
+            // 旧布局存档里残留的 localUsage 槽位渲染为空。
+            EmptyView()
         case .aiFeed:
             // Fork note: AI 动态已断开(不再访问 api.tokenremain.com)。
             // 旧布局存档里残留的 aiFeed 槽位渲染为空。

@@ -4,14 +4,15 @@ import Testing
 
 @Suite("Popover widget layout")
 struct PopoverLayoutStoreTests {
-    @Test("Default order keeps providers first and local usage last")
+    @Test("Default order keeps the three mainstream providers visible")
     func defaultOrder() {
         let defaults = testDefaults()
         let store = PopoverLayoutStore(defaults: defaults)
 
         // 主流三家之外的 provider 挂件首次出现默认隐藏,由 "+" 菜单按需添加。
-        // Fork note: AI 动态已断开,默认顺序不再包含 aiFeed。
-        #expect(store.visibleWidgets == [.claude, .codex, .cursor, .localUsage])
+        // Fork note: AI 动态已断开,默认顺序不包含 aiFeed;token 用量/成本
+        // 已移除,默认顺序也不再包含 localUsage(枚举值仅为兼容旧存档保留)。
+        #expect(store.visibleWidgets == [.claude, .codex, .cursor])
         #expect(store.availableWidgets == PopoverLayoutStore.defaultOrder.filter(PopoverLayoutStore.defaultHidden.contains))
         #expect(PopoverWidget.aiFeed.title == "AI动态")
     }
@@ -73,23 +74,23 @@ struct PopoverLayoutStoreTests {
         let defaults = testDefaults()
         let store = PopoverLayoutStore(defaults: defaults)
 
-        store.hide(.localUsage)
-        #expect(store.visibleWidgets == [.claude, .codex, .cursor])
-        #expect(Set(store.availableWidgets) == PopoverLayoutStore.defaultHidden.union([.localUsage]))
+        store.hide(.cursor)
+        #expect(store.visibleWidgets == [.claude, .codex])
+        #expect(Set(store.availableWidgets) == PopoverLayoutStore.defaultHidden.union([.cursor]))
 
-        store.show(.localUsage)
-        #expect(store.visibleWidgets == [.claude, .codex, .cursor, .localUsage])
+        store.show(.cursor)
+        #expect(store.visibleWidgets == [.claude, .codex, .cursor])
     }
 
     @Test("Order and pinned expansion survive a new store")
     func persistence() {
         let defaults = testDefaults()
         var store = PopoverLayoutStore(defaults: defaults)
-        store.move(.localUsage, before: .claude)
+        store.move(.cursor, before: .claude)
         store.togglePinned(.codex)
 
         store = PopoverLayoutStore(defaults: defaults)
-        #expect(store.visibleWidgets == [.localUsage, .claude, .codex, .cursor])
+        #expect(store.visibleWidgets == [.cursor, .claude, .codex])
         #expect(store.isPinned(.codex))
         #expect(store.isExpanded(.codex))
     }

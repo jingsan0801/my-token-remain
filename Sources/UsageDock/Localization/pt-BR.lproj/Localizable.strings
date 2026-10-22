@@ -9,7 +9,7 @@
 "nav.devices" = "Dispositivos";
 "nav.data_sources" = "Fontes de dados";
 "nav.settings" = "Ajustes";
-"section.overview.subtitle" = "Risco de cota, uso de hoje e custo estimado";
+"section.overview.subtitle" = "Risco de cota e cotas oficiais ao vivo";
 "section.limits.subtitle" = "Janelas de cota oficiais das suas ferramentas de codificação com IA";
 "section.trends.subtitle" = "Uso ao longo do tempo · ccusage local";
 "section.devices.subtitle" = "Este Mac e futuro monitoramento entre dispositivos";

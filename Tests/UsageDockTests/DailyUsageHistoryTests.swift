@@ -159,54 +159,6 @@ struct DailyUsageHistoryTests {
         #expect(day.cost(for: .claude) == 3.0)
     }
 
-    @Test("Trend provider selection supports both, either, and neither series")
-    func selectedTrendTotals() throws {
-        let data = payload("""
-        {"period":"2026-07-20","agents":[
-            {"agent":"claude","totalTokens":300,"totalCost":1.5},
-            {"agent":"codex","totalTokens":100,"totalCost":0.5}
-        ]}
-        """)
-        let day = try #require(try CCUsageService.parseHistory(data).days.first)
-
-        #expect(UsageTrendChart.selectedTotal(
-            day,
-            metric: .tokens,
-            visibleAgentIDs: ["claude", "codex"]
-        ) == 400)
-        #expect(UsageTrendChart.selectedTotal(
-            day,
-            metric: .tokens,
-            visibleAgentIDs: ["codex"]
-        ) == 100)
-        #expect(UsageTrendChart.selectedTotal(
-            day,
-            metric: .cost,
-            visibleAgentIDs: ["claude"]
-        ) == 1.5)
-        #expect(UsageTrendChart.selectedTotal(
-            day,
-            metric: .tokens,
-            visibleAgentIDs: []
-        ) == 0)
-    }
-
-    @Test("A newly discovered agent can be selected without a code change")
-    func dynamicAgentSelection() throws {
-        let data = payload("""
-        {"period":"2026-07-20","agents":[
-            {"agent":"gemini","totalTokens":275,"totalCost":0.75}
-        ]}
-        """)
-        let day = try #require(try CCUsageService.parseHistory(data).days.first)
-        #expect(UsageTrendChart.selectedTotal(
-            day,
-            metric: .tokens,
-            visibleAgentIDs: ["gemini"]
-        ) == 275)
-        #expect(UsageInsights.displayName(for: "gemini") == "Gemini")
-    }
-
     @Test("An empty successful report is no-usage, not an endless loading state")
     func emptyReportState() throws {
         let snapshot = try CCUsageService.parseSnapshot(payload(""))
@@ -274,46 +226,6 @@ struct DailyUsageHistoryTests {
         #expect(bounded.reduce(0) { $0 + $1.totalTokens } == rows.reduce(0) { $0 + $1.totalTokens })
     }
 
-    @Test("Pinned-day projection ranks five models and keeps the tail as Other")
-    func modelBreakdownProjection() {
-        let models: [DailyUsageHistory.ModelUsage] = (0..<7).map { index in
-            let inputTokens = Int64((7 - index) * 100)
-            let outputTokens = Int64(index)
-            return DailyUsageHistory.ModelUsage(
-                id: "claude-model-\(index)",
-                inputTokens: inputTokens,
-                outputTokens: outputTokens,
-                cacheTokens: 0,
-                cost: Double(7 - index)
-            )
-        }
-        let day = DailyUsageHistory.Day(
-            date: Date(timeIntervalSince1970: 1_000),
-            agents: [
-                .init(
-                    id: "claude",
-                    tokens: 2_821,
-                    cost: 28,
-                    unpricedModels: ["claude-model-6"],
-                    models: models
-                )
-            ]
-        )
-        let breakdown = TrendDayModelBreakdown.make(
-            day: day,
-            agentIDs: ["claude"],
-            metric: .tokens
-        )
-        let rows = breakdown.groups.first?.rows ?? []
-        #expect(rows.count == 6)
-        #expect(rows.last?.id == "other")
-        #expect(rows.last?.constituentCount == 2)
-        #expect(rows.last?.isUnpriced == true)
-        let displayedTotal = rows.reduce(Int64(0)) { $0 + $1.totalTokens }
-        let sourceTotal = models.reduce(Int64(0)) { $0 + $1.totalTokens }
-        #expect(displayedTotal == sourceTotal)
-    }
-
     @Test("Older cached agents decode without model detail")
     func preModelCacheMigration() throws {
         let json = #"{"id":"claude","tokens":123,"cost":0.5}"#
@@ -336,32 +248,5 @@ struct DailyUsageHistoryTests {
         #expect(history.days.first?.claudeTokens == 2)
     }
 
-    @Test("Nice axis ceiling rounds a peak up to 1/2/2.5/5/10 x 10^n")
-    func niceCeiling() {
-        #expect(UsageTrendChart.niceCeiling(0) == 1)
-        #expect(UsageTrendChart.niceCeiling(1_200_000) == 2_000_000)
-        #expect(UsageTrendChart.niceCeiling(4.5) == 5)
-        #expect(UsageTrendChart.niceCeiling(2.3) == 2.5)
-        #expect(UsageTrendChart.niceCeiling(900) == 1_000)
-    }
-
-    @Test("Compact axis token labels stay short enough for the y gutter")
-    func compactAxisTokens() {
-        #expect(UsageTrendChart.compactAxisTokens(1_000_000_000) == "1.0B")
-        #expect(UsageTrendChart.compactAxisTokens(750_000_000) == "750M")
-        #expect(UsageTrendChart.compactAxisTokens(1_200_000) == "1.2M")
-        #expect(UsageTrendChart.compactAxisTokens(500_000) == "500K")
-        #expect(UsageTrendChart.compactAxisTokens(250) == "250")
-    }
-
-    @Test("Day labels read in month/day form")
-    func dayLabels() {
-        var components = DateComponents()
-        components.year = 2026
-        components.month = 7
-        components.day = 9
-        let date = Calendar.current.date(from: components)!
-        #expect(UsageTrendChart.dayMonthLabel(date) == "7/9")
-        #expect(UsageTrendChart.fullDayLabel(date) == "7月9日")
-    }
+    // Fork note: 趋势图(UsageTrendChart/TrendDayModelBreakdown)已随趋势页移除,相关测试一并删除。
 }

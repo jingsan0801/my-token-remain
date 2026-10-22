@@ -96,8 +96,8 @@ struct DevicesSection: View {
     }
 
     private var activeSourcesText: String {
-        var sources = insights.quotas.map { $0.provider.displayName }
-        if insights.daily != nil { sources.append("ccusage") }
+        // Fork note: ccusage(token 用量统计)已移除,不再列为活跃来源。
+        let sources = insights.quotas.map { $0.provider.displayName }
         return sources.isEmpty ? L10n.text("common.none") : sources.joined(separator: " · ")
     }
 

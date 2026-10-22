@@ -9,7 +9,7 @@
 "nav.devices" = "الأجهزة";
 "nav.data_sources" = "مصادر البيانات";
 "nav.settings" = "الإعدادات";
-"section.overview.subtitle" = "مخاطر الحصة واستخدام اليوم والتكلفة المقدرة";
+"section.overview.subtitle" = "مخاطر الحصة والحصص الرسمية المباشرة";
 "section.limits.subtitle" = "نوافذ الحصة الرسمية لأدوات الترميز بالذكاء الاصطناعي";
 "section.trends.subtitle" = "الاستخدام عبر الزمن · ccusage المحلي";
 "section.devices.subtitle" = "هذا الـ Mac والمراقبة المستقبلية بين الأجهزة";

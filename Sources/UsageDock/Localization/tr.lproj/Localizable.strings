@@ -9,7 +9,7 @@
 "nav.devices" = "Aygıtlar";
 "nav.data_sources" = "Veri kaynakları";
 "nav.settings" = "Ayarlar";
-"section.overview.subtitle" = "Kota riski, bugünkü kullanım ve tahmini maliyet";
+"section.overview.subtitle" = "Kota riski ve canlı resmi kotalar";
 "section.limits.subtitle" = "Yapay zekâ kodlama araçlarının resmî kota pencereleri";
 "section.trends.subtitle" = "Zaman içinde kullanım · yerel ccusage";
 "section.devices.subtitle" = "Bu Mac ve gelecekte aygıtlar arası izleme";

@@ -246,14 +246,6 @@ struct QuotaCard: View {
                 Divider().overlay(DashboardSurface.border)
                 AccountBalanceRow(balance: balance)
             }
-            if let spend = quota.spend, spend.hasValues {
-                Divider().overlay(DashboardSurface.border)
-                ProviderSpendRow(spend: spend)
-            }
-            if let models = quota.modelUsage, !models.isEmpty {
-                Divider().overlay(DashboardSurface.border)
-                ProviderModelUsageRow(models: models)
-            }
             TimelineView(.periodic(from: .now, by: 60)) { context in
                 // A failed latest refresh means everything on the card is the
                 // cached snapshot, even when it is younger than the staleness
@@ -1049,97 +1041,8 @@ struct ExtraUsageRow: View {
     }
 }
 
-/// Compact official spend summary used by providers such as OpenRouter. A
-/// missing bucket remains hidden instead of looking like a real $0 reading.
-struct ProviderSpendRow: View {
-    let spend: ProviderSpend
-
-    private var items: [(String, Double)] {
-        [
-            (L10n.text("usage.spend_today"), spend.todayUSD),
-            (L10n.text("quota.spend_week"), spend.weekUSD),
-            (L10n.text("quota.spend_month"), spend.monthUSD),
-            (L10n.text("quota.spend_all_time"), spend.allTimeUSD)
-        ].compactMap { label, value in
-            guard let value, value.isFinite else { return nil }
-            return (label, max(0, value))
-        }
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(L10n.text("quota.official_spend"))
-                .font(.system(size: 12))
-                .usageDockAdaptiveForeground(.secondary)
-            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                HStack(alignment: .firstTextBaseline) {
-                    Text(item.0)
-                        .font(.system(size: 10.5))
-                        .usageDockAdaptiveForeground(.secondary)
-                    Spacer(minLength: 8)
-                    Text(UsageFormatting.compactUSD(item.1))
-                        .numericFont(10.5, .semibold)
-                        .usageDockAdaptiveForeground(.primary)
-                }
-            }
-        }
-        .accessibilityElement(children: .combine)
-    }
-}
-
-/// Models the provider's own billing API attributes to the current cycle,
-/// largest token total first. Three lines cover the common case without an
-/// inner scroll; the rest collapse into a count.
-struct ProviderModelUsageRow: View {
-    let models: [ProviderModelUsage]
-
-    static let visibleLimit = 3
-
-    private var totalTokens: Int64 {
-        models.reduce(0) { $0 + $1.totalTokens }
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(L10n.text("quota.models_this_cycle"))
-                .font(.system(size: 12))
-                .usageDockAdaptiveForeground(.secondary)
-            ForEach(Array(models.prefix(Self.visibleLimit).enumerated()), id: \.offset) { _, model in
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text(model.model)
-                        .font(.system(size: 10.5))
-                        .usageDockAdaptiveForeground(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                        .help(model.model)
-                    Spacer(minLength: 8)
-                    Text(detailText(for: model))
-                        .numericFont(10.5, .semibold)
-                        .usageDockAdaptiveForeground(.primary)
-                        .fixedSize()
-                }
-            }
-            if models.count > Self.visibleLimit {
-                Text(L10n.format("quota.models_more", models.count - Self.visibleLimit))
-                    .font(.system(size: 10))
-                    .usageDockAdaptiveForeground(.secondary)
-            }
-        }
-        .accessibilityElement(children: .combine)
-    }
-
-    private func detailText(for model: ProviderModelUsage) -> String {
-        var parts = [UsageFormatting.compactNumber(model.totalTokens)]
-        if totalTokens > 0 {
-            parts.append(UsageFormatting.percent(Double(model.totalTokens) / Double(totalTokens) * 100))
-        }
-        if let cents = model.costCents, cents > 0 {
-            parts.append(UsageFormatting.compactUSD(cents / 100))
-        }
-        return parts.joined(separator: " · ")
-    }
-}
-
+// Fork note: 自用版不再展示官方花费(成本)与按模型的 token 用量明细,
+// ProviderSpendRow / ProviderModelUsageRow 已随界面移除。
 struct AccountBalanceRow: View {
     let balance: QuotaBalance
 
@@ -1165,9 +1068,6 @@ struct QuotaWindowRow: View {
     var showsDetails = true
     var scopeName: String?
     var remainingBalance: QuotaBalance? = nil
-    /// Most-used model's local output speed, shown at the end of the reset
-    /// line. Callers pass it to one row per provider only.
-    var modelSpeed: ModelSpeedSummary? = nil
 
     /// Scoped rows are named by their call site; a general window can also
     /// name itself when it represents one pool of a split cycle (Cursor).
@@ -1180,7 +1080,7 @@ struct QuotaWindowRow: View {
     }
 
     var body: some View {
-        // 行级 60 秒一跳足够驱动配速警示与分钟级倒计时;常驻桌面的浮窗
+        // 行级 60 秒一跳足够驱动分钟级倒计时;常驻桌面的浮窗
         // 不该为秒针每秒重排整行。最后一小时的秒级滚动由重置标签内部
         // 的局部 TimelineView 单独承担。
         TimelineView(.periodic(from: .now, by: 60)) { context in
@@ -1196,14 +1096,6 @@ struct QuotaWindowRow: View {
                         .font(.system(size: 13))
                         .usageDockAdaptiveForeground(.secondary)
                     Spacer()
-                    if let pace = UsagePace(window: window, now: context.date),
-                       pace.showsRemainingWarning {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(DashboardTheme.danger)
-                            .help(L10n.text("pace.ahead_warning"))
-                            .accessibilityLabel(L10n.text("pace.ahead_warning"))
-                    }
                     Text(remainingText)
                         .numericFont(14, .bold)
                         .usageDockAdaptiveForeground(.primary)
@@ -1228,19 +1120,10 @@ struct QuotaWindowRow: View {
                             Text(L10n.text("quota.reset_pending"))
                                 .layoutPriority(1)
                         }
-                        if let modelSpeed {
-                            Spacer(minLength: 8)
-                            ModelSpeedLabel(speed: modelSpeed)
-                        }
                     }
                     .font(.system(size: 10))
                     .usageDockAdaptiveForeground(.secondary)
                     .transition(.opacity.combined(with: .move(edge: .top)))
-
-                    if let pace = UsagePace(window: window, now: context.date) {
-                        QuotaPaceRow(pace: pace, now: context.date)
-                            .transition(.opacity.combined(with: .move(edge: .top)))
-                    }
                 }
             }
             .animation(.snappy(duration: 0.22), value: showsDetails)
@@ -1311,32 +1194,6 @@ struct QuotaWindowRow: View {
 /// 重置时间标签。距重置不足一小时才以秒级滚动倒计时;此时它是整个
 /// 卡片里唯一按 1 秒刷新的叶子视图,重排被限制在这一小段文本内。
 /// 一小时以上按分钟粒度显示,由外层 60 秒时间线驱动即可。
-/// `gpt-6-astra · ≈26 tok/s`. The model name gives way first when space is
-/// tight; the speed itself never truncates.
-private struct ModelSpeedLabel: View {
-    let speed: ModelSpeedSummary
-
-    var body: some View {
-        let help = L10n.format("quota.model_speed_help", speed.displayName, ModelSpeedSummary.windowDays)
-        HStack(spacing: 4) {
-            Text(speed.displayName)
-                .lineLimit(1)
-                .truncationMode(.middle)
-            Text("·")
-            Text(L10n.format("trends.model_tps_format", TrendModelBreakdownPanel.speedLabel(speed.tokensPerSecond)))
-                .numericFont(10, .medium)
-                .usageDockAdaptiveForeground(.primary)
-                .fixedSize()
-        }
-        .font(.system(size: 10))
-        .usageDockAdaptiveForeground(.secondary)
-        .help(help)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(help)
-        .accessibilityValue(L10n.format("trends.model_tps_format", TrendModelBreakdownPanel.speedLabel(speed.tokensPerSecond)))
-    }
-}
-
 private struct QuotaResetLabel: View {
     let resetsAt: Date
     /// 外层 60 秒时间线的当前时刻,同时决定秒级/分钟级两种模式的切换。
@@ -1352,50 +1209,5 @@ private struct QuotaResetLabel: View {
             Text(UsageFormatting.resetDescription(to: resetsAt, now: referenceDate))
                 .numericFont(10)
         }
-    }
-}
-
-private struct QuotaPaceRow: View {
-    let pace: UsagePace
-    let now: Date
-
-    private var fixedTint: Color? {
-        switch pace.status {
-        case .onTrack: return nil
-        case .reserve: return DashboardTheme.success
-        case .deficit: return pace.willLastUntilReset ? DashboardTheme.warning : DashboardTheme.danger
-        }
-    }
-
-    private var paceLabel: String {
-        let delta = UsageFormatting.percent(abs(pace.deltaPercent))
-        switch pace.status {
-        case .onTrack: return L10n.text("pace.on_track")
-        case .reserve: return L10n.format("pace.reserve", delta)
-        case .deficit: return L10n.format("pace.deficit", delta)
-        }
-    }
-
-    private var outcomeLabel: String {
-        if pace.willLastUntilReset {
-            return L10n.text("pace.lasts_until_reset")
-        }
-        guard let runOutAt = pace.estimatedRunOutAt else { return L10n.text("pace.projected_early") }
-        return L10n.format("pace.projected_in", UsageFormatting.durationUntil(runOutAt, now: now))
-    }
-
-    var body: some View {
-        HStack(spacing: 5) {
-            Image(systemName: pace.willLastUntilReset ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
-                .font(.system(size: 9))
-            Text(paceLabel)
-                .numericFont(10, .medium)
-            Spacer(minLength: 8)
-            Text(outcomeLabel)
-                .numericFont(10)
-        }
-        .font(.system(size: 10))
-        .usageDockAdaptiveForeground(.secondary, fixedColor: fixedTint)
-        .accessibilityElement(children: .combine)
     }
 }

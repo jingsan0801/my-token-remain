@@ -107,48 +107,5 @@ struct TokenCompositionTests {
         #expect(composition.parts.count == 4)
     }
 
-    @Test("Bar widths keep tiny shares visible without overflowing")
-    func barWidthsFloorTinyShares() {
-        let widths = TokenCompositionBar.widths(
-            for: [0.001, 0.004, 0.995],
-            available: 200,
-            minimum: 2
-        )
-        #expect(widths[0] == 2)
-        #expect(widths[1] == 2)
-        #expect(abs(widths.reduce(0, +) - 200) < 0.001)
-        #expect(TokenCompositionStrip.shareLabel(0.0004) == "<0.1%")
-        #expect(TokenCompositionStrip.shareLabel(0.949) == "94.9%")
-    }
-
-    @Test("Model breakdown carries composition and local speed per named row")
-    func breakdownRowsCarryCompositionAndSpeed() throws {
-        let date = try #require(Calendar.current.date(from: DateComponents(year: 2026, month: 10, day: 4)))
-        let model = DailyUsageHistory.ModelUsage(
-            id: "gpt-6-astra", inputTokens: 4, outputTokens: 1, cacheTokens: 5, cost: 1,
-            cacheWriteTokens: 0, cacheReadTokens: 5
-        )
-        let day = DailyUsageHistory.Day(
-            date: date,
-            agents: [.init(id: "codex", tokens: 10, cost: 1, models: [model])]
-        )
-        let key = ModelThroughputSnapshot.key(
-            day: ModelThroughputParser.dayKey(date),
-            agentID: "codex",
-            modelID: "gpt-6-astra"
-        )
-        let throughput = ModelThroughputSnapshot(
-            buckets: [key: ThroughputBucket(outputTokens: 600, seconds: 10, samples: 4)]
-        )
-        let breakdown = TrendDayModelBreakdown.make(
-            day: day,
-            agentIDs: ["codex"],
-            metric: .tokens,
-            throughput: throughput
-        )
-        let row = try #require(breakdown.groups.first?.rows.first)
-        #expect(row.tokensPerSecond == 60)
-        #expect(row.composition.cacheRead == 5)
-        #expect(row.composition.output == 1)
-    }
+    // Fork note: 用量构成条与趋势模型明细已随界面移除,对应视图测试一并删除。
 }

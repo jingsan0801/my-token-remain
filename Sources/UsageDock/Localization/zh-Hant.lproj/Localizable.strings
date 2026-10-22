@@ -9,7 +9,7 @@
 "nav.devices" = "裝置";
 "nav.data_sources" = "資料來源";
 "nav.settings" = "設定";
-"section.overview.subtitle" = "掌握額度風險、今日用量與預估成本";
+"section.overview.subtitle" = "掌握額度風險與官方額度即時快照";
 "section.limits.subtitle" = "AI 編碼工具官方額度視窗明細";
 "section.trends.subtitle" = "跨日使用趨勢 · 本地 ccusage";
 "section.devices.subtitle" = "本機與未來跨裝置監測";
