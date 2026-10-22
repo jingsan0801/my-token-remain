@@ -25,13 +25,49 @@ struct LimitsSection: View {
         store.cardNotice(for: provider)
     }
 
+    /// 全部刷新:复用整轮刷新入口,强制拉取每个已追踪 provider 的额度。
+    /// 本地用量不在这里重复触发,额度页只关心额度快照。
+    private var refreshAllButton: some View {
+        Button {
+            Task { await store.refresh(forceCCUsage: false, forceClaude: true) }
+        } label: {
+            HStack(spacing: 5) {
+                if store.isRefreshing {
+                    ProgressView().controlSize(.mini)
+                } else {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 10, weight: .semibold))
+                }
+                Text(L10n.text("limits.refresh_all"))
+                    .font(.system(size: 11, weight: .semibold))
+                    .lineLimit(1)
+            }
+            .foregroundStyle(DashboardTheme.secondaryText)
+            .padding(.horizontal, 9)
+            .padding(.vertical, 4)
+            .background {
+                Capsule().fill(DashboardSurface.surface2)
+            }
+            .overlay {
+                Capsule().stroke(DashboardSurface.border, lineWidth: 1)
+            }
+            .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .disabled(store.isRefreshing || !store.manuallyRefreshingProviders.isEmpty)
+        .help(L10n.text("limits.refresh_all_help"))
+        .accessibilityLabel(L10n.text("limits.refresh_all"))
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             SectionTitleHeader(
                 title: DashboardSection.limits.title,
                 subtitle: DashboardSection.limits.subtitle,
                 trailing: insights.lastUpdated.map { L10n.format("common.updated_at", $0.formatted(date: .omitted, time: .standard)) }
-            )
+            ) {
+                refreshAllButton
+            }
 
             LazyVGrid(
                 columns: [GridItem(.adaptive(minimum: 300, maximum: 460), spacing: 14, alignment: .top)],

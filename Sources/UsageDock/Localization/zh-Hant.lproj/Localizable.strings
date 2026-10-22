@@ -244,6 +244,8 @@
 "limits.manage_tracking_hint" = "增減追蹤的 App：點按「加入 App」卡片加入新的服務；在任一卡片上按右鍵可停止追蹤。";
 "limits.provider_detected" = "%1$@（已偵測到）";
 "limits.provider_not_detected" = "%1$@（未偵測到）";
+"limits.refresh_all" = "全部重新整理";
+"limits.refresh_all_help" = "立即重新整理所有已追蹤應用程式的額度";
 "limits.reset_time_note" = "重置時間來自官方快照；若某視窗尚未提供重置時間，會顯示「待官方提供」。";
 "limits.stop_tracking_named" = "停止追蹤 %1$@";
 "logo.accessibility.brand_state" = "MyTokenRemain，%1$@";
@@ -346,6 +348,7 @@
 "quota.official_subtitle" = "最常用服務商的最吃緊視窗";
 "quota.official_title" = "官方額度";
 "quota.provider_remaining" = "%1$@ 剩餘 %2$@";
+"quota.refresh_named" = "重新整理 %1$@ 額度";
 "quota.reset_pending" = "下次重置時間待官方提供";
 "risk.accessibility_summary" = "目前使用判斷 %1$@，%2$@";
 "risk.provider_remaining" = "%1$@ 剩餘 %2$@";

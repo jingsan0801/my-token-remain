@@ -2,10 +2,23 @@ import SwiftUI
 
 /// Large header for a Dashboard detail pane: title, subtitle and an optional
 /// trailing meta string (typically the last-updated time).
-struct SectionTitleHeader: View {
+struct SectionTitleHeader<Accessory: View>: View {
     let title: String
     let subtitle: String
     var trailing: String?
+    let accessory: Accessory
+
+    init(
+        title: String,
+        subtitle: String,
+        trailing: String? = nil,
+        @ViewBuilder accessory: () -> Accessory
+    ) {
+        self.title = title
+        self.subtitle = subtitle
+        self.trailing = trailing
+        self.accessory = accessory()
+    }
 
     var body: some View {
         HStack(alignment: .top) {
@@ -17,15 +30,24 @@ struct SectionTitleHeader: View {
                     .font(.system(size: 12))
                     .foregroundStyle(DashboardTheme.secondaryText)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 12)
+            // 交互控件(如「全部刷新」)留在合并后的标题元素之外,
+            // 否则会被并进同一个无障碍元素而无法单独聚焦。
+            accessory
             if let trailing {
                 Text(trailing)
                     .numericFont(12)
                     .foregroundStyle(DashboardTheme.mutedText)
             }
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isHeader)
+    }
+}
+
+extension SectionTitleHeader where Accessory == EmptyView {
+    init(title: String, subtitle: String, trailing: String? = nil) {
+        self.init(title: title, subtitle: subtitle, trailing: trailing) { EmptyView() }
     }
 }
 

@@ -110,6 +110,9 @@ final class UsageStore: ObservableObject {
     }
     @Published private(set) var isCCUsageRefreshing = false
     @Published private(set) var isRefreshing = false
+    /// 单卡片手动刷新的进度。刻意与整轮自动刷新的 `isRefreshing` 分开:
+    /// 卡片按钮只反映自己发起的请求,也不会因为另一张卡片在刷新而错位。
+    @Published private(set) var manuallyRefreshingProviders: Set<ProviderQuota.Provider> = []
     @Published private(set) var errorMessage: String?
 
     private let tracked: TrackedProvidersStore
@@ -1755,6 +1758,50 @@ final class UsageStore: ObservableObject {
         state.isRefreshing = false
         providerAccountStates[id] = state
         providerAccountQuotaCache.save(currentProviderAccountQuotas())
+    }
+
+    /// 卡片上的「刷新」是否正在进行。多账户卡片按当前选择判断:
+    /// 单独账户视图只看该账户,合并视图看任一启用账户。
+    func isRefreshingQuota(for provider: ProviderQuota.Provider) -> Bool {
+        if manuallyRefreshingProviders.contains(provider) { return true }
+        switch accountSelection(for: provider) {
+        case .account(let id):
+            return providerAccountStates[id]?.isRefreshing ?? false
+        case .all:
+            return accountSnapshots(for: provider).contains { $0.isRefreshing }
+        }
+    }
+
+    /// 卡片上的「刷新」只刷新这张卡正在展示的数据:选中的单个账户,
+    /// 或合并视图里所有启用账户;未开启多账户的 provider 仍走各自
+    /// 默认额度源。请求本身复用各 provider 既有的超时与退避策略,
+    /// 这里只多记一个卡片级进度标志。
+    func refreshQuotaCard(_ provider: ProviderQuota.Provider) async {
+        guard tracked.isEnabled(provider),
+              !manuallyRefreshingProviders.contains(provider) else { return }
+        manuallyRefreshingProviders.insert(provider)
+        defer { manuallyRefreshingProviders.remove(provider) }
+
+        switch accountSelection(for: provider) {
+        case .account(let id):
+            await refreshProviderAccount(id)
+        case .all:
+            // Claude 的强制刷新在同一个流程里覆盖默认源和受管账户,
+            // 再逐个账户刷新只会重复请求同一接口。
+            if provider == .claude,
+               accountSnapshots(for: provider).contains(where: {
+                   $0.id == .system(.claude) && $0.profile.isEnabled
+               }) {
+                await refresh(forceCCUsage: false, forceClaude: true)
+                return
+            }
+            let enabledIDs = accountSnapshots(for: provider)
+                .filter { $0.profile.isEnabled }
+                .map(\.id)
+            for id in enabledIDs.isEmpty ? [.system(provider)] : enabledIDs {
+                await refreshProviderAccount(id)
+            }
+        }
     }
 
     private func refreshKeyProvider(

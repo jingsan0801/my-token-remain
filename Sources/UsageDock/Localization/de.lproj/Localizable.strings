@@ -240,6 +240,8 @@
 "limits.manage_tracking_hint" = "Verfolgte Apps verwalten: Karte „App hinzufügen“ anklicken, um einen Dienst zu ergänzen; Rechtsklick auf eine Karte beendet das Verfolgen.";
 "limits.provider_detected" = "%1$@ (erkannt)";
 "limits.provider_not_detected" = "%1$@ (nicht erkannt)";
+"limits.refresh_all" = "Alle aktualisieren";
+"limits.refresh_all_help" = "Kontingente aller verfolgten Apps jetzt aktualisieren";
 "limits.reset_time_note" = "Zurücksetzungszeiten stammen aus offiziellen Snapshots; fehlt die Zeit für ein Fenster noch, erscheint „Zurücksetzungszeit noch nicht offiziell verfügbar“.";
 "limits.stop_tracking_named" = "%1$@ nicht mehr verfolgen";
 "logo.accessibility.brand_state" = "MyTokenRemain, %1$@";
@@ -342,6 +344,7 @@
 "quota.official_subtitle" = "Knappste Fenster deiner meistgenutzten Anbieter";
 "quota.official_title" = "Offizielles Kontingent";
 "quota.provider_remaining" = "%1$@: %2$@ verbleibend";
+"quota.refresh_named" = "%1$@-Kontingent aktualisieren";
 "quota.reset_pending" = "Zurücksetzungszeit noch nicht offiziell verfügbar";
 "risk.accessibility_summary" = "Aktuelle Nutzungsbewertung %1$@, %2$@";
 "risk.provider_remaining" = "%1$@: %2$@ verbleibend";

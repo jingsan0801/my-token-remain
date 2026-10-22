@@ -240,6 +240,8 @@
 "limits.manage_tracking_hint" = "追跡するアプリの追加と削除:「アプリを追加」カードで新しいサービスを追加、任意のカードを右クリックすると追跡を停止できます。";
 "limits.provider_detected" = "%1$@(検出済み)";
 "limits.provider_not_detected" = "%1$@(未検出)";
+"limits.refresh_all" = "すべて更新";
+"limits.refresh_all_help" = "追跡中のすべてのアプリのクォータを今すぐ更新";
 "limits.reset_time_note" = "リセット時刻は公式スナップショットから取得します。ウィンドウにまだリセット時刻がない場合は「公式の提供待ち」と表示されます。";
 "limits.stop_tracking_named" = "%1$@の追跡を停止";
 "logo.accessibility.brand_state" = "MyTokenRemain、%1$@";
@@ -342,6 +344,7 @@
 "quota.official_subtitle" = "よく使うプロバイダーの最も逼迫したウィンドウ";
 "quota.official_title" = "公式クォータ";
 "quota.provider_remaining" = "%1$@ 残り %2$@";
+"quota.refresh_named" = "%1$@ のクォータを更新";
 "quota.reset_pending" = "次回リセット時刻は公式の提供待ち";
 "risk.accessibility_summary" = "現在の使用判定は%1$@、%2$@";
 "risk.provider_remaining" = "%1$@ 残り %2$@";

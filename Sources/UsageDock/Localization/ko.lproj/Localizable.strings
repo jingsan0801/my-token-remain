@@ -240,6 +240,8 @@
 "limits.manage_tracking_hint" = "추적할 앱 추가/제거: “앱 추가” 카드를 눌러 새 서비스를 추가하고, 카드를 우클릭하면 추적을 중지할 수 있습니다.";
 "limits.provider_detected" = "%1$@ (감지됨)";
 "limits.provider_not_detected" = "%1$@ (감지 안 됨)";
+"limits.refresh_all" = "모두 새로고침";
+"limits.refresh_all_help" = "추적 중인 모든 앱의 할당량을 지금 새로고침";
 "limits.reset_time_note" = "재설정 시간은 공식 스냅샷에서 가져옵니다. 창에 재설정 시간이 아직 제공되지 않으면 “공식 제공 대기 중”으로 표시됩니다.";
 "limits.stop_tracking_named" = "%1$@ 추적 중지";
 "logo.accessibility.brand_state" = "MyTokenRemain, %1$@";
@@ -342,6 +344,7 @@
 "quota.official_subtitle" = "가장 많이 쓰는 제공업체의 가장 빠듯한 창";
 "quota.official_title" = "공식 할당량";
 "quota.provider_remaining" = "%1$@ %2$@ 남음";
+"quota.refresh_named" = "%1$@ 할당량 새로고침";
 "quota.reset_pending" = "다음 재설정 시간은 공식 제공 대기 중";
 "risk.accessibility_summary" = "현재 사용 판단 %1$@, %2$@";
 "risk.provider_remaining" = "%1$@ %2$@ 남음";

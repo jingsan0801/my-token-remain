@@ -343,6 +343,8 @@ struct QuotaCard: View {
                 .contentShape(Rectangle())
                 .directReorderHandle()
 
+            quotaRefreshButton
+
             if let plan = quota?.planName, !plan.isEmpty {
                 TagPill(text: plan)
                     .padding(.top, 2)
@@ -356,6 +358,32 @@ struct QuotaCard: View {
             alignment: .top
         )
         .contentShape(Rectangle())
+    }
+
+    /// 卡片级手动刷新。拉取范围由 store 按当前账户选择决定;这里只负责
+    /// 呈现「正在刷新」并阻止重复点击。放在拖拽把手之外,点击不会触发排序。
+    private var quotaRefreshButton: some View {
+        let isRefreshing = store.isRefreshingQuota(for: provider)
+        return Button {
+            Task { await store.refreshQuotaCard(provider) }
+        } label: {
+            Group {
+                if isRefreshing {
+                    ProgressView().controlSize(.mini)
+                } else {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(DashboardTheme.secondaryText)
+                }
+            }
+            .frame(width: 18, height: 18)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(isRefreshing)
+        .padding(.top, 2)
+        .help(L10n.format("quota.refresh_named", provider.displayName))
+        .accessibilityLabel(L10n.format("quota.refresh_named", provider.displayName))
     }
 
     // MARK: - Multi-account

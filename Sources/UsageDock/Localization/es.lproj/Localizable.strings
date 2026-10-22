@@ -240,6 +240,8 @@
 "limits.manage_tracking_hint" = "Añade o quita apps del seguimiento: haz clic en la tarjeta \"Añadir app\" para sumar un servicio; haz clic derecho en cualquier tarjeta para dejar de seguirla.";
 "limits.provider_detected" = "%1$@ (detectado)";
 "limits.provider_not_detected" = "%1$@ (no detectado)";
+"limits.refresh_all" = "Actualizar todo";
+"limits.refresh_all_help" = "Actualizar ahora la cuota de todas las apps seguidas";
 "limits.reset_time_note" = "Las horas de reinicio provienen de instantáneas oficiales; si una ventana aún no tiene hora de reinicio, se muestra \"A la espera de la hora oficial de reinicio\".";
 "limits.stop_tracking_named" = "Dejar de seguir %1$@";
 "logo.accessibility.brand_state" = "MyTokenRemain, %1$@";
@@ -342,6 +344,7 @@
 "quota.official_subtitle" = "Las ventanas más ajustadas de tus proveedores más usados";
 "quota.official_title" = "Cuota oficial";
 "quota.provider_remaining" = "%1$@: %2$@ restante";
+"quota.refresh_named" = "Actualizar la cuota de %1$@";
 "quota.reset_pending" = "A la espera de la hora oficial de reinicio";
 "risk.accessibility_summary" = "Evaluación de uso %1$@, %2$@";
 "risk.provider_remaining" = "%1$@: %2$@ restante";

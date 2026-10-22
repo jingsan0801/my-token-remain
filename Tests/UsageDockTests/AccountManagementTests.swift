@@ -273,6 +273,31 @@ struct AccountManagementTests {
         #expect(store.providerAccountStates[account.id]?.quota != nil)
     }
 
+    @Test("A card refresh reloads only what that card is showing")
+    func cardRefreshTargetsCard() async throws {
+        let fixture = try Fixture(providers: [.openrouter, .openrouter])
+        defer { fixture.cleanUp() }
+        let calls = FetchCalls()
+        let store = fixture.makeStore(fetch: { profile, _ in
+            await calls.record(profile.id)
+            return AccountManagementTests.quota(profile.provider)
+        })
+        let first = fixture.profiles[0]
+        let second = fixture.profiles[1]
+
+        // An account-scoped card refreshes that account and nothing else.
+        store.setAccountSelection(.account(first.id), for: .openrouter)
+        await store.refreshQuotaCard(.openrouter)
+        #expect(await calls.ids == [first.id])
+        #expect(!store.isRefreshingQuota(for: .openrouter))
+
+        // The combined card refreshes every enabled account exactly once.
+        store.setAccountSelection(.all, for: .openrouter)
+        await store.refreshQuotaCard(.openrouter)
+        #expect(await calls.ids == [first.id, first.id, second.id])
+        #expect(!store.isRefreshingQuota(for: .openrouter))
+    }
+
     @Test("Removing the last managed account restores the parked default source")
     func removingLastAccountRestoresDefaultSource() throws {
         let fixture = try Fixture(providers: [.openrouter])

@@ -236,6 +236,8 @@
 "limits.manage_tracking_hint" = "Add or remove tracked apps: click the \"Add app\" card to add a service; right-click any card to stop tracking.";
 "limits.provider_detected" = "%1$@ (detected)";
 "limits.provider_not_detected" = "%1$@ (not detected)";
+"limits.refresh_all" = "Refresh all";
+"limits.refresh_all_help" = "Refresh the quota of every tracked app now";
 "limits.reset_time_note" = "Reset times come from official snapshots; when a window has no reset time yet, it shows \"Waiting for the official reset time\".";
 "limits.stop_tracking_named" = "Stop tracking %1$@";
 "logo.accessibility.brand_state" = "MyTokenRemain, %1$@";
@@ -338,6 +340,7 @@
 "quota.official_subtitle" = "Tightest windows of your most-used providers";
 "quota.official_title" = "Official Quota";
 "quota.provider_remaining" = "%1$@ %2$@ remaining";
+"quota.refresh_named" = "Refresh %1$@ quota";
 "quota.reset_pending" = "Waiting for the official reset time";
 "risk.accessibility_summary" = "Usage assessment %1$@, %2$@";
 "risk.provider_remaining" = "%1$@ %2$@ remaining";
