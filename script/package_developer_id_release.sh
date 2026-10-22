@@ -19,7 +19,7 @@ DMG="$OUTPUT_DIR/TokenRemain.dmg"
 VERSIONED_DMG="$OUTPUT_DIR/TokenRemain-$VERSION-$BUILD.dmg"
 IDENTITY="${USAGEDOCK_SIGNING_IDENTITY:-}"
 NOTARY_PROFILE="${TOKENREMAIN_NOTARYTOOL_PROFILE:-}"
-BROADCAST_BASE_URL="${TOKENREMAIN_BROADCAST_BASE_URL:-https://api.tokenremain.com}"
+BROADCAST_BASE_URL="${TOKENREMAIN_BROADCAST_BASE_URL:-https://api.mytokenremain.jingsan.wang}"
 IDENTITY_COMMON_NAME=""
 VERIFY_WORK_DIR=""
 VERIFICATION_APP=""
@@ -136,7 +136,7 @@ generate_update_feed() {
   rm -f "$APPCAST" "$DMG" "$VERSIONED_DMG"
   "$tool" \
     --download-url-prefix "https://github.com/Carstin520/token-remain/releases/download/$RELEASE_TAG/" \
-    --link "https://tokenremain.com" \
+    --link "https://mytokenremain.jingsan.wang" \
     --maximum-deltas 0 \
     "$OUTPUT_DIR"
   [[ -s "$APPCAST" ]] || {

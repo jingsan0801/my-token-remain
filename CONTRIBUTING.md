@@ -2,7 +2,7 @@
 
 Thanks for helping! Issues and pull requests are welcome in English or Chinese (中文 issue / PR 同样欢迎).
 
-- **Bug or idea?** [Open an issue](https://github.com/Carstin520/token-remain/issues) with your TokenRemain version, macOS version, the affected provider, the exact visible message, and steps to reproduce.
+- **Bug or idea?** [Open an issue](https://github.com/jingsan0801/my-token-remain/issues) with your TokenRemain version, macOS version, the affected provider, the exact visible message, and steps to reproduce.
 - **Security problem?** Don't open a public issue — follow [SECURITY.md](SECURITY.md).
 - **Never paste secrets.** Tokens, API keys, cookies, auth files and unredacted API responses must not appear in issues, screenshots, fixtures or commits.
 

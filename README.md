@@ -1,7 +1,5 @@
 <div align="center">
 
-<a href="https://tokenremain.com"><img src="site/assets/mascot.gif" width="112" alt="TokenRemain 吉祥物动画：剩余额度从 100% 递减到 0%，表情随之变化" /></a>
-
 # TokenRemain
 
 **AI 编码工具的剩余额度，常驻 Mac 菜单栏。**<br/>
@@ -19,10 +17,6 @@
 
 <br/>
 
-<p align="center">
-  <img src="site/assets/dash-overview-zh.webp" width="77%" alt="Dashboard 概览：最低剩余额度、官方额度进度与风险提示" />
-  <img src="site/assets/popover-zh.webp" width="19%" alt="菜单栏弹窗：按应用列出剩余额度" />
-</p>
 <p align="center"><sub>Claude Code、Codex、Cursor、Grok、GLM 等 21+ 家工具的剩余额度与重置倒计时，一屏看完。</sub></p>
 
 > [!NOTE]
@@ -41,14 +35,6 @@
 - **只读本机已有凭证**：无需注册账号，无遥测，不刷新第三方 token，不上传凭证。
 - **可选 WebDAV 配置同步**(fork 自有):把账号配置与密钥以明文 JSON 写到你自己的 WebDAV 服务器(如坚果云),方便多 Mac 复制配置;默认关闭。
 - **低能耗**：后台 CPU 比 v1.2.2 降低 95%（[测试方法](docs/performance-v1.2.3.md)）；界面支持简体中文、繁體中文、English、日本語、한국어 等多种语言。
-
-## 界面一览
-
-<p align="center">
-  <img src="site/assets/dash-limits-zh.webp" width="80%" alt="额度页：各服务商的官方窗口与重置倒计时" />
-</p>
-<p align="center"><sub><b>额度</b> · 每个窗口的剩余、重置时间与更新时间。</sub></p>
-
 
 
 ## 快速上手
@@ -110,7 +96,7 @@
 
 **其他联网行为**（均不携带凭证）：服务状态读取 `status.openai.com`、`status.claude.com` 的公开接口；开启 WebDAV 同步时只连接你自己配置的服务器。
 
-细节见[隐私政策](https://tokenremain.com/privacy)。
+细节见[隐私政策](https://mytokenremain.jingsan.wang/privacy.html)。
 
 ## 常见问题
 
@@ -155,7 +141,7 @@ TokenRemain 从不刷新 token，只读取工具自己保存的登录状态。�
 <summary><b>卡片标注了「第三方 API」</b></summary>
 <br/>
 
-Claude Code 设置了 `ANTHROPIC_BASE_URL`，或 Codex 配置了自定义 `base_url` 时，额度来自实际提供服务的 API，卡片会注明来源。如果你用的是官方登录却被这样标注，请[提交 issue](https://github.com/Carstin520/token-remain/issues) 并附上脱敏后的配置。
+Claude Code 设置了 `ANTHROPIC_BASE_URL`，或 Codex 配置了自定义 `base_url` 时，额度来自实际提供服务的 API，卡片会注明来源。如果你用的是官方登录却被这样标注，请[提交 issue](https://github.com/jingsan0801/my-token-remain/issues) 并附上脱敏后的配置。
 
 </details>
 
@@ -174,7 +160,7 @@ rm -rf ~/Library/Caches/com.jamesli.usagedock ~/Library/Application\ Support/com
 
 </details>
 
-还有问题？请[提交 issue](https://github.com/Carstin520/token-remain/issues) 或查看[支持页](https://tokenremain.com/support)。
+还有问题？请[提交 issue](https://github.com/jingsan0801/my-token-remain/issues) 或查看[支持页](https://mytokenremain.jingsan.wang/support.html)。
 
 ## 参与开发
 

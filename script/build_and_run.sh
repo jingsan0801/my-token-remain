@@ -10,7 +10,7 @@ PRODUCT_NAME="UsageDock"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
 INSTALL_DIR="${USAGEDOCK_INSTALL_DIR:-$HOME/Applications}"
-BROADCAST_BASE_URL="${TOKENREMAIN_BROADCAST_BASE_URL:-https://api.tokenremain.com}"
+BROADCAST_BASE_URL="${TOKENREMAIN_BROADCAST_BASE_URL:-https://api.mytokenremain.jingsan.wang}"
 # A stable signature lets macOS retain the user's "Always Allow" choice for
 # the Claude Code keychain item across UsageDock rebuilds.
 SIGNING_IDENTITY="${USAGEDOCK_SIGNING_IDENTITY:-}"

@@ -12,7 +12,7 @@ BASELINE_EXECUTABLE="UsageDockProviderAuditBaseline"
 CANDIDATE_EXECUTABLE="UsageDockAppStoreCandidate"
 ENTITLEMENTS="$ROOT_DIR/Resources/UsageDockAppStoreCandidate.entitlements"
 SIGNING_IDENTITY="${TOKENREMAIN_APP_STORE_SIGNING_IDENTITY:-}"
-BROADCAST_BASE_URL="${TOKENREMAIN_BROADCAST_BASE_URL:-https://api.tokenremain.com}"
+BROADCAST_BASE_URL="${TOKENREMAIN_BROADCAST_BASE_URL:-https://api.mytokenremain.jingsan.wang}"
 
 export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"
 

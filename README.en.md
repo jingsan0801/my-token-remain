@@ -1,7 +1,5 @@
 <div align="center">
 
-<a href="https://tokenremain.com"><img src="site/assets/mascot.gif" width="112" alt="TokenRemain mascot animation: remaining quota draining from 100% to 0%, expression changing along the way" /></a>
-
 # TokenRemain
 
 **Your AI coding quota, always in the Mac menu bar.**<br/>
@@ -19,10 +17,6 @@ Credentials never leave your machine: read-only, never refreshed, never uploaded
 
 <br/>
 
-<p align="center">
-  <img src="site/assets/dash-overview.webp" width="77%" alt="Dashboard overview: lowest remaining quota, official quota progress and risk notes" />
-  <img src="site/assets/popover.webp" width="19%" alt="Menu bar popover listing remaining quota per app" />
-</p>
 <p align="center"><sub>Remaining quota and reset countdowns for Claude Code, Codex, Cursor, Grok, GLM and 21+ tools — on one screen.</sub></p>
 
 > [!NOTE]
@@ -41,13 +35,6 @@ Credentials never leave your machine: read-only, never refreshed, never uploaded
 - **Reads what's already there**: no account to create, no telemetry, never refreshes third-party tokens, never uploads credentials.
 - **Optional WebDAV config sync** (fork-only): writes account configuration and keys as plaintext JSON to your own WebDAV server to copy settings between Macs; off by default.
 - **Light on energy**: background CPU down 95% vs v1.2.2 ([method](docs/performance-v1.2.3.md)); interface in English, 简体中文, 繁體中文, 日本語, 한국어 and more.
-
-## Screenshots
-
-<p align="center">
-  <img src="site/assets/dash-limits.webp" width="80%" alt="Limits page: official windows per provider with reset countdowns" />
-</p>
-<p align="center"><sub><b>Limits</b> · remaining quota, reset time and freshness for every window.</sub></p>
 
 
 
@@ -110,7 +97,7 @@ Every claim links to the code or test that backs it:
 
 **Other network activity** (never carries credentials): service status reads the public endpoints of `status.openai.com` and `status.claude.com`; WebDAV sync, when enabled, contacts only the server you configure.
 
-Details in the [privacy policy](https://tokenremain.com/privacy).
+Details in the [privacy policy](https://mytokenremain.jingsan.wang/privacy.html).
 
 ## FAQ
 
@@ -155,7 +142,7 @@ The alert reflects the tightest of all windows (usually the 7-day one), while th
 <summary><b>A card is labeled "third-party API"</b></summary>
 <br/>
 
-When Claude Code has `ANTHROPIC_BASE_URL` set, or Codex has a custom `base_url`, the quota comes from the API actually serving you, and the card names it. If you use the official sign-in and still see this label, please [open an issue](https://github.com/Carstin520/token-remain/issues) with your redacted configuration.
+When Claude Code has `ANTHROPIC_BASE_URL` set, or Codex has a custom `base_url`, the quota comes from the API actually serving you, and the card names it. If you use the official sign-in and still see this label, please [open an issue](https://github.com/jingsan0801/my-token-remain/issues) with your redacted configuration.
 
 </details>
 
@@ -174,7 +161,7 @@ Pasted keys can be removed in Keychain Access by searching for `com.jamesli.usag
 
 </details>
 
-Still stuck? [Open an issue](https://github.com/Carstin520/token-remain/issues) or visit the [support page](https://tokenremain.com/support).
+Still stuck? [Open an issue](https://github.com/jingsan0801/my-token-remain/issues) or visit the [support page](https://mytokenremain.jingsan.wang/support.html).
 
 ## Contributing
 
