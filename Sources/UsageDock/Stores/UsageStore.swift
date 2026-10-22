@@ -1798,8 +1798,15 @@ final class UsageStore: ObservableObject {
             let enabledIDs = accountSnapshots(for: provider)
                 .filter { $0.profile.isEnabled }
                 .map(\.id)
-            for id in enabledIDs.isEmpty ? [.system(provider)] : enabledIDs {
-                await refreshProviderAccount(id)
+            if enabledIDs.isEmpty {
+                // 只有支持多账户的 provider 才有 system profile。Grok Bot、
+                // OpenCode、Amp 这类没有账户投影的来源如果走账户接口会直接
+                // 返回、一个请求都不发；改走与定时刷新相同的辅助抓取器。
+                await refreshKeyProvider(provider)
+            } else {
+                for id in enabledIDs {
+                    await refreshProviderAccount(id)
+                }
             }
         }
     }
