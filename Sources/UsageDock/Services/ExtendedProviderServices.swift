@@ -205,9 +205,12 @@ struct DeepSeekUsageService {
 /// 钥匙串凭证。CLI token 固定走 Code API(Bearer),手动凭证维持原有
 /// 双口径:Key 形态走 `GET api.kimi.com/coding/v1/usages`(Bearer);
 /// JWT 形态按 kimi-auth 走 `POST www.kimi.com/apiv2 …BillingService/GetUsages`。
-/// 响应 `limits[]` 每项:detail{used/limit/remaining/percent} +
-/// window{duration,timeUnit},按窗口时长升序铺开:最短做 primary,
-/// 时长不同的最长做 secondary,其余进 scoped,任何窗口不丢。
+/// 响应有三个额度来源:`limits[]`(detail{used/limit/remaining/percent}
+/// + window{duration,timeUnit})、`usage`(旧的周窗计数)、以及
+/// `usages` 的 ratio 池(limit_5h/limit_7d/limit_month_total)。三者
+/// 描述同一额度时按周期与用量合并成一行,再按时长升序铺开:最短做
+/// primary,时长不同的最长做 secondary,其余进 scoped,任何窗口不丢。
+/// 网页端 GetUsages 的 `usages` 是数组,细节在 FEATURE_CODING 元素里。
 struct KimiUsageService {
     /// 测试注入:本地 CLI 凭证发现。
     var loadLocalCredential: (Date) -> KimiLocalCredential? = {
@@ -297,9 +300,32 @@ struct KimiUsageService {
         guard let body = ExtendedHTTP.json(data) else {
             throw ExtendedProviderError.invalidResponse(.kimi)
         }
-        let entries = (body["limits"] as? [[String: Any]])
-            ?? ((body["data"] as? [String: Any])?["limits"] as? [[String: Any]])
-            ?? []
+        let dataRoot = body["data"] as? [String: Any]
+        func object(_ key: String) -> [String: Any]? {
+            (body[key] as? [String: Any]) ?? (dataRoot?[key] as? [String: Any])
+        }
+        func array(_ key: String) -> [[String: Any]]? {
+            (body[key] as? [[String: Any]]) ?? (dataRoot?[key] as? [[String: Any]])
+        }
+
+        var entries = array("limits") ?? []
+        // Code API 把 5h/7d/月额度散在两个地方:limits[] 只有计数明细的
+        // 5h 窗口,`usage`(单数)是旧的周窗计数,`usages`(复数)才是
+        // ratio 池(limit_5h / limit_7d / limit_month_total)。只读
+        // limits[] 会让周/月额度完全消失。网页端 GetUsages 的响应又是
+        // usages 数组,细节藏在 FEATURE_CODING 元素里,这里一并展开。
+        var legacyWeekly = object("usage")
+        var ratioPools = object("usages")
+        if let scopes = array("usages") {
+            let coding = scopes.first {
+                ($0["scope"] as? String)?.caseInsensitiveCompare("FEATURE_CODING") == .orderedSame
+            } ?? scopes.first
+            if let coding {
+                entries = (coding["limits"] as? [[String: Any]]) ?? entries
+                legacyWeekly = (coding["detail"] as? [String: Any]) ?? legacyWeekly
+            }
+            ratioPools = nil
+        }
 
         // limits[] 是开放数组,窗口数不定。全部解析后按时长升序稳定排序:
         // 最短档 → primary、与之时长不同的最长档 → secondary(时长必不同,
@@ -321,6 +347,91 @@ struct KimiUsageService {
                 name: entryName(entry)
             ))
         }
+        // 旧计数口径的周窗(Code API 的 `usage`,或网页端 FEATURE_CODING
+        // 的 `detail`)。同一周期的计数明细若已从 limits[] 解析出来,取
+        // 更忙的一方;周期无法对上时保留为独立窗口,避免丢数据。
+        if let legacyWeekly, let percent = usedPercent(legacyWeekly) {
+            let legacy = QuotaWindow(
+                usedPercent: ExtendedHTTP.clamp(percent),
+                windowMinutes: 10_080,
+                resetsAt: resetDate(
+                    legacyWeekly["resetTime"] ?? legacyWeekly["reset_time"]
+                )
+            )
+            let sameDuration = parsed.indices.filter {
+                parsed[$0].window.windowMinutes == 10_080
+            }
+            let existing = sameDuration.max {
+                parsed[$0].window.usedPercent < parsed[$1].window.usedPercent
+            }
+            if let existing,
+               let legacyReset = legacy.resetsAt,
+               let existingReset = parsed[existing].window.resetsAt,
+               abs(legacyReset.timeIntervalSince(existingReset)) <= 2 {
+                if legacy.usedPercent > parsed[existing].window.usedPercent {
+                    parsed[existing] = (window: legacy, name: parsed[existing].name)
+                }
+            } else {
+                parsed.append((window: legacy, name: nil))
+            }
+        }
+
+        // usages 的 ratio 池:limit_5h / limit_7d / limit_month_total。
+        // limit_month_code 是 Code 专属的另一个月度池,官方 UI 的「月额度」
+        // 用 limit_month_total,这里跟随 CodexBar 口径不再重复展示。
+        func ratioCandidate(
+            _ key: String,
+            minutes: Int
+        ) -> (window: QuotaWindow, name: String?)? {
+            guard let pool = ratioPools?[key] as? [String: Any],
+                  let ratio = ExtendedHTTP.number(pool["used_ratio"]),
+                  ratio.isFinite, ratio >= 0 else { return nil }
+            return (
+                window: QuotaWindow(
+                    usedPercent: ExtendedHTTP.clamp(ratio * 100),
+                    windowMinutes: minutes,
+                    resetsAt: resetDate(pool["reset_time"] ?? pool["resetTime"])
+                ),
+                name: nil
+            )
+        }
+
+        // 同一额度同时有计数和 ratio 两套口径时只保留一行:重置时间接近
+        // (≤2 秒)取更忙的一方,无法确认是同一周期时以 ratio 为准。
+        // 同时长的兄弟池不合并,只并入最忙的那条。
+        func merge(
+            _ candidate: (window: QuotaWindow, name: String?),
+            minutes: Int
+        ) {
+            let sameDuration = parsed.indices.filter {
+                parsed[$0].window.windowMinutes == minutes
+            }
+            guard let busiest = sameDuration.max(by: {
+                parsed[$0].window.usedPercent < parsed[$1].window.usedPercent
+            }) else {
+                parsed.append(candidate)
+                return
+            }
+            let counts = parsed[busiest].window
+            if let countReset = counts.resetsAt,
+               let ratioReset = candidate.window.resetsAt,
+               abs(countReset.timeIntervalSince(ratioReset)) <= 2,
+               counts.usedPercent > candidate.window.usedPercent {
+                return
+            }
+            parsed[busiest] = (window: candidate.window, name: parsed[busiest].name)
+        }
+
+        for (key, minutes) in [
+            ("limit_5h", 300),
+            ("limit_7d", 10_080),
+            ("limit_month_total", 43_200)
+        ] {
+            if let candidate = ratioCandidate(key, minutes: minutes) {
+                merge(candidate, minutes: minutes)
+            }
+        }
+
         guard !parsed.isEmpty else {
             throw ExtendedProviderError.invalidResponse(.kimi)
         }

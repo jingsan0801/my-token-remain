@@ -16,18 +16,30 @@ struct CombinedAccountControl: View {
 
     var body: some View {
         if snapshots.filter({ !$0.profile.isSystem || $0.quota != nil }).count >= 2 || requested {
-            VStack(alignment: .leading, spacing: 5) {
-                Toggle(L10n.text("accounts.combined.toggle"), isOn: Binding(
-                    get: { requested },
-                    set: { enabled in
-                        if enabled { pendingGroup = candidate }
-                        else { preferences.setCombinedAccountConsent(nil, for: provider) }
-                    }
-                ))
-                .toggleStyle(.switch)
-                .controlSize(.small)
-                .font(.system(size: 11))
-                .disabled(!requested && candidate == nil)
+            VStack(alignment: .leading, spacing: 4) {
+                // 开关放到行尾,和设置页的控制行保持同一视觉节奏;
+                // 说明文字留在下一行,不挤占统计读数。
+                let canToggle = requested || candidate != nil
+                HStack(spacing: 8) {
+                    Text(L10n.text("accounts.combined.toggle"))
+                        .font(.system(size: 11))
+                        .foregroundStyle(
+                            canToggle ? DashboardTheme.text : DashboardTheme.mutedText
+                        )
+                    Spacer(minLength: 8)
+                    Toggle("", isOn: Binding(
+                        get: { requested },
+                        set: { enabled in
+                            if enabled { pendingGroup = candidate }
+                            else { preferences.setCombinedAccountConsent(nil, for: provider) }
+                        }
+                    ))
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .controlSize(.small)
+                    .disabled(!canToggle)
+                    .accessibilityLabel(L10n.text("accounts.combined.toggle"))
+                }
                 if case .failure(let reason) = result {
                     Text(L10n.text(reason.localizationKey)).font(.system(size: 10.5))
                         .foregroundStyle(DashboardTheme.secondaryText)

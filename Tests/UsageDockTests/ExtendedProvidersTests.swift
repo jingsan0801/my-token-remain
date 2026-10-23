@@ -191,6 +191,98 @@ struct ExtendedProvidersTests {
         #expect(quota.uniqueScopedWindows.first?.window.usedPercent == 20)
     }
 
+    @Test("Kimi Code API usages pools surface the weekly and monthly windows")
+    func kimiRatioPools() throws {
+        // 真实 Code API 口径:limits[] 只有 5h 计数,周/月在 usage/usages 里。
+        // 5h 与周窗都存在计数 + ratio 两套读数,重置接近时取更忙的一方。
+        let payload = """
+        {"limits": [
+            {"detail": {"limit": "100", "used": "25",
+                        "resetTime": "2026-09-19T14:45:59Z"},
+             "window": {"duration": 300, "timeUnit": "TIME_UNIT_MINUTE"}}
+        ],
+        "usage": {"limit": "100", "used": "19",
+                  "resetTime": "2026-09-19T16:45:59Z"},
+        "usages": {
+            "limit_5h": {"used_ratio": 0,
+                         "reset_time": "2026-09-19T14:45:58Z"},
+            "limit_7d": {"used_ratio": 0.125,
+                         "reset_time": "2026-09-19T16:45:59Z"},
+            "limit_month_total": {"used_ratio": 0.4,
+                                  "reset_time": "2026-10-17T00:00:00Z"},
+            "limit_month_code": {"used_ratio": 0.9,
+                                 "reset_time": "2026-10-17T00:00:00Z"}
+        }}
+        """
+        let now = Date(timeIntervalSince1970: 1_784_000_000)
+        let quota = try KimiUsageService.parse(Data(payload.utf8), now: now)
+        #expect(quota.primary.windowMinutes == 300)
+        #expect(quota.primary.usedPercent == 25)
+        #expect(quota.secondary?.windowMinutes == 43_200)
+        #expect(quota.secondary?.usedPercent == 40)
+        // 周窗只保留一条(计数 19% 比 ratio 12.5% 更忙),作为 scoped 中间档。
+        let scoped = quota.uniqueScopedWindows
+        #expect(scoped.count == 1)
+        #expect(scoped.first?.window.windowMinutes == 10_080)
+        #expect(scoped.first?.window.usedPercent == 19)
+        #expect(scoped.first?.displayName == "Weekly")
+        // limit_month_code 不重复成第二个 30 天行。
+        #expect(quota.uniqueScopedWindows.allSatisfy { $0.window.windowMinutes != 43_200 })
+    }
+
+    @Test("Kimi ratio-only responses keep hourly, weekly and monthly windows")
+    func kimiRatioPoolsOnly() throws {
+        let payload = """
+        {"usages": {
+            "limit_5h": {"used_ratio": 0.625},
+            "limit_7d": {"used_ratio": 0.125},
+            "limit_month_total": {"used_ratio": 0.05}
+        }}
+        """
+        let quota = try KimiUsageService.parse(Data(payload.utf8))
+        #expect(quota.primary.windowMinutes == 300)
+        #expect(quota.primary.usedPercent == 62.5)
+        #expect(quota.secondary?.windowMinutes == 43_200)
+        #expect(quota.secondary?.usedPercent == 5)
+        let weekly = try #require(quota.uniqueScopedWindows.first)
+        #expect(weekly.window.windowMinutes == 10_080)
+        #expect(weekly.window.usedPercent == 12.5)
+    }
+
+    @Test("Kimi mismatched count resets defer to the ratio reading")
+    func kimiRatioWinsOnDifferentPeriods() throws {
+        let payload = """
+        {"usage": {"limit": "100", "used": "19",
+                   "resetTime": "2026-09-19T16:45:59Z"},
+         "usages": {"limit_7d": {"used_ratio": 0.4,
+                                 "reset_time": "2026-09-26T16:45:59Z"},
+                    "limit_month_total": {"used_ratio": 0.0313}}}
+        """
+        let quota = try KimiUsageService.parse(Data(payload.utf8))
+        #expect(quota.primary.windowMinutes == 10_080)
+        #expect(quota.primary.usedPercent == 40)
+        #expect(quota.secondary?.windowMinutes == 43_200)
+        #expect(abs((quota.secondary?.usedPercent ?? 0) - 3.13) < 0.0001)
+    }
+
+    @Test("Kimi web GetUsages array form keeps its weekly detail and 5-hour limits")
+    func kimiWebScopeArray() throws {
+        let payload = """
+        {"usages": [{"scope": "FEATURE_CODING",
+                     "detail": {"limit": "100", "used": "19",
+                                "resetTime": "2026-09-19T16:45:59Z"},
+                     "limits": [{"detail": {"limit": "100", "used": "25",
+                                            "resetTime": "2026-09-19T14:45:59Z"},
+                                 "window": {"duration": 300,
+                                            "timeUnit": "TIME_UNIT_MINUTE"}}]}]}
+        """
+        let quota = try KimiUsageService.parse(Data(payload.utf8))
+        #expect(quota.primary.windowMinutes == 300)
+        #expect(quota.primary.usedPercent == 25)
+        #expect(quota.secondary?.windowMinutes == 10_080)
+        #expect(quota.secondary?.usedPercent == 19)
+    }
+
     @Test("MiniMax general lane flips remaining percents into windows")
     func minimax() throws {
         let payload = """

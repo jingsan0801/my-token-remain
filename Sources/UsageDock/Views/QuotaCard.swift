@@ -4,13 +4,21 @@ import SwiftUI
 /// window (remaining %, progress bar, reset label). Shown in the Dashboard's
 /// Limits section. Renders a waiting state before data arrives.
 struct QuotaCard: View {
-    /// Give ordinary two-window cards room for reset, pace and freshness labels.
-    /// Bounded content can grow for wrapping text; larger collections keep this
-    /// shared slot and scroll below the pinned provider header.
-    static let dashboardContentHeight: CGFloat = 248
+    /// 所有 provider 共用同一个内容槽位:卡片底边与网格行严格对齐。
+    /// 高度按常见内容取(两条窗口 + 重置/更新时间、4 个账号的总览、
+    /// Kimi 的 5 小时/周/月三档),真正超出的内容才在卡片内滚动,
+    /// 不用单张卡片把整行网格拉高。
+    static let dashboardContentHeight: CGFloat = 300
+    /// 卡片完整高度(含 `DashboardCard` 内边距),供「添加应用」占位槽
+    /// 对齐真实卡片。
+    static var dashboardCardHeight: CGFloat {
+        dashboardContentHeight + cardPadding * 2
+    }
+    private static let cardPadding: CGFloat = 13
     /// Reserve one shared title slot for every grid card so quota rows stay
     /// aligned even when a compact connection warning is present.
-    private static let headerHeight: CGFloat = 26
+    private static let headerMinHeight: CGFloat = 26
+    private static let contentSpacing: CGFloat = 11
 
     let provider: ProviderQuota.Provider
     let quota: ProviderQuota?
@@ -31,32 +39,6 @@ struct QuotaCard: View {
     /// accepting a secret, so the compact plus button never triggers a surprise.
     @State private var isPresentingAccountSetup = false
     @State private var pendingCredentialUpdateID: ProviderAccountID?
-    /// 实测的滚动视口与内容高度。卡片槽位固定(网格对齐),但内容装得下
-    /// 时不该出现滚动条+大片留白的矛盾观感(#42:Codex Plus 用户没有
-    /// Spark 行,内容其实放得下)。测量驱动而非按 provider 硬编码,之后
-    /// 任何新窗口行(如模型池 5h)把内容顶超槽位时滚动会自动恢复。
-    @State private var scrollViewportHeight: CGFloat = 0
-    @State private var scrollContentHeight: CGFloat = 0
-
-    /// 首帧测量未落地时(0/0)按"装得下"处理,避免加载态闪一下滚动条。
-    private var quotaContentFits: Bool {
-        scrollContentHeight <= scrollViewportHeight + 0.5
-    }
-
-    /// #44 的内容定高布局覆盖最多两条可见额度(含 scoped 池)。附属的
-    /// 重置卡、余额与消费摘要也只有固定数量的行,一起按内容撑高,不为
-    /// 少量信息增加内层滚动。更多窗口/多账户配置仍走固定槽位+
-    /// 滚动,避免单个多池 provider 抬高整行网格。
-    private var usesBoundedContentLayout: Bool {
-        if let combined = combinedAccountQuota {
-            return visibleCombinedWindows(combined).count <= 2 && combined.accountCount <= 3
-        }
-        guard let quota, !showsAccountOverview else { return false }
-        if store.isAddingProviderAccount(provider) { return false }
-        let visibleWindowCount = 1 + (quota.secondary == nil ? 0 : 1)
-            + Self.scopedWindows(in: quota, preferences: preferences).count
-        return visibleWindowCount <= 2
-    }
 
     /// Dashboard 卡片:目录内的池由通用池开关 + 智能默认决定显隐;
     /// 目录外的池(账户级兄弟池)维持既有行为——恒显。
@@ -92,32 +74,27 @@ struct QuotaCard: View {
     }
 
     var body: some View {
-        DashboardCard(padding: 13) {
-            VStack(alignment: .leading, spacing: 11) {
+        DashboardCard(padding: Self.cardPadding) {
+            VStack(alignment: .leading, spacing: Self.contentSpacing) {
                 header
-                if usesBoundedContentLayout {
-                    VStack(alignment: .leading, spacing: 11) {
+                // 内容装得下时直接铺开:不创建内层滚动视图,也就不会
+                // 截获页面滚轮;真的超过统一槽位时才退回卡片内滚动。
+                ViewThatFits(in: .vertical) {
+                    VStack(alignment: .leading, spacing: Self.contentSpacing) {
                         quotaContent
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                } else {
+
                     ScrollView(.vertical) {
-                        VStack(alignment: .leading, spacing: 11) {
+                        VStack(alignment: .leading, spacing: Self.contentSpacing) {
                             quotaContent
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(heightReader { scrollContentHeight = $0 })
                     }
-                    .scrollDisabled(quotaContentFits)
-                    .scrollIndicators(quotaContentFits ? .hidden : .automatic)
-                    .background(heightReader { scrollViewportHeight = $0 })
+                    .scrollIndicators(.automatic)
                 }
             }
-            .frame(
-                minHeight: Self.dashboardContentHeight,
-                maxHeight: usesBoundedContentLayout ? nil : Self.dashboardContentHeight,
-                alignment: .top
-            )
+            .frame(height: Self.dashboardContentHeight, alignment: .top)
         }
         .accessibilityElement(children: .contain)
         .alert(
@@ -146,15 +123,6 @@ struct QuotaCard: View {
             }
         } message: { id in
             Text(L10n.format(removeMessageKey(for: id), accountName(for: id)))
-        }
-    }
-
-    /// 尺寸测量探针:铺在被测视图的 background 里,不参与命中与布局。
-    private func heightReader(_ update: @escaping (CGFloat) -> Void) -> some View {
-        GeometryReader { proxy in
-            Color.clear
-                .onAppear { update(proxy.size.height) }
-                .onChange(of: proxy.size.height) { _, newValue in update(newValue) }
         }
     }
 
@@ -349,7 +317,7 @@ struct QuotaCard: View {
                 }
             }
         }
-        .frame(maxWidth: .infinity, minHeight: Self.headerHeight, alignment: .top)
+        .frame(maxWidth: .infinity, minHeight: Self.headerMinHeight, alignment: .top)
         .contentShape(Rectangle())
     }
 
@@ -619,8 +587,8 @@ struct QuotaCard: View {
 
     @ViewBuilder
     private var accountOverview: some View {
-        CombinedAccountControl(provider: provider, snapshots: accountSnapshots, preferences: preferences)
         if let group = combinedAccountQuota {
+            CombinedAccountControl(provider: provider, snapshots: accountSnapshots, preferences: preferences)
             CombinedAccountQuotaView(group: group, windows: visibleCombinedWindows(group), provider: provider)
             let summary = store.accountSummary(for: provider)
             if summary.lowAccountCount > 0 {
@@ -673,11 +641,16 @@ struct QuotaCard: View {
             }
         }
 
+        // 先给总览读数,再给“是否合并”这类分组控制,视线顺序更贴近
+        // 使用顺序:先看还剩多少,再决定怎么归组。
+        CombinedAccountControl(provider: provider, snapshots: accountSnapshots, preferences: preferences)
+
         ForEach(enabled) { snapshot in
             Divider().overlay(DashboardSurface.border)
             AccountDigestRow(
                 snapshot: snapshot,
                 provider: provider,
+                preferences: preferences,
                 select: { store.setAccountSelection(.account(snapshot.id), for: provider) }
             )
             .contextMenu { accountActions(snapshot, store: store) }
@@ -774,11 +747,21 @@ extension ProviderAccountProfile {
 
 /// One enabled account inside the all-account view: its own lowest remaining
 /// window, independent of whether any sibling account failed. Clicking it opens
-/// that account's full quota rows in the same card.
+/// that account's full quota rows in the same card. Multi-window providers
+/// (Kimi's 5-hour/weekly/monthly plan) also list every window here, so the
+/// summary does not hide the real constraint.
 private struct AccountDigestRow: View {
     let snapshot: ProviderAccountSnapshot
     let provider: ProviderQuota.Provider
+    @ObservedObject var preferences: PreferencesStore
     let select: () -> Void
+
+    private struct WindowDigest: Identifiable {
+        let id: Int
+        let label: String
+        let valueText: String
+        let remainingPercent: Double
+    }
 
     private var summary: ProviderQuota.GeneralQuotaSummary? {
         snapshot.quota?.generalQuotaSummary(strategy: .lowestRemaining)
@@ -809,36 +792,117 @@ private struct AccountDigestRow: View {
         summary.map { UsageFormatting.windowName(minutes: $0.window.windowMinutes) }
     }
 
+    /// 账户的全部可见窗口,按窗口时长升序。scoped 池仍走通用池开关,
+    /// 目录外的账户级兄弟池保持恒显。
+    private var windowDigests: [WindowDigest] {
+        guard let quota = snapshot.quota else { return [] }
+        var entries: [(window: QuotaWindow, name: String?, balance: QuotaBalance?)] = [
+            (
+                quota.primary,
+                quota.primary.poolName,
+                quota.primary.remainingBalance ?? quota.remainingBalance
+            )
+        ]
+        if let secondary = quota.secondary {
+            entries.append((secondary, secondary.poolName, secondary.remainingBalance))
+        }
+        for scoped in QuotaCard.scopedWindows(in: quota, preferences: preferences) {
+            entries.append((scoped.window, scoped.displayName, scoped.window.remainingBalance))
+        }
+        return entries.enumerated()
+            .sorted {
+                ($0.element.window.windowMinutes, $0.offset)
+                    < ($1.element.window.windowMinutes, $1.offset)
+            }
+            .enumerated()
+            .map { index, item in
+                let remaining = min(100, max(0, 100 - item.element.window.usedPercent))
+                return WindowDigest(
+                    id: index,
+                    label: item.element.name
+                        ?? UsageFormatting.windowName(minutes: item.element.window.windowMinutes),
+                    valueText: QuotaWindowRow.remainingValueText(
+                        remainingPercent: remaining,
+                        remainingBalance: item.element.balance,
+                        remainingCredits: item.element.window.remainingCredits
+                    ),
+                    remainingPercent: remaining
+                )
+            }
+    }
+
+    /// 单窗口账户的信息已由右侧「剩余」承载,多窗口才需要第二行明细。
+    private var breakdownText: Text? {
+        guard windowDigests.count > 1 else { return nil }
+        var text = Text("")
+        for (index, digest) in windowDigests.enumerated() {
+            if index > 0 {
+                text = text + Text("   ·   ")
+                    .font(.system(size: 10.5))
+                    .foregroundStyle(DashboardTheme.mutedText)
+            }
+            text = text + Text(digest.label)
+                .font(.system(size: 10.5))
+                .foregroundStyle(DashboardTheme.mutedText)
+            text = text + Text(" ")
+            text = text + Text(digest.valueText)
+                .font(.system(size: 10.5, weight: .semibold).monospacedDigit())
+                .foregroundStyle(
+                    digest.remainingPercent < 10 ? DashboardTheme.danger : DashboardTheme.secondaryText
+                )
+        }
+        return text
+    }
+
+    private var accessibilityValue: String {
+        guard windowDigests.count > 1 else { return valueText }
+        let windows = windowDigests
+            .map { "\($0.label) \($0.valueText)" }
+            .joined(separator: ", ")
+        return "\(valueText), \(windows)"
+    }
+
     var body: some View {
         Button(action: select) {
-            HStack(spacing: 6) {
+            HStack(alignment: .top, spacing: 6) {
                 Image(systemName: "person.crop.circle")
                     .font(.system(size: 10))
                     .foregroundStyle(DashboardTheme.mutedText)
-                Text(snapshot.profile.accountDisplayName)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(DashboardTheme.text)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                if let windowText {
-                    Text(windowText)
-                        .numericFont(10)
-                        .foregroundStyle(DashboardTheme.mutedText)
-                        .lineLimit(1)
+                    .padding(.top, 2)
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 6) {
+                        Text(snapshot.profile.accountDisplayName)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(DashboardTheme.text)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        if let windowText {
+                            Text(windowText)
+                                .numericFont(10)
+                                .foregroundStyle(DashboardTheme.mutedText)
+                                .lineLimit(1)
+                        }
+                        if snapshot.isRefreshing {
+                            ProgressView().controlSize(.mini)
+                        } else if snapshot.quota == nil, let notice = snapshot.notice, !notice.isEmpty {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 9))
+                                .foregroundStyle(DashboardTheme.warning)
+                                .help(notice)
+                        }
+                        Spacer(minLength: 8)
+                    }
+                    if let breakdownText {
+                        breakdownText
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
-                if snapshot.isRefreshing {
-                    ProgressView().controlSize(.mini)
-                } else if snapshot.quota == nil, let notice = snapshot.notice, !notice.isEmpty {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 9))
-                        .foregroundStyle(DashboardTheme.warning)
-                        .help(notice)
-                }
-                Spacer(minLength: 8)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 Text(valueText)
                     .numericFont(12, .semibold)
                     .foregroundStyle(valueTint)
                     .lineLimit(1)
+                    .padding(.top, 0.5)
             }
             .contentShape(Rectangle())
         }
@@ -852,7 +916,7 @@ private struct AccountDigestRow: View {
                 snapshot.profile.accountDisplayName
             )
         )
-        .accessibilityValue(valueText)
+        .accessibilityValue(accessibilityValue)
         .accessibilityHint(L10n.text("accounts.row_help"))
         .accessibilityAddTraits(.isButton)
     }

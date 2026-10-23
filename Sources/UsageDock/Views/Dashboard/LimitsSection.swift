@@ -175,26 +175,33 @@ struct LimitsSection: View {
 /// 点一下即加入追踪(与卡片右键"停止追踪"互为镜像)。
 private struct AddProviderTile: View {
     @ObservedObject var tracked: TrackedProvidersStore
+    @State private var isHovered = false
 
     private var detections: [TrackedProvidersStore.Detection] {
         TrackedProvidersStore.detections().filter { !tracked.isEnabled($0.provider) }
     }
 
+    private var slotShape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: 15, style: .continuous)
+    }
+
     var body: some View {
-        Menu {
-            ForEach(detections) { detection in
-                Button {
-                    withAnimation(.snappy) { tracked.setEnabled(detection.provider, true) }
-                } label: {
-                    Label(
-                        detection.installed
-                            ? L10n.format("limits.provider_detected", detection.provider.displayName)
-                            : L10n.format("limits.provider_not_detected", detection.provider.displayName),
-                        systemImage: detection.installed ? "checkmark.circle" : "circle.dashed"
-                    )
-                }
-            }
-        } label: {
+        // 虚线卡面与点击层分开:borderless `Menu` 会把复杂 label 压成
+        // 一个小按钮,单独画槽位才能得到与真实卡片一致的整格占位。
+        let fillStyle = isHovered
+            ? AnyShapeStyle(DashboardSurface.surface2.opacity(0.35))
+            : AnyShapeStyle(Color.clear)
+        let borderStyle = isHovered
+            ? AnyShapeStyle(DashboardTheme.mutedText.opacity(0.9))
+            : AnyShapeStyle(DashboardSurface.border)
+        ZStack {
+            slotShape.fill(fillStyle)
+            slotShape
+                .strokeBorder(
+                    borderStyle,
+                    style: StrokeStyle(lineWidth: 1.5, dash: [6, 5])
+                )
+
             VStack(spacing: 8) {
                 Image(systemName: "plus.circle.dashed")
                     .font(.system(size: 22, weight: .medium))
@@ -206,18 +213,35 @@ private struct AddProviderTile: View {
                     .font(.system(size: 11))
                     .foregroundStyle(DashboardTheme.secondaryText)
             }
-            .frame(maxWidth: .infinity, minHeight: 132)
-            .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(
-                        DashboardSurface.border,
-                        style: StrokeStyle(lineWidth: 1.5, dash: [6, 5])
-                    )
-            )
-            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .accessibilityHidden(true)
+
+            Menu {
+                ForEach(detections) { detection in
+                    Button {
+                        withAnimation(.snappy) { tracked.setEnabled(detection.provider, true) }
+                    } label: {
+                        Label(
+                            detection.installed
+                                ? L10n.format("limits.provider_detected", detection.provider.displayName)
+                                : L10n.format("limits.provider_not_detected", detection.provider.displayName),
+                            systemImage: detection.installed ? "checkmark.circle" : "circle.dashed"
+                        )
+                    }
+                }
+            } label: {
+                Color.clear
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .contentShape(slotShape)
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .accessibilityLabel(L10n.text("limits.add_app_accessibility"))
         }
-        .menuStyle(.borderlessButton)
-        .menuIndicator(.hidden)
-        .accessibilityLabel(L10n.text("limits.add_app_accessibility"))
+        // 和额度卡共用同一高度与圆角,让“添加应用”成为一个真正的网格槽位。
+        .frame(maxWidth: .infinity, minHeight: QuotaCard.dashboardCardHeight)
+        .contentShape(slotShape)
+        .animation(.easeInOut(duration: 0.12), value: isHovered)
+        .onHover { isHovered = $0 }
     }
 }
